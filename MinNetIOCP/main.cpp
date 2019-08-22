@@ -18,7 +18,9 @@ void main()
 	MinNetIOCP * iocp = new MinNetIOCP();
 
 	iocp->ServerStart();
-	
+	iocp->ServerLoop();
+
+
 	//printf("Lua 스크립트 테스트에용\n");
 	//lua_State * L = lua_open();
 	//luaL_openlibs(L);

@@ -73,11 +73,11 @@ namespace MinNet
 		MinNetPacket(char * buffer);
 		~MinNetPacket();
 
-		MinNetUser * user = nullptr;
-
 		byte *buffer;
 		int buffer_position;
 		int packet_type;
+		int body_size = 0;
+		int size();
 
 		void create_packet(int packet_type);
 		void create_header();
@@ -118,9 +118,7 @@ namespace MinNet
 	class MinNetUser
 	{
 	public:
-		OVERLAPPED overlapped;
-		WSABUF wsabuf;
-		char recv_buffer[1024 + 1] = { '\0', };
+
 		byte temporary_buffer[2048] = { '\0', };
 		int buffer_position = 0;
 		SOCKET sock;

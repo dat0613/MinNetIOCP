@@ -147,12 +147,14 @@
     <ClInclude Include="LuaTest.h" />
     <ClInclude Include="MinNet.h" />
     <ClInclude Include="MinNetIOCP.h" />
+    <ClInclude Include="MinNetOverlapped.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="LuaTest.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MinNet.cpp" />
     <ClCompile Include="MinNetIOCP.cpp" />
+    <ClCompile Include="MinNetOverlapped.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="test.lua" />

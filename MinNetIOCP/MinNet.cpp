@@ -125,13 +125,18 @@ MinNet::MinNetPacket::MinNetPacket(char * buffer)
 	this->buffer = (byte *)buffer;
 	buffer_position = 0;
 
-	short body_size = pop_short();
+	body_size = pop_short();
 	packet_type = pop_int();
 }
 
 MinNetPacket::~MinNetPacket()				//패킷의 소멸자
 {
 	delete[] buffer;
+}
+
+int MinNet::MinNetPacket::size()
+{
+	return body_size + 6;
 }
 
 void MinNetPacket::create_packet(int packet_type)	//패킷을 만들고자 할때 무조건적으로 호출하여야 하는 함수
@@ -149,7 +154,7 @@ void MinNetPacket::set_buffer_position(unsigned int pos)
 
 void MinNetPacket::create_header()					//패킷을 전송할때 자동으로 호출되는 함수
 {
-	short body_size = (short)(buffer_position - Defines::HEADERSIZE);
+	body_size = (short)(buffer_position - Defines::HEADERSIZE);
 	int header_position = 0;
 
 	byte* header_size = BitConverter::GetBytes(body_size);
@@ -259,20 +264,21 @@ Vector3 MinNetPacket::pop_vector3()			//vector3형 데이터를 패킷에서 빼오는 함수
 int MinNet::MinNetPacket::Parse(byte * arr, int length)
 {
 	buffer_position = 0;// 버퍼 위치를 0으로 초기화 시킴
-	byte * real_buffer = buffer;// 현재 할당 되어있는 버퍼를 잠시 저장해둠
 
 	if (length < 6 - 1)// 최소한 헤더만큼 있는지 확인
 		return 0;
 
+	byte * real_buffer = buffer;// 현재 할당 되어있는 버퍼를 잠시 저장해둠
+
 	buffer = arr;// 메모리의 이동을 최소화 하기 위해 패킷의 버퍼를 잠시동안 arr로 변경한 후 검사함
 
-	short body_size = pop_short();// 몸체 크기 받음
+	body_size = pop_short();// 몸체 크기 받음
 	packet_type = pop_int();// 패킷 타입 받음
 
-	if (length < 6 + body_size - 1)// 몸체가 전부 있는지 체크
-		return 0;
-
 	buffer = real_buffer;// arr에 필요한 데이터가 전부 있는것으로 판단되어 원래 버퍼로 돌아옴
+
+	if (length < 6 + body_size - 1 - 1)// 몸체가 전부 있는지 체크
+		return 0;
 
 	memcpy(real_buffer, arr, length + body_size);// 몸체를 받아옴
 
@@ -288,6 +294,8 @@ int MinNet::MinNetPacket::Parse(byte * arr, int length)
 	cout << pop_int() << endl;
 	cout << pop_bool() << endl;
 	cout << pop_float() << endl;
+
+	cout << "사이즈 : " << body_size + 6 << endl;
 
 	return body_size + 6;
 }
