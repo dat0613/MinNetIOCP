@@ -10,6 +10,8 @@
 #include "MinNet.h"
 #include <queue>
 #include <MSWSock.h>
+#include <functional>
+#include <typeinfo>
 
 #pragma comment (lib, "mswsock.lib")
 
@@ -23,6 +25,82 @@ public:
 
 };
 
+template <class T>
+class MinNetObjectPool
+{
+public:
+	~MinNetObjectPool()
+	{
+		while (!pool.empty())
+		{
+			T* obj = pool.front();
+			if (destructor != nullptr)
+				destructor(obj);
+			pool.pop();
+			delete obj;
+		}
+	}
+
+	void SetConstructor(function<void(T *)> constructor)
+	{
+		this->constructor = constructor;
+	}
+
+	void SetDestructor(function<void(T *)> destructor)
+	{
+		this->destructor = destructor;
+	}
+
+	void SetOnPush(function<void(T *)> onPush)
+	{
+		this->onPush = onPush;
+	}
+
+	void AddObject(int size)
+	{
+		for (int i = 0; i < size; i++)
+			push(CreateNewObject());
+	}
+
+	T* pop()
+	{
+		if (pool.empty())
+		{// 풀이 비어있음
+			cout << typeid(T).name() << " 풀의 객체가 고갈되어 새로운 객체를 생성합니다" << endl;
+			return CreateNewObject();
+		}
+		else
+		{
+			T* obj = pool.front();
+			pool.pop();
+			return obj;
+		}
+	}
+
+	void push(T* obj)
+	{
+		if (onPush != nullptr)
+		{
+			onPush(obj);
+		}
+		pool.push(obj);
+	}
+
+private:
+	queue<T*> pool;
+	function<void(T *)> constructor = nullptr;
+	function<void(T *)> destructor = nullptr;
+	function<void(T *)> onPush = nullptr;
+
+	T* CreateNewObject()
+	{
+		T* obj = new T();
+
+		if (constructor != nullptr)
+			constructor(obj);
+	}
+};
+
 struct MinNetOverlapped : OVERLAPPED
 {
 	enum TYPE
@@ -31,19 +109,6 @@ struct MinNetOverlapped : OVERLAPPED
 	};
 
 	TYPE type;
-};
-
-struct MinNetSendOverlapped : MinNetOverlapped
-{
-	MinNetUser * user;
-	MinNetPacket * packet;
-	WSABUF wsabuf;
-};
-
-struct MinNetRecvOverlapped : MinNetOverlapped
-{
-	MinNetUser * user;
-	WSABUF wsabuf;
 };
 
 struct MinNetAcceptOverlapped : MinNetOverlapped
@@ -57,6 +122,19 @@ struct MinNetCloseOverlapped : MinNetOverlapped
 {
 	SOCKET socket;
 };
+struct MinNetSendOverlapped : MinNetOverlapped
+{
+	MinNetUser * user;
+	MinNetPacket * packet;
+	WSABUF wsabuf;
+};
+
+struct MinNetRecvOverlapped : MinNetOverlapped
+{
+	MinNetUser * user;
+	WSABUF wsabuf;
+};
+
 
 class MinNetIOCP
 {
@@ -71,6 +149,16 @@ private:
 
 	LPFN_ACCEPTEX lpfnAcceptEx = NULL;
 	GUID guidAcceptEx = WSAID_ACCEPTEX;
+
+	MinNetObjectPool<MinNetUser> user_pool;
+	MinNetObjectPool<MinNetPacket> packet_pool;
+
+	MinNetObjectPool<MinNetAcceptOverlapped> accept_overlapped_pool;
+	MinNetObjectPool<MinNetCloseOverlapped> close_overlapped_pool;
+	MinNetObjectPool<MinNetSendOverlapped> send_overlapped_pool;
+	MinNetObjectPool<MinNetRecvOverlapped> recv_overlapped_pool;
+
+
 
 	CRITICAL_SECTION user_list_section;
 	list<MinNetUser *> user_list;
