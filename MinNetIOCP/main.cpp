@@ -17,7 +17,7 @@ void main()
 
 	MinNetIOCP * iocp = new MinNetIOCP();
 
-	iocp->ServerStart();
+	iocp->StartServer();
 	iocp->ServerLoop();
 
 

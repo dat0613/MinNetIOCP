@@ -9,16 +9,25 @@
 #include <thread>
 #include "MinNet.h"
 #include <queue>
+#include <MSWSock.h>
 
+#pragma comment (lib, "mswsock.lib")
 
 using namespace std;
 using namespace MinNet;
+
+template <class T>
+class MinNetMemoryPool
+{
+public:
+
+};
 
 struct MinNetOverlapped : OVERLAPPED
 {
 	enum TYPE
 	{
-		RECV, SEND
+		ACCEPT, CLOSE, RECV, SEND
 	};
 
 	TYPE type;
@@ -37,25 +46,48 @@ struct MinNetRecvOverlapped : MinNetOverlapped
 	WSABUF wsabuf;
 };
 
+struct MinNetAcceptOverlapped : MinNetOverlapped
+{
+	SOCKET socket;
+	char buf[1024] = { '\0' };
+	DWORD dwBytes;
+};
+
+struct MinNetCloseOverlapped : MinNetOverlapped
+{
+	SOCKET socket;
+};
+
 class MinNetIOCP
 {
 public:
 	MinNetIOCP();
 	~MinNetIOCP();
 	
-	void ServerStart();
+	void StartServer();
 	void ServerLoop();
 
 private:
+
+	LPFN_ACCEPTEX lpfnAcceptEx = NULL;
+	GUID guidAcceptEx = WSAID_ACCEPTEX;
+
 	CRITICAL_SECTION user_list_section;
 	list<MinNetUser *> user_list;
 	DWORD WINAPI WorkThread(LPVOID arg);
-	DWORD WINAPI AcceptThread(LPVOID arg);
+
+	sockaddr_in * SOCKADDRtoSOCKADDR_IN(sockaddr * addr);
 
 	SOCKET listen_socket;
 
 	CRITICAL_SECTION recvQ_section;
 	queue<pair<MinNetPacket *, MinNetUser *>> recvQ;
+
+	void StartAccept();
+	void EndAccept(MinNetAcceptOverlapped * overlap);
+
+	void StartClose(SOCKET socket);
+	void EndClose(MinNetCloseOverlapped * overlap);
 
 	void StartRecv(MinNetUser * user);
 	void EndRecv(MinNetRecvOverlapped * overlap, int len);
@@ -64,5 +96,5 @@ private:
 	void EndSend(MinNetSendOverlapped * overlap);
 
 	HANDLE hPort = nullptr;
-	HANDLE port = nullptr;	
+	HANDLE port = nullptr;
 };

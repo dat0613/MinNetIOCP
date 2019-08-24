@@ -291,12 +291,6 @@ int MinNet::MinNetPacket::Parse(byte * arr, int length)
 
 	delete[] arr_cpy;
 
-	cout << pop_int() << endl;
-	cout << pop_bool() << endl;
-	cout << pop_float() << endl;
-
-	cout << "»çÀÌÁî : " << body_size + 6 << endl;
-
 	return body_size + 6;
 }
 

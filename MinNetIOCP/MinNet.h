@@ -122,6 +122,7 @@ namespace MinNet
 		byte temporary_buffer[2048] = { '\0', };
 		int buffer_position = 0;
 		SOCKET sock;
+		bool isConnected = false;
 
 		int ID;
 

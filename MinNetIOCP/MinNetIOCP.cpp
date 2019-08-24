@@ -2,25 +2,6 @@
 
 MinNetIOCP::MinNetIOCP()
 {
-	hPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
-	//port = CreateIoCompletionPort(socket, hPort, (ULONG_PTR)session, 0);
-	
-	SYSTEM_INFO si;
-	GetSystemInfo(&si);
-
-	HANDLE hThread;
-	DWORD Threadid;
-	// (int)si.dwNumberOfProcessors * 2
-	for (int i = 0; i < (int)si.dwNumberOfProcessors * 2; i++)
-	{
-		//hThread = CreateThread(NULL, 0, TestThread, hPort, 0, &Threadid);
-		thread * hThread = new thread([&]() { WorkThread(hPort); });
-		if (hThread == NULL)
-			return;
-	}
-
-	InitializeCriticalSection(&user_list_section);
-	InitializeCriticalSection(&recvQ_section);
 }
 
 
@@ -40,7 +21,7 @@ MinNetIOCP::~MinNetIOCP()
 	user_list.clear();
 }
 
-void MinNetIOCP::ServerStart()
+void MinNetIOCP::StartServer()
 {
 	WSADATA wsa;
 	if(WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
@@ -49,11 +30,30 @@ void MinNetIOCP::ServerStart()
 		return;
 	}
 
-	listen_socket = socket(AF_INET, SOCK_STREAM, 0);
+	hPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
+	if (hPort == nullptr)
+	{
+		cout << "CreateIoCompletionPort error" << endl;
+		return;
+	}
 
+	SYSTEM_INFO si;
+	GetSystemInfo(&si);
+
+	for (int i = 0; i < (int)si.dwNumberOfProcessors * 2; i++)
+	{
+		thread * hThread = new thread([&]() { WorkThread(hPort); });
+		if (hThread == NULL)
+			return;
+	}
+
+	InitializeCriticalSection(&user_list_section);
+	InitializeCriticalSection(&recvQ_section);
+
+	listen_socket = WSASocket(PF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	if (listen_socket == INVALID_SOCKET)
 	{
-		printf("socket error");
+		printf("WSASocket error");
 		return;
 	}
 
@@ -66,6 +66,13 @@ void MinNetIOCP::ServerStart()
 	char iSockOpt = 1;
 	setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, &iSockOpt, sizeof(iSockOpt));
 
+	CreateIoCompletionPort((HANDLE)listen_socket, hPort, listen_socket, 0);
+
+	BOOL on = TRUE;
+	if (setsockopt(listen_socket, SOL_SOCKET, SO_CONDITIONAL_ACCEPT, (char *)&on, sizeof(on)))
+		return;
+
+
 	int retval = ::bind(listen_socket, (sockaddr*)&serverAddr, sizeof(serverAddr));
 	if (retval == SOCKET_ERROR)
 	{
@@ -73,6 +80,15 @@ void MinNetIOCP::ServerStart()
 		return;
 	}
 
+	DWORD dwBytes;
+	retval = WSAIoctl(listen_socket, SIO_GET_EXTENSION_FUNCTION_POINTER, &guidAcceptEx, sizeof(guidAcceptEx), &lpfnAcceptEx, sizeof(lpfnAcceptEx), &dwBytes, NULL, NULL);
+	if (retval == SOCKET_ERROR)
+		if (WSAGetLastError() != WSA_IO_PENDING)
+		{
+			printf("WSAIoctl error");
+			return;
+		}
+	
 	retval = listen(listen_socket, SOMAXCONN);
 	if (retval == SOCKET_ERROR)
 	{
@@ -80,7 +96,10 @@ void MinNetIOCP::ServerStart()
 		return;
 	}
 
-	thread * hThread = new thread([&]() { AcceptThread(nullptr); });
+
+	StartAccept();
+
+	//thread * hThread = new thread([&]() { AcceptThread(nullptr); });
 }
 
 void MinNetIOCP::ServerLoop()
@@ -95,7 +114,6 @@ void MinNetIOCP::ServerLoop()
 			fps = frame;
 			frame = 0;
 			lasttime = time(NULL);
-			cout << "fps : " << fps << endl;
 		}
 
 		frame++;
@@ -125,7 +143,7 @@ DWORD WINAPI MinNetIOCP::WorkThread(LPVOID arg)
 	HANDLE hcp = (HANDLE)arg;
 	int retval;
 	DWORD cbTransferred;
-	SOCKET clientSocket;
+	SOCKET sock;
 	MinNetOverlapped * overlap;
 
 	while (true)
@@ -134,91 +152,181 @@ DWORD WINAPI MinNetIOCP::WorkThread(LPVOID arg)
 		(
 			hcp, 
 			&cbTransferred, 
-			(LPDWORD)&clientSocket,
+			(LPDWORD)&sock,
 			(LPOVERLAPPED *)&overlap,
 			INFINITE
 		);
 
-		if (retval == 0 || cbTransferred == 0)
+		//if (retval == 0 || cbTransferred == 0)
+		//	continue;
+
+		cout << "소켓 : " << sock << endl;
+		cout << "서버 : " << listen_socket << endl;
+
+		if (retval > 0)
 		{
-		//	//if (retval == 0)
-		//	//{
-		//	//	DWORD temp1, temp2;
-		//	//	WSAGetOverlappedResult(user->sock, (LPWSAOVERLAPPED)&overlap, &temp1, FALSE, &temp2);
-		//	//	printf("???");
-		//	//	return 0;
-		//	//}
+			switch (overlap->type)
+			{
+			case MinNetOverlapped::ACCEPT:
+				EndAccept((MinNetAcceptOverlapped *)overlap);
+				break;
 
-		//	EnterCriticalSection(&user_list_section);
-		//	//user_list.remove((MinNetUser*)user);
-		//	LeaveCriticalSection(&user_list_section);
+			case MinNetOverlapped::CLOSE:
+				EndClose((MinNetCloseOverlapped *)overlap);
+				break;
 
-		//	closesocket(user->sock);
-		//	printf("나감\n");
-		//	delete user;
-			continue;
-		}
-
-		switch (overlap->type)
-		{
-		case MinNetOverlapped::RECV:
-			MinNetUser * user;
-			user = ((MinNetRecvOverlapped *)overlap)->user;
-			EndRecv((MinNetRecvOverlapped *)overlap, cbTransferred);
-			StartRecv(user);
-			break;
+			case MinNetOverlapped::RECV:
+				MinNetUser * user;
+				user = ((MinNetRecvOverlapped *)overlap)->user;
+				EndRecv((MinNetRecvOverlapped *)overlap, cbTransferred);
+				StartRecv(user);
+				break;
 		
-		case MinNetOverlapped::SEND:
-			EndSend((MinNetSendOverlapped *)overlap);
-			break;
+			case MinNetOverlapped::SEND:
+				EndSend((MinNetSendOverlapped *)overlap);
+				break;
+			}
 		}
-
-		//if (user != nullptr)
-		//{
-		//	EndRecv((MinNetRecvOverlapped *)overlap, cbTransferred);
-		//	StartRecv(user);
-		//}
-		printf("탈출\n");
-
-
+		else
+		{
+			if (cbTransferred == 0)
+			{
+				StartClose(sock);
+			}
+		}
 		_sleep(0);
-		continue;
 	}
 	return 0;
 }
 
-DWORD WINAPI MinNetIOCP::AcceptThread(LPVOID arg)
+sockaddr_in * MinNetIOCP::SOCKADDRtoSOCKADDR_IN(sockaddr * addr)
 {
-	while (true)
+	if (addr->sa_family == AF_INET)
 	{
-		SOCKADDR_IN clientAddr;
-		int addrlen = sizeof(clientAddr);
-		SOCKET clientSocket = accept(listen_socket, (SOCKADDR *)&clientAddr, &addrlen);
-		if (clientSocket == INVALID_SOCKET)
-			continue;
-		printf("대충 클라이언트 접속 했다는 내용\n");
-		printf("[ %s : %d ]\n\n", inet_ntoa(clientAddr.sin_addr), ntohs(clientAddr.sin_port));
-
-		HANDLE hResult = CreateIoCompletionPort((HANDLE)clientSocket, hPort, (DWORD)clientSocket, 0);
-		if (hResult == NULL)
-			return 0;
-
-		MinNetUser * user = new MinNet::MinNetUser();
-
-		cout << "새로운 유저 : " << user << endl;
-
-		EnterCriticalSection(&user_list_section);
-		user_list.push_back(user);
-		LeaveCriticalSection(&user_list_section);
-
-		user->sock = clientSocket;
-
-		StartRecv(user);
-
-		_sleep(0);
+		sockaddr_in * sin = reinterpret_cast<sockaddr_in *>(addr);
+		return sin;
 	}
+	return nullptr;
+}
 
-	return 0;
+void MinNetIOCP::StartAccept()
+{
+	MinNetAcceptOverlapped * overlap = new MinNetAcceptOverlapped();
+	ZeroMemory(overlap, sizeof(MinNetAcceptOverlapped));
+
+	overlap->type = MinNetOverlapped::TYPE::ACCEPT;
+	overlap->socket = WSASocket(PF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+
+	bool error = !lpfnAcceptEx
+	(
+		this->listen_socket,
+		overlap->socket,
+		(LPVOID)&overlap->buf,
+		0,
+		sizeof(SOCKADDR_IN) + 16, 
+		sizeof(SOCKADDR_IN) + 16,
+		&overlap->dwBytes, 
+		overlap
+	);
+
+	if (error)
+		if (WSAGetLastError() != WSA_IO_PENDING)
+		{
+			cout << "accept 실패 : " << WSAGetLastError() << endl;
+			return;
+		}
+}
+
+void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
+{
+	if (setsockopt(overlap->socket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (const char*)&listen_socket, sizeof(SOCKET)) == SOCKET_ERROR)
+	{
+		// 대충 오류니까 overlap->socket 닫음
+		cout << "EndAccept error" << endl;
+		StartClose(overlap->socket);
+		return;
+	}
+	
+	//SOCKADDR *local_addr, *remote_addr;
+	//int l_len = 0, r_len = 0;
+	//GetAcceptExSockaddrs
+	//(
+	//	(LPVOID)&overlap->buf,
+	//	(sizeof(SOCKADDR_IN) + 16) * 2,
+	//	sizeof(SOCKADDR_IN) + 16,
+	//	sizeof(SOCKADDR_IN) + 16,
+	//	&local_addr,
+	//	&l_len,
+	//	&remote_addr,
+	//	&r_len
+	//);
+
+	//sockaddr_in * sin = SOCKADDRtoSOCKADDR_IN(remote_addr);
+
+	//cout << inet_ntoa(sin->sin_addr) << endl;
+
+	cout << "새로운 유저 접속 : " << overlap->socket << endl;
+
+	HANDLE hResult = CreateIoCompletionPort((HANDLE)overlap->socket, hPort, (DWORD)overlap->socket, 0);
+	if (hResult == NULL)
+		return;
+
+	MinNetUser * user = new MinNetUser();
+	user->sock = overlap->socket;
+	user->isConnected = true;
+
+	EnterCriticalSection(&user_list_section);
+	user_list.push_back(user);
+	LeaveCriticalSection(&user_list_section);
+
+	delete overlap;
+
+	StartRecv(user);
+	StartAccept();
+}
+
+void MinNetIOCP::StartClose(SOCKET socket)
+{
+	//if (!user->isConnected)
+	//	return;
+
+	//user->isConnected = false;
+
+	MinNetCloseOverlapped * overlap = new MinNetCloseOverlapped();
+	ZeroMemory(overlap, sizeof(MinNetCloseOverlapped));
+	overlap->socket = socket;
+	overlap->type = MinNetOverlapped::CLOSE;
+
+
+	if (TransmitFile(overlap->socket, 0, 0, 0, overlap, 0, TF_DISCONNECT | TF_REUSE_SOCKET) == FALSE)
+	{
+		DWORD error = WSAGetLastError();
+		if (error != WSA_IO_PENDING)
+		{
+			if (error == WSAENOTCONN)
+			{
+				cout << "이미 닫힌 소켓임 : " << overlap->socket << endl;
+				return;
+			}
+			cout << "Transmitfile error : " << error << endl;
+			return;
+		}
+	}
+	else
+	{
+		cout << "성공적으로 호출 함" << endl;
+	}
+}
+
+void MinNetIOCP::EndClose(MinNetCloseOverlapped * overlap)
+{
+	cout << "여기" << endl;
+	EnterCriticalSection(&user_list_section);
+
+	// 대충 유저 지우는 코드
+	LeaveCriticalSection(&user_list_section);
+
+	cout << "유저 나감" << endl;
 }
 
 void MinNetIOCP::StartRecv(MinNetUser * user)
@@ -239,7 +347,7 @@ void MinNetIOCP::StartRecv(MinNetUser * user)
 	if (retval == SOCKET_ERROR)
 		if (WSAGetLastError() != WSA_IO_PENDING)
 		{
-			cout << "에러" << endl;
+			StartClose(user->sock);
 			return;
 		}
 
@@ -249,6 +357,12 @@ void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
 {
 	if (overlap->user == nullptr)
 		return;
+
+	if(len == 0)
+	{
+		StartClose(overlap->user->sock);
+		return;
+	}
 
 	MinNetUser * user = overlap->user;
 
@@ -295,7 +409,10 @@ void MinNetIOCP::StartSend(MinNetUser * user, MinNetPacket * packet)
 	cout << retval << endl;
 	if (retval == SOCKET_ERROR)
 		if (WSAGetLastError() != WSA_IO_PENDING)
+		{
+			StartClose(user->sock);
 			return;
+		}
 }
 
 void MinNetIOCP::EndSend(MinNetSendOverlapped * overlap)
