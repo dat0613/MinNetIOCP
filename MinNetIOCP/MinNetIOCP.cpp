@@ -2,50 +2,6 @@
 
 MinNetIOCP::MinNetIOCP()
 {
-	user_pool.AddObject(100);
-
-	accept_overlapped_pool.SetOnPush(
-		[](MinNetAcceptOverlapped * overlap)
-		{
-			overlap->type = MinNetOverlapped::TYPE::ACCEPT;
-			ZeroMemory(overlap, sizeof(MinNetAcceptOverlapped));
-		}
-	);
-	accept_overlapped_pool.AddObject(20);
-
-	close_overlapped_pool.SetOnPush(
-		[](MinNetCloseOverlapped * overlap)
-		{
-			overlap->type = MinNetOverlapped::TYPE::CLOSE;
-			ZeroMemory(overlap, sizeof(MinNetCloseOverlapped));
-		}
-	);
-	close_overlapped_pool.AddObject(20);
-	
-	send_overlapped_pool.SetOnPush(
-		[](MinNetSendOverlapped * overlap)
-		{
-			overlap->type = MinNetOverlapped::TYPE::SEND;
-			ZeroMemory(overlap, sizeof(MinNetSendOverlapped));
-		}
-	);
-	send_overlapped_pool.AddObject(100);
-
-	recv_overlapped_pool.SetOnPush(
-		[](MinNetRecvOverlapped * overlap)
-		{
-			overlap->type = MinNetOverlapped::TYPE::RECV;
-			ZeroMemory(overlap, sizeof(MinNetRecvOverlapped));
-		}
-	);
-	recv_overlapped_pool.AddObject(100);
-
-	packet_pool.SetOnPush(
-		[](MinNetPacket * packet)
-		{
-			ZeroMemory(packet->buffer, 1024);
-		}
-	);
 }
 
 MinNetIOCP::~MinNetIOCP()
@@ -89,9 +45,6 @@ void MinNetIOCP::StartServer()
 		if (hThread == NULL)
 			return;
 	}
-
-	InitializeCriticalSection(&user_list_section);
-	InitializeCriticalSection(&recvQ_section);
 
 	listen_socket = WSASocket(PF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	if (listen_socket == INVALID_SOCKET)
@@ -139,10 +92,9 @@ void MinNetIOCP::StartServer()
 		return;
 	}
 
+	CreatePool();
 
 	StartAccept();
-
-	//thread * hThread = new thread([&]() { AcceptThread(nullptr); });
 }
 
 void MinNetIOCP::ServerLoop()
@@ -161,8 +113,7 @@ void MinNetIOCP::ServerLoop()
 
 		frame++;
 
-
-		EnterCriticalSection(&recvQ_section);
+		recvq_spin_lock.lock();
 
 		while (!recvQ.empty())
 		{
@@ -173,7 +124,7 @@ void MinNetIOCP::ServerLoop()
 			recvQ.pop();
 		}
 
-		LeaveCriticalSection(&recvQ_section);
+		recvq_spin_lock.unlock();
 
 
 
@@ -202,9 +153,6 @@ DWORD WINAPI MinNetIOCP::WorkThread(LPVOID arg)
 
 		//if (retval == 0 || cbTransferred == 0)
 		//	continue;
-
-		cout << "소켓 : " << sock << endl;
-		cout << "서버 : " << listen_socket << endl;
 
 		if (retval > 0)
 		{
@@ -250,6 +198,73 @@ sockaddr_in * MinNetIOCP::SOCKADDRtoSOCKADDR_IN(sockaddr * addr)
 		return sin;
 	}
 	return nullptr;
+}
+
+void MinNetIOCP::CreatePool()
+{
+	user_pool.AddObject(100);
+
+	accept_overlapped_pool.SetOnPush(
+		[](MinNetAcceptOverlapped * overlap)
+		{
+			ZeroMemory(overlap, sizeof(MinNetAcceptOverlapped));
+			overlap->type = MinNetOverlapped::TYPE::ACCEPT;
+			overlap->socket = INVALID_SOCKET;
+			overlap->socket = WSASocket(PF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+		}
+	);
+	accept_overlapped_pool.AddObject(20);
+
+	close_overlapped_pool.SetOnPush(
+		[](MinNetCloseOverlapped * overlap)
+		{
+			ZeroMemory(overlap, sizeof(MinNetCloseOverlapped));
+			overlap->type = MinNetOverlapped::TYPE::CLOSE;
+		}
+	);
+	close_overlapped_pool.AddObject(20);
+
+	send_overlapped_pool.SetOnPush(
+		[](MinNetSendOverlapped * overlap)
+		{
+			ZeroMemory(overlap, sizeof(MinNetSendOverlapped));
+			overlap->type = MinNetOverlapped::TYPE::SEND;
+		}
+	);
+	send_overlapped_pool.AddObject(100);
+
+	recv_overlapped_pool.SetConstructor(
+		[](MinNetRecvOverlapped * overlap)
+		{
+			overlap->wsabuf.buf = new char[1024];
+			overlap->wsabuf.len = 1024;
+		}
+	);
+	recv_overlapped_pool.SetDestructor(
+		[](MinNetRecvOverlapped * overlap)
+		{
+			delete[] overlap->wsabuf.buf;
+		}
+	);
+	recv_overlapped_pool.SetOnPush(
+		[](MinNetRecvOverlapped * overlap)
+		{
+			ZeroMemory(overlap, sizeof(MinNetOverlapped));
+			overlap->type = MinNetOverlapped::TYPE::RECV;
+
+			ZeroMemory(overlap->wsabuf.buf, 1024);
+			overlap->wsabuf.len = 1024;
+		}
+	);
+	recv_overlapped_pool.AddObject(100);
+
+	packet_pool.SetOnPush(
+		[](MinNetPacket * packet)
+		{
+			ZeroMemory(packet->buffer, 1024);
+		}
+	);
+	packet_pool.AddObject(0);
 }
 
 void MinNetIOCP::StartAccept()
@@ -311,13 +326,12 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 		return;
 
 	MinNetUser * user = user_pool.pop();
-	cout << user->ID << endl;
 	user->sock = overlap->socket;
 	user->isConnected = true;
 
-	EnterCriticalSection(&user_list_section);
+	user_list_spin_lock.lock();
 	user_list.push_back(user);
-	LeaveCriticalSection(&user_list_section);
+	user_list_spin_lock.unlock();
 
 	accept_overlapped_pool.push(overlap);
 
@@ -358,26 +372,19 @@ void MinNetIOCP::StartClose(SOCKET socket)
 
 void MinNetIOCP::EndClose(MinNetCloseOverlapped * overlap)
 {
-	cout << "여기" << endl;
-	EnterCriticalSection(&user_list_section);
+	user_list_spin_lock.lock();
 
 	// 대충 유저 지우는 코드
-	LeaveCriticalSection(&user_list_section);
+	user_list_spin_lock.unlock();
 
-	cout << "유저 나감" << endl;
 	close_overlapped_pool.push(overlap);
 }
 
 void MinNetIOCP::StartRecv(MinNetUser * user)
 {
 	MinNetRecvOverlapped * overlap = recv_overlapped_pool.pop();
-	//ZeroMemory(overlap, sizeof(MinNetRecvOverlapped));
-	overlap->type = MinNetOverlapped::TYPE::RECV;
+
 	overlap->user = user;
-	char * buf = new char[1024];
-	overlap->wsabuf.buf = buf;
-	ZeroMemory(overlap->wsabuf.buf, 1024);
-	overlap->wsabuf.len = 1024;
 
 	DWORD recvbytes;
 	DWORD flags = 0;
@@ -389,7 +396,6 @@ void MinNetIOCP::StartRecv(MinNetUser * user)
 			StartClose(user->sock);
 			return;
 		}
-
 }
 
 void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
@@ -408,8 +414,6 @@ void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
 	memcpy(&user->temporary_buffer[user->buffer_position], overlap->wsabuf.buf, len);
 	user->buffer_position += len;
 
-	cout << user->buffer_position << endl;
-
 	while (true)
 	{
 
@@ -423,12 +427,11 @@ void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
 			break;
 		}
 
-		EnterCriticalSection(&recvQ_section);
+		recvq_spin_lock.lock();
 		recvQ.push(make_pair(packet, user));
-		LeaveCriticalSection(&recvQ_section);
-	}
+		recvq_spin_lock.unlock();
 
-	delete[] overlap->wsabuf.buf;
+	}
 	recv_overlapped_pool.push(overlap);
 }
 
@@ -443,17 +446,41 @@ void MinNetIOCP::StartSend(MinNetUser * user, MinNetPacket * packet)
 	overlap->wsabuf.len = packet->size();
 
 	int retval = WSASend(user->sock, &overlap->wsabuf, 1, nullptr, 0, overlap, nullptr);
-	cout << retval << endl;
+
 	if (retval == SOCKET_ERROR)
 		if (WSAGetLastError() != WSA_IO_PENDING)
 		{
 			StartClose(user->sock);
 			return;
 		}
+
+	float asdf = 10;
+	
 }
 
 void MinNetIOCP::EndSend(MinNetSendOverlapped * overlap)
 {
 	packet_pool.push(overlap->packet);
 	send_overlapped_pool.push(overlap);
+}
+
+MinNetSpinLock::MinNetSpinLock()
+{
+	InitializeCriticalSection(&section);
+}
+
+MinNetSpinLock::~MinNetSpinLock()
+{
+	DeleteCriticalSection(&section);
+}
+
+void MinNetSpinLock::lock()
+{
+	while (TryEnterCriticalSection(&section) == FALSE)
+		_sleep(0);
+}
+
+void MinNetSpinLock::unlock()
+{
+	LeaveCriticalSection(&section);
 }

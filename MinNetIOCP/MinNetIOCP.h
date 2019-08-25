@@ -18,6 +18,22 @@
 using namespace std;
 using namespace MinNet;
 
+
+class MinNetSpinLock
+{
+public:
+
+	MinNetSpinLock();
+	~MinNetSpinLock();
+
+	void lock();
+	void unlock();
+
+private:
+	
+	CRITICAL_SECTION section;
+};
+
 template <class T>
 class MinNetMemoryPool
 {
@@ -34,9 +50,9 @@ public:
 		while (!pool.empty())
 		{
 			T* obj = pool.front();
+			pool.pop();
 			if (destructor != nullptr)
 				destructor(obj);
-			pool.pop();
 			delete obj;
 		}
 	}
@@ -72,7 +88,9 @@ public:
 		else
 		{
 			T* obj = pool.front();
+			spinLock.lock();
 			pool.pop();
+			spinLock.unlock();
 			return obj;
 		}
 	}
@@ -83,14 +101,19 @@ public:
 		{
 			onPush(obj);
 		}
+
+		spinLock.lock();
 		pool.push(obj);
+		spinLock.unlock();
 	}
 
 private:
 	queue<T*> pool;
-	function<void(T *)> constructor = nullptr;
-	function<void(T *)> destructor = nullptr;
-	function<void(T *)> onPush = nullptr;
+	function<void(T*)> constructor = nullptr;
+	function<void(T*)> destructor = nullptr;
+	function<void(T*)> onPush = nullptr;
+
+	MinNetSpinLock spinLock;
 
 	T* CreateNewObject()
 	{
@@ -98,6 +121,8 @@ private:
 
 		if (constructor != nullptr)
 			constructor(obj);
+
+		return obj;
 	}
 };
 
@@ -135,6 +160,22 @@ struct MinNetRecvOverlapped : MinNetOverlapped
 	WSABUF wsabuf;
 };
 
+class MinNetObject {
+public:
+
+private:
+
+};
+
+class MinNetRoom
+{
+public:
+	string name;
+
+
+private:
+
+};
 
 class MinNetIOCP
 {
@@ -158,9 +199,9 @@ private:
 	MinNetObjectPool<MinNetSendOverlapped> send_overlapped_pool;
 	MinNetObjectPool<MinNetRecvOverlapped> recv_overlapped_pool;
 
-
-
 	CRITICAL_SECTION user_list_section;
+	MinNetSpinLock recvq_spin_lock;
+	MinNetSpinLock user_list_spin_lock;
 	list<MinNetUser *> user_list;
 	DWORD WINAPI WorkThread(LPVOID arg);
 
@@ -170,6 +211,8 @@ private:
 
 	CRITICAL_SECTION recvQ_section;
 	queue<pair<MinNetPacket *, MinNetUser *>> recvQ;
+
+	void CreatePool();
 
 	void StartAccept();
 	void EndAccept(MinNetAcceptOverlapped * overlap);
