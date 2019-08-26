@@ -1,7 +1,10 @@
 #include "MinNetIOCP.h"
 
-MinNetIOCP::MinNetIOCP()
+#include "MinNet.h"
+
+MinNetIOCP::MinNetIOCP() : room_manager(this)
 {
+
 }
 
 MinNetIOCP::~MinNetIOCP()
@@ -18,6 +21,11 @@ MinNetIOCP::~MinNetIOCP()
 		it++;
 	}
 	user_list.clear();
+}
+
+void MinNetIOCP::SetTickrate(int tick)
+{
+	this->tick = tick;
 }
 
 void MinNetIOCP::StartServer()
@@ -84,6 +92,7 @@ void MinNetIOCP::StartServer()
 			printf("WSAIoctl error");
 			return;
 		}
+
 	
 	retval = listen(listen_socket, SOMAXCONN);
 	if (retval == SOCKET_ERROR)
@@ -99,22 +108,18 @@ void MinNetIOCP::StartServer()
 
 void MinNetIOCP::ServerLoop()
 {
-	int fps = 0;
-	int frame = 0;
-	int lasttime = 0;
+	float sleep_time = 1000.0f / (float)tick;
+	clock_t last_heart_beat = 0;
+	clock_t cur_time = 0;
+
 	while (true)
 	{
-		if (lasttime != time(NULL))
-		{
-			fps = frame;
-			frame = 0;
-			lasttime = time(NULL);
-		}
+		cur_time = clock();
 
-		frame++;
+		if(cur_time - last_heart_beat > 3000)
+			
 
 		recvq_spin_lock.lock();
-
 		while (!recvQ.empty())
 		{
 			auto packet_info = recvQ.front();
@@ -123,12 +128,9 @@ void MinNetIOCP::ServerLoop()
 
 			recvQ.pop();
 		}
-
 		recvq_spin_lock.unlock();
 
-
-
-		_sleep(0);
+		_sleep(sleep_time);
 	}
 }
 
@@ -154,6 +156,9 @@ DWORD WINAPI MinNetIOCP::WorkThread(LPVOID arg)
 		//if (retval == 0 || cbTransferred == 0)
 		//	continue;
 
+		cout << "retval : " << retval << endl;
+		cout << "transf : " << cbTransferred << endl;
+
 		if (retval > 0)
 		{
 			switch (overlap->type)
@@ -167,10 +172,10 @@ DWORD WINAPI MinNetIOCP::WorkThread(LPVOID arg)
 				break;
 
 			case MinNetOverlapped::RECV:
-				MinNetUser * user;
-				user = ((MinNetRecvOverlapped *)overlap)->user;
+				//MinNetUser * user;
+				//user = ((MinNetRecvOverlapped *)overlap)->user;
 				EndRecv((MinNetRecvOverlapped *)overlap, cbTransferred);
-				StartRecv(user);
+				//StartRecv(user);
 				break;
 		
 			case MinNetOverlapped::SEND:
@@ -198,6 +203,26 @@ sockaddr_in * MinNetIOCP::SOCKADDRtoSOCKADDR_IN(sockaddr * addr)
 		return sin;
 	}
 	return nullptr;
+}
+
+void MinNetIOCP::SendPing()
+{
+	MinNetPacket * packet = packet_pool.pop();
+
+	packet->create_packet(Defines::MinNetPacketType::PING);
+	packet->create_header();
+
+	user_list_spin_lock.lock();
+
+	packet->send_count = user_list.size();
+	
+	for (auto it = user_list.begin(); it != user_list.end(); it++)
+	{
+		MinNetUser * user = *it;
+		StartSend(user, packet);
+	}
+	
+	user_list_spin_lock.unlock();
 }
 
 void MinNetIOCP::CreatePool()
@@ -264,7 +289,7 @@ void MinNetIOCP::CreatePool()
 			ZeroMemory(packet->buffer, 1024);
 		}
 	);
-	packet_pool.AddObject(0);
+	packet_pool.AddObject(100);
 }
 
 void MinNetIOCP::StartAccept()
@@ -336,6 +361,9 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 	accept_overlapped_pool.push(overlap);
 
 	StartRecv(user);
+
+	room_manager.GetPeacefulRoom()->AddUser(user);
+
 	StartAccept();
 }
 
@@ -372,15 +400,26 @@ void MinNetIOCP::StartClose(SOCKET socket)
 
 void MinNetIOCP::EndClose(MinNetCloseOverlapped * overlap)
 {
-	user_list_spin_lock.lock();
+	cout << "유저가 나감 : " << overlap->socket << endl;
+	user_list_spin_lock.lock(); 
 
-	// 대충 유저 지우는 코드
+	for (auto it = user_list.begin(); it != user_list.end(); it++)
+	{
+		::MinNetUser * user = *it;
+		if (user->sock == overlap->socket)
+		{
+			user_list.erase(it);
+			user_pool.push(user);
+			break;
+		}
+	}
 	user_list_spin_lock.unlock();
 
 	close_overlapped_pool.push(overlap);
+
 }
 
-void MinNetIOCP::StartRecv(MinNetUser * user)
+void MinNetIOCP::StartRecv(::MinNetUser * user)
 {
 	MinNetRecvOverlapped * overlap = recv_overlapped_pool.pop();
 
@@ -430,8 +469,9 @@ void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
 		recvq_spin_lock.lock();
 		recvQ.push(make_pair(packet, user));
 		recvq_spin_lock.unlock();
-
 	}
+
+	StartRecv(user);
 	recv_overlapped_pool.push(overlap);
 }
 
@@ -453,34 +493,26 @@ void MinNetIOCP::StartSend(MinNetUser * user, MinNetPacket * packet)
 			StartClose(user->sock);
 			return;
 		}
-
-	float asdf = 10;
-	
 }
 
 void MinNetIOCP::EndSend(MinNetSendOverlapped * overlap)
 {
-	packet_pool.push(overlap->packet);
+	overlap->packet->send_count--;
+
+	if (overlap->packet->send_count < 1)// 해당 패킷을 보내는데 성공한 횟수가 지정한 횟수만큼 됬다면 패킷을 회수함
+		packet_pool.push(overlap->packet);
+	else if(overlap->packet->send_count < 1)// 스레드 세이프하지 않아서 그냥 if문을 두번 박음
+		packet_pool.push(overlap->packet);
+
 	send_overlapped_pool.push(overlap);
-}
-
-MinNetSpinLock::MinNetSpinLock()
-{
-	InitializeCriticalSection(&section);
-}
-
-MinNetSpinLock::~MinNetSpinLock()
-{
-	DeleteCriticalSection(&section);
 }
 
 void MinNetSpinLock::lock()
 {
-	while (TryEnterCriticalSection(&section) == FALSE)
-		_sleep(0);
+	while (locker.test_and_set(memory_order_acquire));
 }
 
 void MinNetSpinLock::unlock()
 {
-	LeaveCriticalSection(&section);
+	locker.clear(memory_order_release);
 }

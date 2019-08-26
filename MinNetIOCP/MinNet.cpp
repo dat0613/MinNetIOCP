@@ -1,6 +1,6 @@
 #include "MinNet.h"
-
-using namespace MinNet;
+#include "MinNetIOCP.h"
+#include "MinNetRoom.h"
 
 //////////////////////
 //BitConverter class//
@@ -120,7 +120,7 @@ MinNetPacket::MinNetPacket()				//패킷의 생성자
 	buffer_position = 0;
 }
 
-MinNet::MinNetPacket::MinNetPacket(char * buffer)
+MinNetPacket::MinNetPacket(char * buffer)
 {
 	this->buffer = (byte *)buffer;
 	buffer_position = 0;
@@ -134,7 +134,7 @@ MinNetPacket::~MinNetPacket()				//패킷의 소멸자
 	delete[] buffer;
 }
 
-int MinNet::MinNetPacket::size()
+int MinNetPacket::size()
 {
 	return body_size + 6;
 }
@@ -261,7 +261,7 @@ Vector3 MinNetPacket::pop_vector3()			//vector3형 데이터를 패킷에서 빼오는 함수
 	return temp_vector3;
 }
 
-int MinNet::MinNetPacket::Parse(byte * arr, int length)
+int MinNetPacket::Parse(byte * arr, int length)
 {
 	buffer_position = 0;// 버퍼 위치를 0으로 초기화 시킴
 
@@ -310,7 +310,7 @@ Vector3::Vector3(float x, float y, float z)
 	this->z = z;
 }
 
-ostream & MinNet::operator<<(ostream & o, const Vector3 & vector3)
+ostream & operator<<(ostream & o, const Vector3 & vector3)
 {
 	cout << "[" << vector3.x << ", " << vector3.y << ", " << vector3.z << "]";
 
@@ -329,7 +329,7 @@ Vector2::Vector2(float x, float y)
 	this->y = y;
 }
 
-ostream & MinNet::operator<<(ostream & o, const Vector2 & vector2)
+ostream & operator<<(ostream & o, const Vector2 & vector2)
 {
 	cout << "[" << vector2.x << ", " << vector2.y << "]";
 
@@ -337,72 +337,26 @@ ostream & MinNet::operator<<(ostream & o, const Vector2 & vector2)
 }
 
 
+void MinNetUser::ChangeRoom(MinNetRoom * room)
+{
+	if (now_room != nullptr)// 이미 룸에 들어가 있다면
+	{
+		now_room->RemoveUser(this);// 룸에서 나옴
+	}
+	now_room = room;// 새로운 룸 갱신
+	now_room->AddUser(this);// 새로운 룸에 들어감
+}
+
 MinNetUser::MinNetUser()
 {
 }
 
 MinNetUser::~MinNetUser()
 {
-
-}
-
-bool MinNet::MinNetUser::ConnectToServer(char * IP, short PORT)
-{
-	WSADATA wsa;
-	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
-		return false;
-
-	sock = socket(AF_INET, SOCK_STREAM, 0);
-	if (sock == INVALID_SOCKET)
-		return false;
-
-	SOCKADDR_IN servAddr;
-	ZeroMemory(&servAddr, sizeof(servAddr));
-	servAddr.sin_port = htons(PORT);
-	servAddr.sin_family = AF_INET;
-	servAddr.sin_addr.s_addr = inet_addr(IP);
-
-	linger optval;
-	optval.l_onoff = 1;
-	optval.l_linger = 10;
-	if (setsockopt(sock, SOL_SOCKET, SO_LINGER, (char *)&optval, sizeof(optval)) == SOCKET_ERROR)
-		return false;
-
-	int retval = connect(sock, (sockaddr *)&servAddr, sizeof(servAddr));
-	if (retval == SOCKET_ERROR)
-		return false;
-
-	InitializeCriticalSection(&recv_CS);
-	InitializeCriticalSection(&send_CS);
-
-	MinNetPacket *request_user_id_packet = new MinNetPacket();
-	request_user_id_packet->create_packet(Defines::MinNetPacketType::CLIENT_REQUEST_ID);
-	request_user_id_packet->create_header();
-
-
-	return true;
 }
 
 
-
-void MinNet::MinNetUser::PacketTypeClientAnswerId(MinNetPacket * packet)
+void MinNetUser::PacketTypeClientAnswerId(MinNetPacket * packet)
 {
 	ID = packet->pop_int();
-}
-
-MinNet::MinNetPacketEvent::MinNetPacketEvent()
-{
-	user = NULL;
-	packet = NULL;
-}
-
-MinNet::MinNetPacketEvent::MinNetPacketEvent(MinNetUser * user, MinNetPacket * packet)
-{
-	this->user = user;
-	this->packet = packet;
-}
-
-MinNet::MinNetPacketEvent::~MinNetPacketEvent()
-{
-	delete packet;
 }
