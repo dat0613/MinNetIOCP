@@ -1,8 +1,10 @@
-﻿  MinNetIOCP.cpp
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(133): warning C4244: '인수': 'float'에서 'unsigned long'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(133): warning C4996: '_sleep': This function or variable has been superceded by newer library or operating system functionality. Consider using Sleep instead. See online help for details.
+﻿  MinNetRoom.cpp
+  MinNetIOCP.cpp
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(137): warning C4244: '인수': 'float'에서 'unsigned long'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(137): warning C4996: '_sleep': This function or variable has been superceded by newer library or operating system functionality. Consider using Sleep instead. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdlib.h(1266): note: '_sleep' 선언을 참조하십시오.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(193): warning C4996: '_sleep': This function or variable has been superceded by newer library or operating system functionality. Consider using Sleep instead. See online help for details.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(191): warning C4996: '_sleep': This function or variable has been superceded by newer library or operating system functionality. Consider using Sleep instead. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdlib.h(1266): note: '_sleep' 선언을 참조하십시오.
+  코드를 생성하고 있습니다...
   MinNetIOCP.vcxproj -> C:\Users\ASUS\Documents\GitHub\MinNetIOCP\MinNetIOCP\Debug\MinNetIOCP.exe
   MinNetIOCP.vcxproj -> C:\Users\ASUS\Documents\GitHub\MinNetIOCP\MinNetIOCP\Debug\MinNetIOCP.pdb (Full PDB)

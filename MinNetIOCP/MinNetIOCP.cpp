@@ -116,15 +116,19 @@ void MinNetIOCP::ServerLoop()
 	{
 		cur_time = clock();
 
-		if(cur_time - last_heart_beat > 3000)
-			
+		if (cur_time - last_heart_beat > 3000)
+		{
+			PingTest();
+			last_heart_beat = cur_time;
+		}
 
 		recvq_spin_lock.lock();
+
 		while (!recvQ.empty())
 		{
 			auto packet_info = recvQ.front();
 
-			StartSend(packet_info.second, packet_info.first);
+			//StartSend(packet_info.second, packet_info.first);
 
 			recvQ.pop();
 		}
@@ -132,6 +136,16 @@ void MinNetIOCP::ServerLoop()
 
 		_sleep(sleep_time);
 	}
+}
+
+MinNetPacket * MinNetIOCP::PopPacket()
+{
+	return packet_pool.pop();
+}
+
+void MinNetIOCP::PushPacket(MinNetPacket * packet)
+{
+	packet_pool.push(packet);
 }
 
 DWORD WINAPI MinNetIOCP::WorkThread(LPVOID arg)
@@ -156,9 +170,6 @@ DWORD WINAPI MinNetIOCP::WorkThread(LPVOID arg)
 		//if (retval == 0 || cbTransferred == 0)
 		//	continue;
 
-		cout << "retval : " << retval << endl;
-		cout << "transf : " << cbTransferred << endl;
-
 		if (retval > 0)
 		{
 			switch (overlap->type)
@@ -172,10 +183,7 @@ DWORD WINAPI MinNetIOCP::WorkThread(LPVOID arg)
 				break;
 
 			case MinNetOverlapped::RECV:
-				//MinNetUser * user;
-				//user = ((MinNetRecvOverlapped *)overlap)->user;
 				EndRecv((MinNetRecvOverlapped *)overlap, cbTransferred);
-				//StartRecv(user);
 				break;
 		
 			case MinNetOverlapped::SEND:
@@ -205,24 +213,48 @@ sockaddr_in * MinNetIOCP::SOCKADDRtoSOCKADDR_IN(sockaddr * addr)
 	return nullptr;
 }
 
-void MinNetIOCP::SendPing()
+void MinNetIOCP::PingTest()
+{
+	user_list_spin_lock.lock();
+
+	if (user_list.size() > 0)
+	{
+		for (auto it = user_list.begin(); it != user_list.end(); it++)
+		{
+			MinNetUser * user = *it;
+
+			if (user->last_ping != -1)
+			{
+				if (clock() - user->last_pong > 5000)
+				{// 가장 최근 보낸 ping의 답변을 받지 못함 = 해당 클라이언트의 연결이 끊겼거나 네트워크 상태가 좋지않음
+					StartClose(user->sock);
+				}
+				else
+				{
+					user->ping = user->last_pong - user->last_ping;
+					SendPing(user);
+					user->last_ping = clock();
+				}
+			}
+			else
+			{
+				SendPing(user);
+				user->last_ping = clock();
+			}
+		}
+	}
+
+	user_list_spin_lock.unlock();
+}
+
+void MinNetIOCP::SendPing(MinNetUser * user)
 {
 	MinNetPacket * packet = packet_pool.pop();
 
 	packet->create_packet(Defines::MinNetPacketType::PING);
 	packet->create_header();
 
-	user_list_spin_lock.lock();
-
-	packet->send_count = user_list.size();
-	
-	for (auto it = user_list.begin(); it != user_list.end(); it++)
-	{
-		MinNetUser * user = *it;
-		StartSend(user, packet);
-	}
-	
-	user_list_spin_lock.unlock();
+	StartSend(user, packet);
 }
 
 void MinNetIOCP::CreatePool()
@@ -249,11 +281,18 @@ void MinNetIOCP::CreatePool()
 	);
 	close_overlapped_pool.AddObject(20);
 
+	send_overlapped_pool.SetConstructor(
+		[](MinNetSendOverlapped * overlap) 
+		{
+			overlap->wsabuf.buf = new char[1024];
+		}
+	);
 	send_overlapped_pool.SetOnPush(
 		[](MinNetSendOverlapped * overlap)
 		{
-			ZeroMemory(overlap, sizeof(MinNetSendOverlapped));
+			ZeroMemory(overlap, sizeof(MinNetOverlapped));
 			overlap->type = MinNetOverlapped::TYPE::SEND;
+			ZeroMemory(overlap->wsabuf.buf, 1024);
 		}
 	);
 	send_overlapped_pool.AddObject(100);
@@ -286,10 +325,12 @@ void MinNetIOCP::CreatePool()
 	packet_pool.SetOnPush(
 		[](MinNetPacket * packet)
 		{
+			packet->buffer_position = 0;
+			packet->body_size = 0;
 			ZeroMemory(packet->buffer, 1024);
 		}
 	);
-	packet_pool.AddObject(100);
+	packet_pool.AddObject(5);
 }
 
 void MinNetIOCP::StartAccept()
@@ -352,7 +393,6 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 
 	MinNetUser * user = user_pool.pop();
 	user->sock = overlap->socket;
-	user->isConnected = true;
 
 	user_list_spin_lock.lock();
 	user_list.push_back(user);
@@ -362,7 +402,7 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 
 	StartRecv(user);
 
-	room_manager.GetPeacefulRoom()->AddUser(user);
+	user->ChangeRoom(room_manager.GetPeacefulRoom());
 
 	StartAccept();
 }
@@ -376,7 +416,6 @@ void MinNetIOCP::StartClose(SOCKET socket)
 
 	MinNetCloseOverlapped * overlap = close_overlapped_pool.pop();
 	overlap->socket = socket;
-
 
 	if (TransmitFile(overlap->socket, 0, 0, 0, overlap, 0, TF_DISCONNECT | TF_REUSE_SOCKET) == FALSE)
 	{
@@ -405,9 +444,10 @@ void MinNetIOCP::EndClose(MinNetCloseOverlapped * overlap)
 
 	for (auto it = user_list.begin(); it != user_list.end(); it++)
 	{
-		::MinNetUser * user = *it;
+		MinNetUser * user = *it;
 		if (user->sock == overlap->socket)
 		{
+			user->ChangeRoom(nullptr);
 			user_list.erase(it);
 			user_pool.push(user);
 			break;
@@ -457,6 +497,7 @@ void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
 	{
 
 		MinNetPacket * packet = packet_pool.pop();
+
 		int checked = packet->Parse(user->temporary_buffer, user->buffer_position);
 		user->buffer_position -= checked;
 
@@ -466,9 +507,17 @@ void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
 			break;
 		}
 
-		recvq_spin_lock.lock();
-		recvQ.push(make_pair(packet, user));
-		recvq_spin_lock.unlock();
+		if (packet->packet_type == Defines::MinNetPacketType::PONG)
+		{
+			user->last_pong = clock();
+			packet_pool.push(packet);
+		}
+		else
+		{
+			recvq_spin_lock.lock();
+			recvQ.push(make_pair(packet, user));
+			recvq_spin_lock.unlock();
+		}
 	}
 
 	StartRecv(user);
@@ -481,9 +530,14 @@ void MinNetIOCP::StartSend(MinNetUser * user, MinNetPacket * packet)
 		return;
 
 	MinNetSendOverlapped * overlap = send_overlapped_pool.pop();
-	overlap->packet = packet;
-	overlap->wsabuf.buf = (char *)packet->buffer;
+	memcpy(overlap->wsabuf.buf, packet->buffer, packet->size());
 	overlap->wsabuf.len = packet->size();
+
+	packet->send_count--;
+	if (packet->send_count < 1)
+	{
+		packet_pool.push(packet);
+	}
 
 	int retval = WSASend(user->sock, &overlap->wsabuf, 1, nullptr, 0, overlap, nullptr);
 
@@ -497,13 +551,6 @@ void MinNetIOCP::StartSend(MinNetUser * user, MinNetPacket * packet)
 
 void MinNetIOCP::EndSend(MinNetSendOverlapped * overlap)
 {
-	overlap->packet->send_count--;
-
-	if (overlap->packet->send_count < 1)// 해당 패킷을 보내는데 성공한 횟수가 지정한 횟수만큼 됬다면 패킷을 회수함
-		packet_pool.push(overlap->packet);
-	else if(overlap->packet->send_count < 1)// 스레드 세이프하지 않아서 그냥 if문을 두번 박음
-		packet_pool.push(overlap->packet);
-
 	send_overlapped_pool.push(overlap);
 }
 

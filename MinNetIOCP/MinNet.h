@@ -17,7 +17,7 @@ class Defines
 public:
 	static const short HEADERSIZE = 2 + 4;
 	static const short MAXCONN = 64 - 1;
-	enum MinNetPacketType { USER_ENTER_ROOM = -8200, USER_LEAVE_ROOM, OBJECT_INSTANTIATE, OBJECT_DESTROY, PING, PONG, PING_CAST };
+	enum MinNetPacketType { OTHER_USER_ENTER_ROOM = -8200, OTHER_USER_LEAVE_ROOM, USER_ENTER_ROOM, USER_LEAVE_ROOM, OBJECT_INSTANTIATE, OBJECT_DESTROY, PING, PONG, PING_CAST };
 };
 
 class BitConverter
@@ -71,7 +71,6 @@ public:
 	int send_count = 1;	// 같은 패킷을 여러명에게 보낼때 사용하기위한 변수
 
 	MinNetPacket();
-	MinNetPacket(char * buffer);
 	~MinNetPacket();
 
 	byte *buffer;
@@ -111,11 +110,13 @@ public:
 	byte temporary_buffer[2048] = { '\0', };
 	int buffer_position = 0;
 	SOCKET sock;
-	bool isConnected = false;
+	int ping = -1;
 
 	int ID;
 
 	void ChangeRoom(MinNetRoom * room);
+	clock_t last_ping = -1;
+	clock_t last_pong = -1;
 
 	MinNetUser();
 	~MinNetUser();

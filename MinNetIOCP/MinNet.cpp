@@ -120,15 +120,6 @@ MinNetPacket::MinNetPacket()				//패킷의 생성자
 	buffer_position = 0;
 }
 
-MinNetPacket::MinNetPacket(char * buffer)
-{
-	this->buffer = (byte *)buffer;
-	buffer_position = 0;
-
-	body_size = pop_short();
-	packet_type = pop_int();
-}
-
 MinNetPacket::~MinNetPacket()				//패킷의 소멸자
 {
 	delete[] buffer;
@@ -343,8 +334,11 @@ void MinNetUser::ChangeRoom(MinNetRoom * room)
 	{
 		now_room->RemoveUser(this);// 룸에서 나옴
 	}
-	now_room = room;// 새로운 룸 갱신
-	now_room->AddUser(this);// 새로운 룸에 들어감
+	if (room != nullptr)
+	{
+		now_room = room;// 새로운 룸 갱신
+		now_room->AddUser(this);// 새로운 룸에 들어감
+	}
 }
 
 MinNetUser::MinNetUser()

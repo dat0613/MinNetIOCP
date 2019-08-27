@@ -29,7 +29,6 @@ struct MinNetCloseOverlapped : MinNetOverlapped
 struct MinNetSendOverlapped : MinNetOverlapped
 {
 	MinNetUser * user;
-	MinNetPacket * packet;
 	WSABUF wsabuf;
 };
 

@@ -27,6 +27,11 @@ public:
 	void SetTickrate(int tick);
 	void StartServer();
 	void ServerLoop();
+
+	MinNetPacket * PopPacket();
+	void PushPacket(MinNetPacket * packet);
+	void StartSend(MinNetUser * user, MinNetPacket * packet);
+
 private:
 
 	LPFN_ACCEPTEX lpfnAcceptEx = NULL;
@@ -56,7 +61,8 @@ private:
 	CRITICAL_SECTION recvQ_section;
 	queue<pair<MinNetPacket *, MinNetUser *>> recvQ;
 
-	void SendPing();
+	void PingTest();
+	void SendPing(MinNetUser * user);
 
 	void CreatePool();
 
@@ -69,7 +75,6 @@ private:
 	void StartRecv(MinNetUser * user);
 	void EndRecv(MinNetRecvOverlapped * overlap, int len);
 
-	void StartSend(MinNetUser * user, MinNetPacket * packet);
 	void EndSend(MinNetSendOverlapped * overlap);
 
 	HANDLE hPort = nullptr;
