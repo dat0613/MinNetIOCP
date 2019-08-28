@@ -74,8 +74,9 @@ void MinNetRoom::AddUser(MinNetUser * user)
 
 	manager->Send(this, other_enter);
 
+	lock();
 	user_list.push_back(user);// 유저 리스트에 새로운 유저 추가
-
+	unlock();
 
 	MinNetPacket * enter = manager->PopPacket();// 새롭게 들어온 유저에게 정상적으로 룸에 들어왔다는 것을 알림
 	enter->create_packet((int)Defines::MinNetPacketType::USER_ENTER_ROOM);
@@ -83,6 +84,7 @@ void MinNetRoom::AddUser(MinNetUser * user)
 	enter->create_header();
 
 	manager->Send(user, enter);
+
 
 	cout << user << " 유저가 방으로 들어옴" << endl;
 }
@@ -93,7 +95,10 @@ void MinNetRoom::RemoveUser(MinNetUser * user)
 		return;
 
 	cout << user << " 유저가 방에서 나감" << endl;
+
+	lock();
 	user_list.remove(user); 
+	unlock();
 
 	MinNetPacket * other_leave = manager->PopPacket();// 다른 유저들 에게 어떤 유저가 나갔다는것을 알림
 	other_leave->create_packet((int)Defines::MinNetPacketType::OTHER_USER_LEAVE_ROOM);

@@ -11,6 +11,7 @@ using namespace std;
 class MinNetIOCP;
 class MinNetObject;
 class MinNetUser;
+class MinNetPacket;
 class MinNetRoomManager;
 
 class MinNetRoom

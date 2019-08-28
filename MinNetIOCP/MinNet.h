@@ -17,7 +17,7 @@ class Defines
 public:
 	static const short HEADERSIZE = 2 + 4;
 	static const short MAXCONN = 64 - 1;
-	enum MinNetPacketType { OTHER_USER_ENTER_ROOM = -8200, OTHER_USER_LEAVE_ROOM, USER_ENTER_ROOM, USER_LEAVE_ROOM, OBJECT_INSTANTIATE, OBJECT_DESTROY, PING, PONG, PING_CAST };
+	enum MinNetPacketType { OTHER_USER_ENTER_ROOM = -8200, OTHER_USER_LEAVE_ROOM, USER_ENTER_ROOM, USER_LEAVE_ROOM, OBJECT_INSTANTIATE, OBJECT_DESTROY, PING, PONG, PING_CAST, RPC };
 };
 
 class BitConverter
@@ -87,6 +87,7 @@ public:
 	void push(bool data);
 	void push(short data);
 	void push(float data);
+	void push(string& str);
 	void push(Vector2 data);
 	void push(Vector3 data);
 
@@ -94,6 +95,7 @@ public:
 	bool pop_bool();
 	short pop_short();
 	float pop_float();
+	string pop_string();
 	Vector2 pop_vector2();
 	Vector3 pop_vector3();
 	int Parse(byte * arr, int length);

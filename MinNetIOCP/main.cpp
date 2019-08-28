@@ -12,14 +12,22 @@ extern "C" {
 #pragma comment (lib, "lua5.1.lib")
 #pragma comment (lib, "lua51.lib")
 
+#include "MinNet.h"
+
 void main()
 {
 
-	MinNetIOCP * iocp = new MinNetIOCP();
-	iocp->SetTickrate(20);
-	iocp->StartServer();
-	iocp->ServerLoop();
+	//MinNetIOCP * iocp = new MinNetIOCP();
+	//iocp->SetTickrate(20);
+	//iocp->StartServer();
+	//iocp->ServerLoop();
 
+	MinNetPacket * packet = new MinNetPacket();
+	packet->create_packet(0);
+	string str = "123한글테스트asdf"; 
+	packet->push(str);
+	packet->buffer_position = 6;
+	cout << packet->pop_string() << endl;
 
 	//printf("Lua 스크립트 테스트에용\n");
 	//lua_State * L = lua_open();

@@ -129,6 +129,16 @@ void MinNetIOCP::ServerLoop()
 			auto packet_info = recvQ.front();
 
 			//StartSend(packet_info.second, packet_info.first);
+			MinNetPacket * packet = packet_info.first;
+			if (packet->packet_type == 3)
+			{
+				cout << packet->pop_int() << endl;
+				cout << packet->pop_string() << endl;
+				cout << packet->pop_float() << endl;
+				cout << packet->pop_bool() << endl;
+			}
+
+			packet_pool.push(packet);
 
 			recvQ.pop();
 		}
