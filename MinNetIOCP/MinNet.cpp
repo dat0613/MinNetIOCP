@@ -1,6 +1,7 @@
 #include "MinNet.h"
 #include "MinNetIOCP.h"
 #include "MinNetRoom.h"
+#include <atlstr.h>
 
 //////////////////////
 //BitConverter class//
@@ -184,11 +185,13 @@ void MinNetPacket::push(float data)					//float형 데이터를 패킷에 넣는 함수
 	buffer_position += sizeof(data);
 }
 
-void MinNetPacket::push(string& str)
+void MinNetPacket::push(string str)
 {
-	int len = str.length();
+	string utf8 = StringConverter::MultibyteToUTF8(str);
+	int len = utf8.size();
 	push(len);
-	memcpy(&buffer[buffer_position], (byte *)str.c_str(), len);
+
+	memcpy(&buffer[buffer_position], (byte *)utf8.c_str(), len);
 	buffer_position += len;
 }
 
@@ -242,12 +245,13 @@ float MinNetPacket::pop_float()						//float형 데이터를 패킷에서 빼오는 함수
 }
 
 string MinNetPacket::pop_string()
-{
+{ 
 	int len = pop_int();
-	string str;
-	str.assign((char *)&buffer[buffer_position], len);
+
+	string utf8((char *)&buffer[buffer_position], len);
 	buffer_position += len;
-	return str;
+
+	return StringConverter::UTF8ToMultibyte(utf8);
 }
 
 Vector2 MinNetPacket::pop_vector2()			//vector2형 데이터를 패킷에서 빼오는 함수
@@ -370,4 +374,34 @@ MinNetUser::~MinNetUser()
 void MinNetUser::PacketTypeClientAnswerId(MinNetPacket * packet)
 {
 	ID = packet->pop_int();
+}
+
+wstring StringConverter::MultibyteToUnicode(string multibyte)
+{
+	return CA2W(multibyte.c_str());
+}
+
+string StringConverter::UnicodeToMultibyte(wstring unicode)
+{
+	return CW2A(unicode.c_str());
+}
+
+string StringConverter::UnicodeToUTF8(wstring unicode)
+{
+	return CW2A(unicode.c_str(), CP_UTF8);
+}
+
+wstring StringConverter::UTF8ToUnicode(string utf8)
+{
+	return CA2W(utf8.c_str(), CP_UTF8);
+}
+
+string StringConverter::MultibyteToUTF8(string multibyte)
+{
+	return UnicodeToUTF8(MultibyteToUnicode(multibyte));
+}
+
+string StringConverter::UTF8ToMultibyte(string utf8)
+{
+	return UnicodeToMultibyte(UTF8ToUnicode(utf8));
 }

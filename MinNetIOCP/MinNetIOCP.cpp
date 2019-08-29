@@ -136,6 +136,8 @@ void MinNetIOCP::ServerLoop()
 				cout << packet->pop_string() << endl;
 				cout << packet->pop_float() << endl;
 				cout << packet->pop_bool() << endl;
+
+				cout << packet->buffer_position << endl;
 			}
 
 			packet_pool.push(packet);

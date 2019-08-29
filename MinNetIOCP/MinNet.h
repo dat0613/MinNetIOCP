@@ -20,7 +20,7 @@ public:
 	enum MinNetPacketType { OTHER_USER_ENTER_ROOM = -8200, OTHER_USER_LEAVE_ROOM, USER_ENTER_ROOM, USER_LEAVE_ROOM, OBJECT_INSTANTIATE, OBJECT_DESTROY, PING, PONG, PING_CAST, RPC };
 };
 
-class BitConverter
+static class BitConverter
 {
 public:
 	static byte* GetBytes(int data);
@@ -34,6 +34,18 @@ public:
 	static float ToFloat(byte* byte_array, int start_position);
 
 	static void ByteCopy(byte* dst, int dst_position, byte *src, int src_length);
+};
+
+static class StringConverter
+{
+public:
+	static wstring MultibyteToUnicode(string multibyte);
+	static string UnicodeToMultibyte(wstring unicode);
+	static string UnicodeToUTF8(wstring unicode);
+	static wstring UTF8ToUnicode(string utf8);
+	static string MultibyteToUTF8(string multibyte);
+	static string UTF8ToMultibyte(string utf8);
+
 };
 
 class Vector3
@@ -87,7 +99,7 @@ public:
 	void push(bool data);
 	void push(short data);
 	void push(float data);
-	void push(string& str);
+	void push(string str);
 	void push(Vector2 data);
 	void push(Vector3 data);
 

@@ -115,6 +115,33 @@ void MinNetRoom::RemoveUser(MinNetUser * user)
 	manager->Send(user, leave);
 }
 
+void MinNetRoom::AddObject(MinNetGameObject * object, string name, int id, MinNetUser * spawner)
+{
+	object->SetID(id);
+	object->SetName(name);
+
+	MinNetPacket * packet = manager->PopPacket();
+	packet->create_packet(Defines::MinNetPacketType::OBJECT_INSTANTIATE);
+	packet->push(name);
+	packet->push(id);
+	manager->Send(this, packet);
+}
+
+void MinNetRoom::RemoveObject(MinNetGameObject * object)
+{
+
+}
+
+void MinNetRoom::RemoveObject(int id)
+{
+
+}
+
+int MinNetRoom::GetNewID()
+{
+	return id_count++;
+}
+
 void MinNetRoom::lock()
 {
 	user_lock.lock();
@@ -172,14 +199,18 @@ void MinNetRoomManager::PushPacket(MinNetPacket * packet)
 	minnet->PushPacket(packet);
 }
 
-void MinNetRoomManager::Send(MinNetRoom * room, MinNetPacket * packet)
+void MinNetRoomManager::Send(MinNetRoom * room, MinNetPacket * packet, MinNetUser * except)
 {
 	room->lock();
 	packet->send_count = room->GetUserList()->size();
 
+	if (except != nullptr)
+		packet->send_count--;
+
 	for (auto user : *room->GetUserList())
 	{
-		Send(user, packet);
+		if(except != user)
+			Send(user, packet);
 	}
 	room->unlock();
 }
@@ -187,4 +218,24 @@ void MinNetRoomManager::Send(MinNetRoom * room, MinNetPacket * packet)
 void MinNetRoomManager::Send(MinNetUser * user, MinNetPacket * packet)
 {
 	minnet->StartSend(user, packet);
+}
+
+void MinNetGameObject::SetID(int id)
+{
+	this->id = id;
+}
+
+int MinNetGameObject::GetID()
+{
+	return id;
+}
+
+void MinNetGameObject::SetName(string name)
+{
+	this->name = name;
+}
+
+string MinNetGameObject::GetName()
+{
+	return name;
 }
