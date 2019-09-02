@@ -4,6 +4,7 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include "MinNet.h"
 #include "MinNetOptimizer.h"
 
 using namespace std;
@@ -36,6 +37,8 @@ public:
 	MinNetRoom();
 	~MinNetRoom();
 
+	MinNetObjectPool<MinNetGameObject> gameobject_pool;
+
 	void SetName(string name);
 	string GetName();
 	void SetNumber(int number);
@@ -45,6 +48,11 @@ public:
 	bool IsPeaceful();
 
 	list<MinNetUser *> * GetUserList();
+
+	MinNetGameObject * Instantiate(string prefabName, Vector3 position, Vector3 euler, int id, bool casting = true);
+	MinNetGameObject * Instantiate(string prefabName, Vector3 position, Vector3 euler, bool autoDelete, int id, MinNetUser * spawner);
+
+	void PacketHandler(MinNetUser * user, MinNetPacket * packet);
 
 	void SetManager(MinNetRoomManager * manager);
 
@@ -72,6 +80,8 @@ private:
 	list<MinNetUser *> user_list;
 	map<int, MinNetGameObject *> object_map;
 	MinNetRoomManager * manager = nullptr;
+
+	void ObjectInstantiate(MinNetUser * user, MinNetPacket * packet);
 };
 
 

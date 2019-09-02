@@ -7,6 +7,14 @@
 MinNetRoom::MinNetRoom()
 {
 	SetMaxUser(10);
+	gameobject_pool.SetOnPush([](MinNetGameObject * obj) {
+		obj->rotation = obj->position = { 0.0f, 0.0f, 0.0f };
+		obj->scale = { 1.0f, 1.0f, 1.0f };
+		obj->SetID(-1);
+		obj->SetName("");
+	});
+
+	gameobject_pool.AddObject(30);
 }
 
 MinNetRoom::~MinNetRoom()
@@ -55,6 +63,54 @@ bool MinNetRoom::IsPeaceful()
 list<MinNetUser*> * MinNetRoom::GetUserList()
 {
 	return &user_list;
+}
+
+MinNetGameObject * MinNetRoom::Instantiate(string prefabName, Vector3 position, Vector3 euler, int id, bool casting)
+{
+	MinNetGameObject * obj = gameobject_pool.pop();
+
+	obj->SetName(prefabName);
+	obj->position = position;
+	obj->rotation = euler;
+	obj->SetID(id);
+
+	AddObject(obj, prefabName, id, nullptr);
+
+	if (casting)
+	{
+		MinNetPacket * packet = manager->PopPacket();
+		packet->push(prefabName);
+		packet->push(position);
+		packet->push(euler);
+	}
+
+	return obj;
+}
+
+MinNetGameObject * MinNetRoom::Instantiate(string prefabName, Vector3 position, Vector3 euler, bool autoDelete, int id, MinNetUser * spawner)
+{
+
+	return nullptr;
+}
+
+
+
+void MinNetRoom::PacketHandler(MinNetUser * user, MinNetPacket * packet)
+{
+	switch ((Defines::MinNetPacketType)packet->packet_type)
+	{
+	case Defines::MinNetPacketType::OBJECT_INSTANTIATE:
+		ObjectInstantiate(packet);
+		break;
+
+	case Defines::MinNetPacketType::OBJECT_DESTROY:
+		
+		break;
+
+
+	default:
+		break;
+	}
 }
 
 void MinNetRoom::SetManager(MinNetRoomManager * manager)
@@ -150,6 +206,24 @@ void MinNetRoom::lock()
 void MinNetRoom::unlock()
 {
 	user_lock.unlock();
+}
+
+void MinNetRoom::ObjectInstantiate(MinNetUser * user, MinNetPacket * packet)
+{
+	string prefabName = packet->pop_string();
+	Vector3 position = packet->pop_vector3();
+	Vector3 rotation = packet->pop_vector3();
+	bool autoDelete = packet->pop_bool();
+
+	int id = GetNewID();
+
+	MinNetGameObject * obj = Instantiate(prefabName, position, rotation, id, false);
+
+	if(autoDelete)
+		user->
+
+	packet->push(id);
+	manager->Send(this, packet, user);
 }
 
 MinNetRoomManager::MinNetRoomManager(MinNetIOCP * minnet)

@@ -37,6 +37,9 @@ private:
 	LPFN_ACCEPTEX lpfnAcceptEx = NULL;
 	GUID guidAcceptEx = WSAID_ACCEPTEX;
 
+	HANDLE hPort = nullptr;
+	HANDLE port = nullptr;
+	
 	int tick = 60;
 
 	MinNetObjectPool<MinNetUser> user_pool;
@@ -77,6 +80,5 @@ private:
 
 	void EndSend(MinNetSendOverlapped * overlap);
 
-	HANDLE hPort = nullptr;
-	HANDLE port = nullptr;
+	void OnPong(MinNetUser * user, MinNetPacket * packet);
 };

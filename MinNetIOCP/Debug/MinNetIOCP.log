@@ -1,6 +1,19 @@
 ﻿  main.cpp
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(37): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(49): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
+  MinNetRoom.cpp
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(37): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(49): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
+  MinNetIOCP.cpp
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(37): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(49): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(149): warning C4244: '인수': 'float'에서 'unsigned long'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(149): warning C4996: '_sleep': This function or variable has been superceded by newer library or operating system functionality. Consider using Sleep instead. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdlib.h(1266): note: '_sleep' 선언을 참조하십시오.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(213): warning C4996: '_sleep': This function or variable has been superceded by newer library or operating system functionality. Consider using Sleep instead. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdlib.h(1266): note: '_sleep' 선언을 참조하십시오.
+  코드를 생성하고 있습니다...
+  컴파일하고 있습니다...
   MinNet.cpp
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(37): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(49): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
@@ -10,20 +23,13 @@ c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(70): warning C48
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(79): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(89): warning C4244: '초기화 중': 'float'에서 'unsigned long'(으)로 변환하면서 데이터가 손실될 수 있습니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(91): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(381): warning C4927: 변환이 잘못되었습니다. 사용자 정의 변환이 암시적으로 두 번 이상 적용되었습니다.
-  c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(381): note: 'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string(const _Elem *)' 생성자를 호출하는 동안
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(386): warning C4927: 변환이 잘못되었습니다. 사용자 정의 변환이 암시적으로 두 번 이상 적용되었습니다.
+  c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(386): note: 'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string(const _Elem *)' 생성자를 호출하는 동안
           with
           [
               _Elem=wchar_t
           ]
   c:\program files (x86)\microsoft visual studio 14.0\vc\include\xstring(834): note: 'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string' 선언을 참조하십시오.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(386): warning C4927: 변환이 잘못되었습니다. 사용자 정의 변환이 암시적으로 두 번 이상 적용되었습니다.
-  c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(386): note: 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const _Elem *)' 생성자를 호출하는 동안
-          with
-          [
-              _Elem=char
-          ]
-  c:\program files (x86)\microsoft visual studio 14.0\vc\include\xstring(834): note: 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string' 선언을 참조하십시오.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(391): warning C4927: 변환이 잘못되었습니다. 사용자 정의 변환이 암시적으로 두 번 이상 적용되었습니다.
   c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(391): note: 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const _Elem *)' 생성자를 호출하는 동안
           with
@@ -32,7 +38,14 @@ c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(391): warning C4
           ]
   c:\program files (x86)\microsoft visual studio 14.0\vc\include\xstring(834): note: 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string' 선언을 참조하십시오.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(396): warning C4927: 변환이 잘못되었습니다. 사용자 정의 변환이 암시적으로 두 번 이상 적용되었습니다.
-  c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(396): note: 'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string(const _Elem *)' 생성자를 호출하는 동안
+  c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(396): note: 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const _Elem *)' 생성자를 호출하는 동안
+          with
+          [
+              _Elem=char
+          ]
+  c:\program files (x86)\microsoft visual studio 14.0\vc\include\xstring(834): note: 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string' 선언을 참조하십시오.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(401): warning C4927: 변환이 잘못되었습니다. 사용자 정의 변환이 암시적으로 두 번 이상 적용되었습니다.
+  c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(401): note: 'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string(const _Elem *)' 생성자를 호출하는 동안
           with
           [
               _Elem=wchar_t

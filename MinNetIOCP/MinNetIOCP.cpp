@@ -10,7 +10,7 @@ MinNetIOCP::MinNetIOCP() : room_manager(this)
 MinNetIOCP::~MinNetIOCP()
 {
 	closesocket(listen_socket);
-	
+
 	auto it = user_list.begin();
 
 	while (it != user_list.end())
@@ -31,7 +31,7 @@ void MinNetIOCP::SetTickrate(int tick)
 void MinNetIOCP::StartServer()
 {
 	WSADATA wsa;
-	if(WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
+	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
 	{
 		printf("WSAStartup error");
 		return;
@@ -93,7 +93,7 @@ void MinNetIOCP::StartServer()
 			return;
 		}
 
-	
+
 	retval = listen(listen_socket, SOMAXCONN);
 	if (retval == SOCKET_ERROR)
 	{
@@ -172,8 +172,8 @@ DWORD WINAPI MinNetIOCP::WorkThread(LPVOID arg)
 	{
 		retval = GetQueuedCompletionStatus
 		(
-			hcp, 
-			&cbTransferred, 
+			hcp,
+			&cbTransferred,
 			(LPDWORD)&sock,
 			(LPOVERLAPPED *)&overlap,
 			INFINITE
@@ -197,7 +197,7 @@ DWORD WINAPI MinNetIOCP::WorkThread(LPVOID arg)
 			case MinNetOverlapped::RECV:
 				EndRecv((MinNetRecvOverlapped *)overlap, cbTransferred);
 				break;
-		
+
 			case MinNetOverlapped::SEND:
 				EndSend((MinNetSendOverlapped *)overlap);
 				break;
@@ -237,13 +237,12 @@ void MinNetIOCP::PingTest()
 
 			if (user->last_ping != -1)
 			{
-				if (clock() - user->last_pong > 5000)
+				if (clock() - user->last_pong > 3000)
 				{// 가장 최근 보낸 ping의 답변을 받지 못함 = 해당 클라이언트의 연결이 끊겼거나 네트워크 상태가 좋지않음
 					StartClose(user->sock);
 				}
 				else
 				{
-					user->ping = user->last_pong - user->last_ping;
 					SendPing(user);
 					user->last_ping = clock();
 				}
@@ -275,72 +274,72 @@ void MinNetIOCP::CreatePool()
 
 	accept_overlapped_pool.SetOnPush(
 		[](MinNetAcceptOverlapped * overlap)
-		{
-			ZeroMemory(overlap, sizeof(MinNetAcceptOverlapped));
-			overlap->type = MinNetOverlapped::TYPE::ACCEPT;
-			overlap->socket = INVALID_SOCKET;
-			overlap->socket = WSASocket(PF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
-		}
+	{
+		ZeroMemory(overlap, sizeof(MinNetAcceptOverlapped));
+		overlap->type = MinNetOverlapped::TYPE::ACCEPT;
+		overlap->socket = INVALID_SOCKET;
+		overlap->socket = WSASocket(PF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+	}
 	);
 	accept_overlapped_pool.AddObject(20);
 
 	close_overlapped_pool.SetOnPush(
 		[](MinNetCloseOverlapped * overlap)
-		{
-			ZeroMemory(overlap, sizeof(MinNetCloseOverlapped));
-			overlap->type = MinNetOverlapped::TYPE::CLOSE;
-		}
+	{
+		ZeroMemory(overlap, sizeof(MinNetCloseOverlapped));
+		overlap->type = MinNetOverlapped::TYPE::CLOSE;
+	}
 	);
 	close_overlapped_pool.AddObject(20);
 
 	send_overlapped_pool.SetConstructor(
-		[](MinNetSendOverlapped * overlap) 
-		{
-			overlap->wsabuf.buf = new char[1024];
-		}
+		[](MinNetSendOverlapped * overlap)
+	{
+		overlap->wsabuf.buf = new char[1024];
+	}
 	);
 	send_overlapped_pool.SetOnPush(
 		[](MinNetSendOverlapped * overlap)
-		{
-			ZeroMemory(overlap, sizeof(MinNetOverlapped));
-			overlap->type = MinNetOverlapped::TYPE::SEND;
-			ZeroMemory(overlap->wsabuf.buf, 1024);
-		}
+	{
+		ZeroMemory(overlap, sizeof(MinNetOverlapped));
+		overlap->type = MinNetOverlapped::TYPE::SEND;
+		ZeroMemory(overlap->wsabuf.buf, 1024);
+	}
 	);
 	send_overlapped_pool.AddObject(100);
 
 	recv_overlapped_pool.SetConstructor(
 		[](MinNetRecvOverlapped * overlap)
-		{
-			overlap->wsabuf.buf = new char[1024];
-			overlap->wsabuf.len = 1024;
-		}
+	{
+		overlap->wsabuf.buf = new char[1024];
+		overlap->wsabuf.len = 1024;
+	}
 	);
 	recv_overlapped_pool.SetDestructor(
 		[](MinNetRecvOverlapped * overlap)
-		{
-			delete[] overlap->wsabuf.buf;
-		}
+	{
+		delete[] overlap->wsabuf.buf;
+	}
 	);
 	recv_overlapped_pool.SetOnPush(
 		[](MinNetRecvOverlapped * overlap)
-		{
-			ZeroMemory(overlap, sizeof(MinNetOverlapped));
-			overlap->type = MinNetOverlapped::TYPE::RECV;
+	{
+		ZeroMemory(overlap, sizeof(MinNetOverlapped));
+		overlap->type = MinNetOverlapped::TYPE::RECV;
 
-			ZeroMemory(overlap->wsabuf.buf, 1024);
-			overlap->wsabuf.len = 1024;
-		}
+		ZeroMemory(overlap->wsabuf.buf, 1024);
+		overlap->wsabuf.len = 1024;
+	}
 	);
 	recv_overlapped_pool.AddObject(100);
 
 	packet_pool.SetOnPush(
 		[](MinNetPacket * packet)
-		{
-			packet->buffer_position = 0;
-			packet->body_size = 0;
-			ZeroMemory(packet->buffer, 1024);
-		}
+	{
+		packet->buffer_position = 0;
+		packet->body_size = 0;
+		ZeroMemory(packet->buffer, 1024);
+	}
 	);
 	packet_pool.AddObject(5);
 }
@@ -355,9 +354,9 @@ void MinNetIOCP::StartAccept()
 		overlap->socket,
 		(LPVOID)&overlap->buf,
 		0,
-		sizeof(SOCKADDR_IN) + 16, 
 		sizeof(SOCKADDR_IN) + 16,
-		&overlap->dwBytes, 
+		sizeof(SOCKADDR_IN) + 16,
+		&overlap->dwBytes,
 		overlap
 	);
 
@@ -378,7 +377,7 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 		StartClose(overlap->socket);
 		return;
 	}
-	
+
 	//SOCKADDR *local_addr, *remote_addr;
 	//int l_len = 0, r_len = 0;
 	//GetAcceptExSockaddrs
@@ -452,7 +451,7 @@ void MinNetIOCP::StartClose(SOCKET socket)
 void MinNetIOCP::EndClose(MinNetCloseOverlapped * overlap)
 {
 	cout << "유저가 나감 : " << overlap->socket << endl;
-	user_list_spin_lock.lock(); 
+	user_list_spin_lock.lock();
 
 	for (auto it = user_list.begin(); it != user_list.end(); it++)
 	{
@@ -494,7 +493,7 @@ void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
 	if (overlap->user == nullptr)
 		return;
 
-	if(len == 0)
+	if (len == 0)
 	{
 		StartClose(overlap->user->sock);
 		return;
@@ -520,10 +519,7 @@ void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
 		}
 
 		if (packet->packet_type == Defines::MinNetPacketType::PONG)
-		{
-			user->last_pong = clock();
-			packet_pool.push(packet);
-		}
+			OnPong(user, packet);
 		else
 		{
 			recvq_spin_lock.lock();
@@ -564,6 +560,19 @@ void MinNetIOCP::StartSend(MinNetUser * user, MinNetPacket * packet)
 void MinNetIOCP::EndSend(MinNetSendOverlapped * overlap)
 {
 	send_overlapped_pool.push(overlap);
+}
+
+void MinNetIOCP::OnPong(MinNetUser * user, MinNetPacket * packet)
+{
+	user->last_pong = clock();
+	user->ping = user->last_pong - user->last_ping;
+	packet_pool.push(packet);
+
+	MinNetPacket * cast = packet_pool.pop();
+	cast->create_packet(Defines::MinNetPacketType::PING_CAST);
+	cast->push(user->ping);
+	cast->create_header();
+	StartSend(user, cast);
 }
 
 void MinNetSpinLock::lock()

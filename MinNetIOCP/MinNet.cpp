@@ -362,6 +362,11 @@ void MinNetUser::ChangeRoom(MinNetRoom * room)
 	}
 }
 
+MinNetRoom * MinNetUser::GetRoom()
+{
+	return now_room;
+}
+
 MinNetUser::MinNetUser()
 {
 }

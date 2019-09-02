@@ -17,7 +17,7 @@ class Defines
 public:
 	static const short HEADERSIZE = 2 + 4;
 	static const short MAXCONN = 64 - 1;
-	enum MinNetPacketType { OTHER_USER_ENTER_ROOM = -8200, OTHER_USER_LEAVE_ROOM, USER_ENTER_ROOM, USER_LEAVE_ROOM, OBJECT_INSTANTIATE, OBJECT_DESTROY, PING, PONG, PING_CAST, RPC };
+	enum MinNetPacketType { OTHER_USER_ENTER_ROOM = -8200, OTHER_USER_LEAVE_ROOM, USER_ENTER_ROOM, USER_LEAVE_ROOM, OBJECT_INSTANTIATE, OBJECT_DESTROY, PING, PONG, PING_CAST, RPC, ID_CAST };
 };
 
 static class BitConverter
@@ -129,6 +129,7 @@ public:
 	int ID;
 
 	void ChangeRoom(MinNetRoom * room);
+	MinNetRoom * GetRoom();
 	clock_t last_ping = -1;
 	clock_t last_pong = -1;
 
