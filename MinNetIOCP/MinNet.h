@@ -6,18 +6,18 @@
 #include <queue>
 #include <thread>
 #include <process.h>
+#include <map>
 
 using namespace std;
 
 class MinNetRoom;
-
+class MinNetGameObject;
 
 class Defines
 {
 public:
 	static const short HEADERSIZE = 2 + 4;
-	static const short MAXCONN = 64 - 1;
-	enum MinNetPacketType { OTHER_USER_ENTER_ROOM = -8200, OTHER_USER_LEAVE_ROOM, USER_ENTER_ROOM, USER_LEAVE_ROOM, OBJECT_INSTANTIATE, OBJECT_DESTROY, PING, PONG, PING_CAST, RPC, ID_CAST };
+	enum MinNetPacketType { OTHER_USER_ENTER_ROOM = -8200, OTHER_USER_LEAVE_ROOM, USER_ENTER_ROOM, USER_LEAVE_ROOM, OBJECT_INSTANTIATE, OBJECT_DESTROY, PING, PONG, PING_CAST, RPC, ID_CAST, USER_WAITNG_ROOM };
 };
 
 static class BitConverter
@@ -79,9 +79,6 @@ class MinNetPacket
 	friend class MinNetUser;
 
 public:
-
-	int send_count = 1;	// 같은 패킷을 여러명에게 보낼때 사용하기위한 변수
-
 	MinNetPacket();
 	~MinNetPacket();
 
@@ -127,11 +124,15 @@ public:
 	int ping = -1;
 
 	int ID;
+	
+	bool isConnected = false;
 
 	void ChangeRoom(MinNetRoom * room);
 	MinNetRoom * GetRoom();
 	clock_t last_ping = -1;
 	clock_t last_pong = -1;
+
+	map<MinNetGameObject *, int> autoDeleteObjectMap;
 
 	MinNetUser();
 	~MinNetUser();
@@ -143,6 +144,4 @@ private:
 	MinNetRoom * now_room = nullptr;
 
 	void PacketTypeClientAnswerId(MinNetPacket * packet);
-
-
 };

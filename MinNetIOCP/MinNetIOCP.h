@@ -64,6 +64,11 @@ private:
 	CRITICAL_SECTION recvQ_section;
 	queue<pair<MinNetPacket *, MinNetUser *>> recvQ;
 
+	void PacketHandler(MinNetUser * user, MinNetPacket * packet);
+
+	void JoinPeacefulRoom(MinNetUser * user);
+
+
 	void PingTest();
 	void SendPing(MinNetUser * user);
 
@@ -72,7 +77,7 @@ private:
 	void StartAccept();
 	void EndAccept(MinNetAcceptOverlapped * overlap);
 
-	void StartClose(SOCKET socket);
+	void StartClose(MinNetUser * user);
 	void EndClose(MinNetCloseOverlapped * overlap);
 
 	void StartRecv(MinNetUser * user);

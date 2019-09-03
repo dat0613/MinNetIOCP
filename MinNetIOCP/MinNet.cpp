@@ -360,6 +360,10 @@ void MinNetUser::ChangeRoom(MinNetRoom * room)
 		now_room = room;// 새로운 룸 갱신
 		now_room->AddUser(this);// 새로운 룸에 들어감
 	}
+	else
+	{
+		now_room = nullptr;
+	}
 }
 
 MinNetRoom * MinNetUser::GetRoom()

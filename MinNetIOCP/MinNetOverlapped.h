@@ -24,7 +24,7 @@ struct MinNetAcceptOverlapped : MinNetOverlapped
 
 struct MinNetCloseOverlapped : MinNetOverlapped
 {
-	SOCKET socket;
+	MinNetUser * user;
 };
 struct MinNetSendOverlapped : MinNetOverlapped
 {

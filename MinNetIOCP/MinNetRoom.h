@@ -26,6 +26,8 @@ public:
 	Vector3 rotation;
 	Vector3 scale = { 1.0f, 1.0f, 1.0f };
 
+	MinNetUser * owner;
+
 private:
 	string name;
 	int id = -1;
@@ -49,10 +51,12 @@ public:
 
 	list<MinNetUser *> * GetUserList();
 
-	MinNetGameObject * Instantiate(string prefabName, Vector3 position, Vector3 euler, int id, bool casting = true);
+	MinNetGameObject * Instantiate(string prefabName, Vector3 position, Vector3 euler, int id, bool casting = false, MinNetUser * except = nullptr);
 	MinNetGameObject * Instantiate(string prefabName, Vector3 position, Vector3 euler, bool autoDelete, int id, MinNetUser * spawner);
+	void Destroy(string prefabName, int id, bool casting = false, MinNetUser * except = nullptr);
 
-	void PacketHandler(MinNetUser * user, MinNetPacket * packet);
+	void ObjectInstantiate(MinNetUser * user, MinNetPacket * packet);
+	void ObjectDestroy(MinNetUser * user, MinNetPacket * packet);
 
 	void SetManager(MinNetRoomManager * manager);
 
@@ -81,7 +85,6 @@ private:
 	map<int, MinNetGameObject *> object_map;
 	MinNetRoomManager * manager = nullptr;
 
-	void ObjectInstantiate(MinNetUser * user, MinNetPacket * packet);
 };
 
 
@@ -96,6 +99,8 @@ public:
 
 	void Send(MinNetRoom * room, MinNetPacket * packet, MinNetUser * except = nullptr);
 	void Send(MinNetUser * user, MinNetPacket * packet);
+
+	void PacketHandler(MinNetUser * user, MinNetPacket * packet);
 
 private:
 	MinNetObjectPool<MinNetRoom> room_pool;
