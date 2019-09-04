@@ -51,8 +51,7 @@ public:
 
 	list<MinNetUser *> * GetUserList();
 
-	MinNetGameObject * Instantiate(string prefabName, Vector3 position, Vector3 euler, int id, bool casting = false, MinNetUser * except = nullptr);
-	MinNetGameObject * Instantiate(string prefabName, Vector3 position, Vector3 euler, bool autoDelete, int id, MinNetUser * spawner);
+	MinNetGameObject * Instantiate(string prefabName, Vector3 position, Vector3 euler, int id, bool casting = false, MinNetUser * except = nullptr, bool autoDelete = false);
 	void Destroy(string prefabName, int id, bool casting = false, MinNetUser * except = nullptr);
 
 	void ObjectInstantiate(MinNetUser * user, MinNetPacket * packet);
@@ -63,14 +62,11 @@ public:
 	void AddUser(MinNetUser * user);
 	void RemoveUser(MinNetUser * user);
 
-	void AddObject(MinNetGameObject * object, string name, int id, MinNetUser * spawner);
+	void AddObject(MinNetGameObject * object);
 	void RemoveObject(MinNetGameObject * object);
 	void RemoveObject(int id);
 
 	int GetNewID();
-
-	void lock();
-	void unlock();
 
 private:
 	string name = "";
@@ -79,10 +75,9 @@ private:
 
 	int id_count = 0;
 
-	MinNetSpinLock user_lock;
-	MinNetSpinLock object_lock;
 	list<MinNetUser *> user_list;
 	map<int, MinNetGameObject *> object_map;
+	list<MinNetGameObject *> object_list;
 	MinNetRoomManager * manager = nullptr;
 
 };

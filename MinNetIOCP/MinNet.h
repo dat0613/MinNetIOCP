@@ -132,7 +132,7 @@ public:
 	clock_t last_ping = -1;
 	clock_t last_pong = -1;
 
-	map<MinNetGameObject *, int> autoDeleteObjectMap;
+	map<int, MinNetGameObject *> autoDeleteObjectMap;
 
 	MinNetUser();
 	~MinNetUser();

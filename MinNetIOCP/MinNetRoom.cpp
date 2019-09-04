@@ -66,7 +66,7 @@ list<MinNetUser*> * MinNetRoom::GetUserList()
 	return &user_list;
 }
 
-MinNetGameObject * MinNetRoom::Instantiate(string prefabName, Vector3 position, Vector3 euler, int id, bool casting, MinNetUser * except)
+MinNetGameObject * MinNetRoom::Instantiate(string prefabName, Vector3 position, Vector3 euler, int id, bool casting, MinNetUser * except, bool autoDelete)
 {
 	MinNetGameObject * obj = gameobject_pool.pop();
 
@@ -74,8 +74,6 @@ MinNetGameObject * MinNetRoom::Instantiate(string prefabName, Vector3 position, 
 	obj->position = position;
 	obj->rotation = euler;
 	obj->SetID(id);
-
-	AddObject(obj, prefabName, id, nullptr);
 
 	if (casting)
 	{
@@ -88,15 +86,31 @@ MinNetGameObject * MinNetRoom::Instantiate(string prefabName, Vector3 position, 
 		packet->create_header();
 
 		manager->Send(this, packet, except);
+
+		manager->PushPacket(packet);
+
+		if (except != nullptr)
+		{
+			MinNetPacket * packet = manager->PopPacket();
+			packet->create_packet(Defines::MinNetPacketType::ID_CAST);
+			packet->push(obj->GetName());
+			packet->push(obj->GetID());
+			packet->create_header();
+
+			manager->Send(except, packet);
+		
+			manager->PushPacket(packet);
+	
+			if (autoDelete)
+			{
+				obj->owner = except;
+			}
+		}
 	}
 
+	AddObject(obj);
+
 	return obj;
-}
-
-MinNetGameObject * MinNetRoom::Instantiate(string prefabName, Vector3 position, Vector3 euler, bool autoDelete, int id, MinNetUser * spawner)
-{
-
-	return nullptr;
 }
 
 void MinNetRoom::Destroy(string prefabName, int id, bool casting, MinNetUser * except)
@@ -186,43 +200,35 @@ void MinNetRoom::RemoveUser(MinNetUser * user)
 	manager->PushPacket(leave);
 }
 
-void MinNetRoom::AddObject(MinNetGameObject * object, string name, int id, MinNetUser * spawner)
+void MinNetRoom::AddObject(MinNetGameObject * object)
 {
-	object->SetID(id);
-	object->SetName(name);
-
-	MinNetPacket * packet = manager->PopPacket();
-	packet->create_packet(Defines::MinNetPacketType::OBJECT_INSTANTIATE);
-	packet->push(name);
-	packet->push(id);
-	manager->Send(this, packet);
-
-	manager->PushPacket(packet);
+	object_list.push_back(object);
+	object_map.insert(make_pair(object->GetID(), object));
+	if (object->owner != nullptr)
+	{
+		object->owner->autoDeleteObjectMap.insert(make_pair(object->GetID(), object));
+	}
 }
 
 void MinNetRoom::RemoveObject(MinNetGameObject * object)
 {
+	object_list.remove(object);
+	object_map.erase(object->GetID());
 
+	if (object->owner != nullptr)
+	{
+		object->owner->autoDeleteObjectMap.erase(object->GetID());
+	}
 }
 
 void MinNetRoom::RemoveObject(int id)
 {
-
+	RemoveObject(object_map[id]);
 }
 
 int MinNetRoom::GetNewID()
 {
 	return id_count++;
-}
-
-void MinNetRoom::lock()
-{
-	user_lock.lock();
-}
-
-void MinNetRoom::unlock()
-{
-	user_lock.unlock();
 }
 
 void MinNetRoom::ObjectInstantiate(MinNetUser * user, MinNetPacket * packet)
@@ -232,35 +238,20 @@ void MinNetRoom::ObjectInstantiate(MinNetUser * user, MinNetPacket * packet)
 	Vector3 rotation = packet->pop_vector3();
 	bool autoDelete = packet->pop_bool();
 
-	int id = GetNewID();
-
-	MinNetGameObject * obj = Instantiate(prefabName, position, rotation, id, true, );
-
-	if (autoDelete)
-	{
-		obj->owner = user;
-		user->autoDeleteObjectMap.insert(make_pair(obj, id));
-	}
-
-	packet->push(id);
-	manager->Send(this, packet, user);
+	Instantiate(prefabName, position, rotation, GetNewID(), true, user, autoDelete);
 }
 
 void MinNetRoom::ObjectDestroy(MinNetUser * user, MinNetPacket * packet)
 {
-	Destroy(packet->pop_string(), packet->pop_int(), true, user);
+	Destroy(packet->pop_string(), packet->pop_int(), true);
 }
 
 MinNetRoomManager::MinNetRoomManager(MinNetIOCP * minnet)
 {
 	this->minnet = minnet;
-	room_pool.SetOnPush
-	(
-		[](MinNetRoom * room)
-		{
-			room->SetManager(nullptr);
-		}
-	);
+	room_pool.SetOnPush([](MinNetRoom * room){
+		room->SetManager(nullptr);
+	});
 	room_pool.AddObject(10);
 }
 
@@ -300,15 +291,11 @@ void MinNetRoomManager::PushPacket(MinNetPacket * packet)
 
 void MinNetRoomManager::Send(MinNetRoom * room, MinNetPacket * packet, MinNetUser * except)
 {
-	room->lock();
-
 	for (auto user : *room->GetUserList())
 	{
 		if(except != user)
 			Send(user, packet);
 	}
-
-	room->unlock();
 }
 
 void MinNetRoomManager::Send(MinNetUser * user, MinNetPacket * packet)
