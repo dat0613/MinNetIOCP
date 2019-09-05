@@ -68,6 +68,8 @@ public:
 
 	int GetNewID();
 
+	void ObjectRPC(MinNetUser * user, MinNetPacket * packet);
+
 private:
 	string name = "";
 	int room_number = 0;

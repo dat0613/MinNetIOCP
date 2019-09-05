@@ -151,6 +151,32 @@ void MinNetRoom::AddUser(MinNetUser * user)
 	if (user == nullptr)
 		return;
 	
+	MinNetPacket * enter = manager->PopPacket();// 새롭게 들어온 유저에게 정상적으로 룸에 들어왔다는 것을 알림
+	enter->create_packet((int)Defines::MinNetPacketType::USER_ENTER_ROOM);
+	// 대충 룸 정보와 다른 정보를 넣을 같이 보낼 예정
+	enter->create_header();
+
+	manager->Send(user, enter);
+
+	manager->PushPacket(enter);
+
+	cout << user << " 유저가 방으로 들어옴" << endl;
+
+	for (MinNetGameObject * obj : object_list)
+	{
+		MinNetPacket * packet = manager->PopPacket();
+		packet->create_packet(Defines::MinNetPacketType::OBJECT_INSTANTIATE);
+		packet->push(obj->GetName());
+		packet->push(obj->position);
+		packet->push(obj->rotation);
+		packet->push(obj->GetID());
+		packet->create_header();
+
+		manager->Send(user, packet);
+
+		manager->PushPacket(packet);
+	}
+
 	MinNetPacket * other_enter = manager->PopPacket();// 다른 유저들 에게 새로운 유저가 들어왔다는 것을 알림
 	other_enter->create_packet((int)Defines::MinNetPacketType::OTHER_USER_ENTER_ROOM);
 	// 대충 룸 정보와 다른 정보를 넣을 같이 보낼 예정
@@ -161,15 +187,6 @@ void MinNetRoom::AddUser(MinNetUser * user)
 	user_list.push_back(user);// 유저 리스트에 새로운 유저 추가
 
 	manager->PushPacket(other_enter);
-
-	MinNetPacket * enter = manager->PopPacket();// 새롭게 들어온 유저에게 정상적으로 룸에 들어왔다는 것을 알림
-	enter->create_packet((int)Defines::MinNetPacketType::USER_ENTER_ROOM);
-	// 대충 룸 정보와 다른 정보를 넣을 같이 보낼 예정
-	enter->create_header();
-
-	manager->PushPacket(enter);
-
-	cout << user << " 유저가 방으로 들어옴" << endl;
 }
 
 void MinNetRoom::RemoveUser(MinNetUser * user)
@@ -231,12 +248,20 @@ int MinNetRoom::GetNewID()
 	return id_count++;
 }
 
+void MinNetRoom::ObjectRPC(MinNetUser * user, MinNetPacket * packet)
+{
+	cout << "RPC 전송" << endl;
+	manager->Send(this, packet);
+}
+
 void MinNetRoom::ObjectInstantiate(MinNetUser * user, MinNetPacket * packet)
 {
 	string prefabName = packet->pop_string();
 	Vector3 position = packet->pop_vector3();
 	Vector3 rotation = packet->pop_vector3();
 	bool autoDelete = packet->pop_bool();
+
+	cout << prefabName + "생성 요청" << endl;
 
 	Instantiate(prefabName, position, rotation, GetNewID(), true, user, autoDelete);
 }
@@ -323,6 +348,9 @@ void MinNetRoomManager::PacketHandler(MinNetUser * user, MinNetPacket * packet)
 		user->GetRoom()->ObjectDestroy(user, packet);
 		break;
 
+	case Defines::MinNetPacketType::RPC:
+		user->GetRoom()->ObjectRPC(user, packet);
+		break;
 
 	default:
 		break;
