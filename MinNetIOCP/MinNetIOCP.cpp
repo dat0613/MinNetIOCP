@@ -276,7 +276,7 @@ void MinNetIOCP::CreatePool()
 		user->last_ping = user->last_pong = user->ping = -1;
 		user->sock = INVALID_SOCKET;
 		user->ChangeRoom(nullptr);
-		user->autoDeleteObjectMap.clear();
+		user->autoDeleteObjectList.clear();
 		user->buffer_position = 0;
 		ZeroMemory(user->temporary_buffer, 2048);
 	});

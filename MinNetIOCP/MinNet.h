@@ -7,6 +7,7 @@
 #include <thread>
 #include <process.h>
 #include <map>
+#include <list>
 
 using namespace std;
 
@@ -132,7 +133,7 @@ public:
 	clock_t last_ping = -1;
 	clock_t last_pong = -1;
 
-	map<int, MinNetGameObject *> autoDeleteObjectMap;
+	list<MinNetGameObject *> autoDeleteObjectList;
 
 	MinNetUser();
 	~MinNetUser();

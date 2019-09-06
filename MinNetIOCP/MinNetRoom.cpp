@@ -198,6 +198,19 @@ void MinNetRoom::RemoveUser(MinNetUser * user)
 
 	user_list.remove(user); 
 
+	queue<MinNetGameObject *> deleteQ;
+
+	for (auto it = user->autoDeleteObjectList.begin(); it != user->autoDeleteObjectList.end(); it++)
+	{
+		deleteQ.push(*it);
+	}
+
+	while (!deleteQ.empty())
+	{
+		RemoveObject(deleteQ.front());
+		deleteQ.pop();
+	}
+
 	MinNetPacket * other_leave = manager->PopPacket();// 다른 유저들 에게 어떤 유저가 나갔다는것을 알림
 	other_leave->create_packet((int)Defines::MinNetPacketType::OTHER_USER_LEAVE_ROOM);
 	// 대충 룸 정보와 다른 정보를 넣을 같이 보낼 예정
@@ -223,7 +236,8 @@ void MinNetRoom::AddObject(MinNetGameObject * object)
 	object_map.insert(make_pair(object->GetID(), object));
 	if (object->owner != nullptr)
 	{
-		object->owner->autoDeleteObjectMap.insert(make_pair(object->GetID(), object));
+		cout << object->GetName() + " 는 자동삭제 오브젝트 임" << endl;
+		object->owner->autoDeleteObjectList.push_back(object);
 	}
 }
 
@@ -234,7 +248,7 @@ void MinNetRoom::RemoveObject(MinNetGameObject * object)
 
 	if (object->owner != nullptr)
 	{
-		object->owner->autoDeleteObjectMap.erase(object->GetID());
+		object->owner->autoDeleteObjectList.remove(object);
 	}
 }
 
