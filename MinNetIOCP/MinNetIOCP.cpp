@@ -455,13 +455,12 @@ void MinNetIOCP::StartClose(MinNetUser * user)
 		DWORD error = WSAGetLastError();
 		if (error != WSA_IO_PENDING)
 		{
-			if (error == WSAENOTCONN)
+			if (error == WSAENOTCONN || error == WSAENOTSOCK)
 			{
 				cout << "이미 닫힌 소켓임 : " << overlap->user->sock << endl;
 				return;
 			}
 			cout << "Transmitfile error : " << error << endl;
-			return;
 		}
 	}
 	else
@@ -474,22 +473,9 @@ void MinNetIOCP::EndClose(MinNetCloseOverlapped * overlap)
 {
 	cout << "유저가 나감 : " << overlap->user->sock << endl;
 
-	if (overlap->user->GetRoom() == nullptr)
-	{
-		user_list.remove(overlap->user);
-		user_pool.push(overlap->user);
-	}
-	else
-	{
-		MinNetPacket * packet = packet_pool.pop();
-		packet->create_packet(Defines::MinNetPacketType::USER_LEAVE_ROOM);
 
-		packet->create_header();
-
-		recvq_spin_lock.lock();
-		recvQ.push(make_pair(packet, overlap->user));
-		recvq_spin_lock.unlock();
-	}
+	user_list.remove(overlap->user);
+	user_pool.push(overlap->user);
 
 	close_overlapped_pool.push(overlap);
 }
@@ -505,11 +491,13 @@ void MinNetIOCP::StartRecv(MinNetUser * user)
 	int retval = WSARecv(user->sock, &overlap->wsabuf, 1, &recvbytes, &flags, overlap, NULL);
 
 	if (retval == SOCKET_ERROR)
+	{
 		if (WSAGetLastError() != WSA_IO_PENDING)
 		{
 			StartClose(user);
 			return;
 		}
+	}
 }
 
 void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
