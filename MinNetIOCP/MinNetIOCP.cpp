@@ -29,7 +29,7 @@ void MinNetIOCP::SetTickrate(int tick)
 }
 
 void MinNetIOCP::StartServer()
-{
+{	
 	WSADATA wsa;
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
 	{
@@ -153,6 +153,23 @@ void MinNetIOCP::PushPacket(MinNetPacket * packet)
 	packet_pool.push(packet);
 }
 
+string MinNetIOCP::GetIP()
+{
+	char name[255];
+	char *ip;
+	PHOSTENT host;
+
+	if (gethostname(name, sizeof(name)) == 0)
+	{
+		if ((host = gethostbyname(name)) != NULL)
+		{
+			ip = inet_ntoa(*(struct in_addr*)*host->h_addr_list);
+		}
+	}
+
+	return ip;
+}
+
 DWORD WINAPI MinNetIOCP::WorkThread(LPVOID arg)
 {
 	HANDLE hcp = (HANDLE)arg;
@@ -229,6 +246,7 @@ void MinNetIOCP::JoinPeacefulRoom(MinNetUser * user)
 
 void MinNetIOCP::PingTest()
 {
+	queue<MinNetUser *> removeQ;
 	if (user_list.size() > 0)
 	{
 		for (auto it = user_list.begin(); it != user_list.end(); it++)
@@ -237,28 +255,38 @@ void MinNetIOCP::PingTest()
 
 			if (user->last_ping != -1)
 			{
-				if (clock() - user->last_pong > 3000)
-				{// 가장 최근 보낸 ping의 답변을 받지 못함 = 해당 클라이언트의 연결이 끊겼거나 네트워크 상태가 좋지않음
-					StartClose(user);
+				if (user->ping > 500)
+				{
+					cout << user << " 이 응답하지 않아 연결 끊음" << endl;
+					removeQ.push(user);
 				}
 				else
 				{
 					SendPing(user);
-					user->last_ping = clock();
 				}
 			}
 			else
 			{
 				SendPing(user);
-				user->last_ping = clock();
 			}
 		}
+	}
+
+	while (!removeQ.empty())
+	{
+		MinNetUser * user = removeQ.front();
+		user->ChangeRoom(nullptr);
+		user_list.remove(user);
+		StartClose(user);
+		removeQ.pop();
 	}
 }
 
 void MinNetIOCP::SendPing(MinNetUser * user)
 {
 	MinNetPacket * packet = packet_pool.pop();
+
+	user->last_ping = clock();
 
 	packet->create_packet(Defines::MinNetPacketType::PING);
 	packet->create_header();
@@ -328,7 +356,7 @@ void MinNetIOCP::CreatePool()
 		packet->body_size = 0;
 		ZeroMemory(packet->buffer, 1024);
 	});
-	packet_pool.AddObject(5);
+	packet_pool.AddObject(10);
 }
 
 void MinNetIOCP::StartAccept()
@@ -397,7 +425,7 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 	user->sock = overlap->socket;
 
 	//user_list_spin_lock.lock();
-	//user_list.push_back(user);
+	user_list.push_back(user);
 	//user_list_spin_lock.unlock();
 
 	user->isConnected = true;
@@ -559,10 +587,13 @@ void MinNetIOCP::OnPong(MinNetUser * user, MinNetPacket * packet)
 	packet_pool.push(packet);
 
 	MinNetPacket * cast = packet_pool.pop();
+
 	cast->create_packet(Defines::MinNetPacketType::PING_CAST);
 	cast->push(user->ping);
 	cast->create_header();
+
 	StartSend(user, cast);
+	packet_pool.push(cast);
 }
 
 void MinNetSpinLock::lock()

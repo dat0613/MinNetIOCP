@@ -70,19 +70,23 @@ public:
 
 	T* pop()
 	{
+		T* retval = nullptr;
+
+		spinLock.lock();
 		if (pool.empty())
 		{// 풀이 비어있음
 			cout << typeid(T).name() << " 풀의 객체가 고갈되어 새로운 객체를 생성합니다" << endl;
-			return CreateNewObject();
+			retval = CreateNewObject();
 		}
 		else
 		{
 			T* obj = pool.front();
-			spinLock.lock();
 			pool.pop();
-			spinLock.unlock();
-			return obj;
+			retval = obj;
 		}
+		spinLock.unlock();
+		
+		return retval;
 	}
 
 	void push(T* obj)

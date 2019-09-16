@@ -207,7 +207,8 @@ void MinNetRoom::RemoveUser(MinNetUser * user)
 
 	while (!deleteQ.empty())
 	{
-		RemoveObject(deleteQ.front());
+		auto obj = deleteQ.front();
+		Destroy(obj->GetName(), obj->GetID(), true, user);
 		deleteQ.pop();
 	}
 
@@ -230,13 +231,27 @@ void MinNetRoom::RemoveUser(MinNetUser * user)
 	manager->PushPacket(leave);
 }
 
+void MinNetRoom::RemoveUsers()
+{
+	queue<MinNetUser *> deleteQ;
+	for (MinNetUser * user : user_list)
+	{
+		deleteQ.push(user);
+	}
+
+	while (!deleteQ.empty())
+	{
+		RemoveUser(deleteQ.front());
+		deleteQ.pop();
+	}
+}
+
 void MinNetRoom::AddObject(MinNetGameObject * object)
 {
 	object_list.push_back(object);
 	object_map.insert(make_pair(object->GetID(), object));
 	if (object->owner != nullptr)
 	{
-		cout << object->GetName() + " 는 자동삭제 오브젝트 임" << endl;
 		object->owner->autoDeleteObjectList.push_back(object);
 	}
 }
@@ -257,6 +272,28 @@ void MinNetRoom::RemoveObject(int id)
 	RemoveObject(object_map[id]);
 }
 
+void MinNetRoom::RemoveObjects()
+{
+	queue<MinNetGameObject *> deleteQ;
+
+	for (MinNetGameObject * obj : object_list)
+	{
+		deleteQ.push(obj);
+	}
+
+	while (!deleteQ.empty())
+	{
+		MinNetGameObject * obj = deleteQ.front();
+		Destroy(obj->GetName(), obj->GetID(), true);
+		deleteQ.pop();
+	}
+}
+
+int MinNetRoom::GetUserCount()
+{
+	return user_list.size();
+}
+
 int MinNetRoom::GetNewID()
 {
 	return id_count++;
@@ -264,8 +301,22 @@ int MinNetRoom::GetNewID()
 
 void MinNetRoom::ObjectRPC(MinNetUser * user, MinNetPacket * packet)
 {
-	cout << "RPC 전송" << endl;
-	manager->Send(this, packet);
+	int id = packet->pop_int();
+	string componentName = packet->pop_string();
+	string methodName = packet->pop_string();
+	int target = packet->pop_int();
+
+	switch (MinNetRpcTarget(target))
+	{
+		case MinNetRpcTarget::All:
+		case MinNetRpcTarget::Others:
+			manager->Send(this, packet, user);
+			break;
+
+		case MinNetRpcTarget::AllViaServer:
+			manager->Send(this, packet);
+			break;
+	}
 }
 
 void MinNetRoom::ObjectInstantiate(MinNetUser * user, MinNetPacket * packet)
@@ -274,8 +325,6 @@ void MinNetRoom::ObjectInstantiate(MinNetUser * user, MinNetPacket * packet)
 	Vector3 position = packet->pop_vector3();
 	Vector3 rotation = packet->pop_vector3();
 	bool autoDelete = packet->pop_bool();
-
-	cout << prefabName + "생성 요청" << endl;
 
 	Instantiate(prefabName, position, rotation, GetNewID(), true, user, autoDelete);
 }
@@ -289,7 +338,10 @@ MinNetRoomManager::MinNetRoomManager(MinNetIOCP * minnet)
 {
 	this->minnet = minnet;
 	room_pool.SetOnPush([](MinNetRoom * room){
+		room->RemoveUsers();
+		room->RemoveObjects();
 		room->SetManager(nullptr);
+
 	});
 	room_pool.AddObject(10);
 }
@@ -369,6 +421,11 @@ void MinNetRoomManager::PacketHandler(MinNetUser * user, MinNetPacket * packet)
 	default:
 		break;
 	}
+}
+
+void MinNetRoomManager::PushRoom(MinNetRoom * room)
+{
+	room_pool.push(room);
 }
 
 void MinNetGameObject::SetID(int id)

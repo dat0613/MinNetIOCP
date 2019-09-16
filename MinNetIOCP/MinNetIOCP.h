@@ -30,6 +30,7 @@ public:
 
 	MinNetPacket * PopPacket();
 	void PushPacket(MinNetPacket * packet);
+	string GetIP();
 	void StartSend(MinNetUser * user, MinNetPacket * packet);
 
 private:

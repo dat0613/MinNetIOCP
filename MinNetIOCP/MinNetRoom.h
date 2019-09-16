@@ -36,6 +36,7 @@ private:
 class MinNetRoom
 {
 public:
+	enum class MinNetRpcTarget { All, Others, AllViaServer };
 	MinNetRoom();
 	~MinNetRoom();
 
@@ -61,10 +62,14 @@ public:
 
 	void AddUser(MinNetUser * user);
 	void RemoveUser(MinNetUser * user);
+	void RemoveUsers();
 
 	void AddObject(MinNetGameObject * object);
 	void RemoveObject(MinNetGameObject * object);
 	void RemoveObject(int id);
+	void RemoveObjects();
+
+	int GetUserCount();
 
 	int GetNewID();
 
@@ -98,6 +103,8 @@ public:
 	void Send(MinNetUser * user, MinNetPacket * packet);
 
 	void PacketHandler(MinNetUser * user, MinNetPacket * packet);
+
+	void PushRoom(MinNetRoom * room);
 
 private:
 	MinNetObjectPool<MinNetRoom> room_pool;
