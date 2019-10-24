@@ -1,0 +1,4 @@
+ComponentTable =
+{
+	"FirstPersonController"
+};

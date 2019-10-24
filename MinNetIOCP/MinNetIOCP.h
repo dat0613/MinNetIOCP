@@ -28,8 +28,6 @@ public:
 	void StartServer();
 	void ServerLoop();
 
-	MinNetPacket * PopPacket();
-	void PushPacket(MinNetPacket * packet);
 	string GetIP();
 	void StartSend(MinNetUser * user, MinNetPacket * packet);
 
@@ -43,18 +41,10 @@ private:
 	
 	int tick = 60;
 
-	MinNetObjectPool<MinNetUser> user_pool;
-	MinNetObjectPool<MinNetPacket> packet_pool;
-
-	MinNetObjectPool<MinNetAcceptOverlapped> accept_overlapped_pool;
-	MinNetObjectPool<MinNetCloseOverlapped> close_overlapped_pool;
-	MinNetObjectPool<MinNetSendOverlapped> send_overlapped_pool;
-	MinNetObjectPool<MinNetRecvOverlapped> recv_overlapped_pool;
-
 	MinNetRoomManager room_manager;
 
-	MinNetSpinLock recvq_spin_lock;
-	MinNetSpinLock user_list_spin_lock;
+	MinNetSpinLock messageQ_spin_lock;
+
 	list<MinNetUser *> user_list;
 	DWORD WINAPI WorkThread(LPVOID arg);
 
@@ -72,8 +62,6 @@ private:
 
 	void PingTest();
 	void SendPing(MinNetUser * user);
-
-	void CreatePool();
 
 	void StartAccept();
 	void EndAccept(MinNetAcceptOverlapped * overlap);

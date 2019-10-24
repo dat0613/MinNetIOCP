@@ -13,34 +13,16 @@ class MinNetIOCP;
 class MinNetUser;
 class MinNetPacket;
 class MinNetRoomManager;
+typedef struct lua_State lua_State;
 
-class MinNetGameObject
-{
-public:
-	void SetID(int id);
-	int GetID();
-	void SetName(string name);
-	string GetName();
-
-	Vector3 position;
-	Vector3 rotation;
-	Vector3 scale = { 1.0f, 1.0f, 1.0f };
-
-	MinNetUser * owner;
-
-private:
-	string name;
-	int id = -1;
-};
+class MinNetGameObject;
 
 class MinNetRoom
 {
 public:
-	enum class MinNetRpcTarget { All, Others, AllViaServer };
+
 	MinNetRoom();
 	~MinNetRoom();
-
-	MinNetObjectPool<MinNetGameObject> gameobject_pool;
 
 	void SetName(string name);
 	string GetName();
@@ -68,6 +50,7 @@ public:
 	void RemoveObject(MinNetGameObject * object);
 	void RemoveObject(int id);
 	void RemoveObjects();
+	MinNetGameObject * GetGameObject(int id);
 
 	int GetUserCount();
 
@@ -75,7 +58,10 @@ public:
 
 	void ObjectRPC(MinNetUser * user, MinNetPacket * packet);
 
+	void SendRPC(int objectId, std::string componentName, std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters);
+
 private:
+
 	string name = "";
 	int room_number = 0;
 	int max_user = 10;
@@ -89,26 +75,18 @@ private:
 
 };
 
-
 class MinNetRoomManager
 {
 public:
 	MinNetRoomManager(MinNetIOCP * minnet);
 	MinNetRoom * GetPeacefulRoom();
 
-	MinNetPacket * PopPacket();
-	void PushPacket(MinNetPacket * packet);
-
 	void Send(MinNetRoom * room, MinNetPacket * packet, MinNetUser * except = nullptr);
 	void Send(MinNetUser * user, MinNetPacket * packet);
 
 	void PacketHandler(MinNetUser * user, MinNetPacket * packet);
-
-	void PushRoom(MinNetRoom * room);
-
 private:
-	MinNetObjectPool<MinNetRoom> room_pool;
+
 	list<MinNetRoom *> room_list;
 	MinNetIOCP * minnet;
-
 };

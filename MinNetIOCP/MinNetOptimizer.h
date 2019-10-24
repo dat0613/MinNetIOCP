@@ -26,6 +26,11 @@ template <class T>
 class MinNetObjectPool
 {
 public:
+	MinNetObjectPool()
+	{
+
+	}
+
 	~MinNetObjectPool()
 	{
 		while (!pool.empty())

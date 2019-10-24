@@ -1,21 +1,14 @@
 #include "MinNetRoom.h"
 
-#include "MinNet.h"
 #include "MinNetIOCP.h"
 #include "MinNetOptimizer.h"
+#include "MinNetPool.h"
+#include "MinNetGameObject.h"
+#include "MinNetLua.h"
 
 MinNetRoom::MinNetRoom()
 {
 	SetMaxUser(10);
-	gameobject_pool.SetOnPush([](MinNetGameObject * obj) {
-		obj->rotation = obj->position = { 0.0f, 0.0f, 0.0f };
-		obj->scale = { 1.0f, 1.0f, 1.0f };
-		obj->SetID(-1);
-		obj->SetName("");
-		obj->owner = nullptr;
-	});
-
-	gameobject_pool.AddObject(30);
 }
 
 MinNetRoom::~MinNetRoom()
@@ -68,7 +61,7 @@ list<MinNetUser*> * MinNetRoom::GetUserList()
 
 MinNetGameObject * MinNetRoom::Instantiate(string prefabName, Vector3 position, Vector3 euler, int id, bool casting, MinNetUser * except, bool autoDelete)
 {
-	MinNetGameObject * obj = gameobject_pool.pop();
+	MinNetGameObject * obj = MinNetPool::gameobjectPool->pop();
 
 	obj->SetName(prefabName);
 	obj->position = position;
@@ -77,7 +70,7 @@ MinNetGameObject * MinNetRoom::Instantiate(string prefabName, Vector3 position, 
 
 	if (casting)
 	{
-		MinNetPacket * packet = manager->PopPacket();
+		MinNetPacket * packet = MinNetPool::packetPool->pop();
 		packet->create_packet(Defines::MinNetPacketType::OBJECT_INSTANTIATE);
 		packet->push(prefabName);
 		packet->push(position);
@@ -87,11 +80,11 @@ MinNetGameObject * MinNetRoom::Instantiate(string prefabName, Vector3 position, 
 
 		manager->Send(this, packet, except);
 
-		manager->PushPacket(packet);
+		MinNetPool::packetPool->push(packet);
 
 		if (except != nullptr)
 		{
-			MinNetPacket * packet = manager->PopPacket();
+			MinNetPacket * packet = MinNetPool::packetPool->pop();
 			packet->create_packet(Defines::MinNetPacketType::ID_CAST);
 			packet->push(obj->GetName());
 			packet->push(obj->GetID());
@@ -99,7 +92,7 @@ MinNetGameObject * MinNetRoom::Instantiate(string prefabName, Vector3 position, 
 
 			manager->Send(except, packet);
 		
-			manager->PushPacket(packet);
+			MinNetPool::packetPool->push(packet);
 	
 			if (autoDelete)
 			{
@@ -127,7 +120,7 @@ void MinNetRoom::Destroy(string prefabName, int id, bool casting, MinNetUser * e
 
 	if (casting)
 	{
-		MinNetPacket * packet = manager->PopPacket();
+		MinNetPacket * packet = MinNetPool::packetPool->pop();
 		packet->create_packet(Defines::MinNetPacketType::OBJECT_DESTROY);
 		packet->push(prefabName);
 		packet->push(id);
@@ -135,7 +128,7 @@ void MinNetRoom::Destroy(string prefabName, int id, bool casting, MinNetUser * e
 
 		manager->Send(this, packet, except);
 
-		manager->PushPacket(packet);
+		MinNetPool::packetPool->push(packet);
 	}
 
 	RemoveObject(obj);
@@ -151,20 +144,20 @@ void MinNetRoom::AddUser(MinNetUser * user)
 	if (user == nullptr)
 		return;
 	
-	MinNetPacket * enter = manager->PopPacket();// 새롭게 들어온 유저에게 정상적으로 룸에 들어왔다는 것을 알림
+	MinNetPacket * enter = MinNetPool::packetPool->pop();// 새롭게 들어온 유저에게 정상적으로 룸에 들어왔다는 것을 알림
 	enter->create_packet((int)Defines::MinNetPacketType::USER_ENTER_ROOM);
 	// 대충 룸 정보와 다른 정보를 넣을 같이 보낼 예정
 	enter->create_header();
 
 	manager->Send(user, enter);
 
-	manager->PushPacket(enter);
+	MinNetPool::packetPool->push(enter);
 
 	cout << user << " 유저가 방으로 들어옴" << endl;
 
 	for (MinNetGameObject * obj : object_list)
 	{
-		MinNetPacket * packet = manager->PopPacket();
+		MinNetPacket * packet = MinNetPool::packetPool->pop();
 		packet->create_packet(Defines::MinNetPacketType::OBJECT_INSTANTIATE);
 		packet->push(obj->GetName());
 		packet->push(obj->position);
@@ -174,10 +167,10 @@ void MinNetRoom::AddUser(MinNetUser * user)
 
 		manager->Send(user, packet);
 
-		manager->PushPacket(packet);
+		MinNetPool::packetPool->push(packet);
 	}
 
-	MinNetPacket * other_enter = manager->PopPacket();// 다른 유저들 에게 새로운 유저가 들어왔다는 것을 알림
+	MinNetPacket * other_enter = MinNetPool::packetPool->pop();// 다른 유저들 에게 새로운 유저가 들어왔다는 것을 알림
 	other_enter->create_packet((int)Defines::MinNetPacketType::OTHER_USER_ENTER_ROOM);
 	// 대충 룸 정보와 다른 정보를 넣을 같이 보낼 예정
 	other_enter->create_header();
@@ -186,7 +179,7 @@ void MinNetRoom::AddUser(MinNetUser * user)
 
 	user_list.push_back(user);// 유저 리스트에 새로운 유저 추가
 
-	manager->PushPacket(other_enter);
+	MinNetPool::packetPool->push(other_enter);
 }
 
 void MinNetRoom::RemoveUser(MinNetUser * user)
@@ -212,23 +205,23 @@ void MinNetRoom::RemoveUser(MinNetUser * user)
 		deleteQ.pop();
 	}
 
-	MinNetPacket * other_leave = manager->PopPacket();// 다른 유저들 에게 어떤 유저가 나갔다는것을 알림
+	MinNetPacket * other_leave = MinNetPool::packetPool->pop();// 다른 유저들 에게 어떤 유저가 나갔다는것을 알림
 	other_leave->create_packet((int)Defines::MinNetPacketType::OTHER_USER_LEAVE_ROOM);
 	// 대충 룸 정보와 다른 정보를 넣을 같이 보낼 예정
 	other_leave->create_header();
 
 	manager->Send(this, other_leave);
 
-	manager->PushPacket(other_leave);
+	MinNetPool::packetPool->push(other_leave);
 
-	MinNetPacket * leave = manager->PopPacket();// 나간 유저에게 정상적으로 룸에서 나갔다는 것을 알림
+	MinNetPacket * leave = MinNetPool::packetPool->pop();// 나간 유저에게 정상적으로 룸에서 나갔다는 것을 알림
 	leave->create_packet((int)Defines::MinNetPacketType::USER_LEAVE_ROOM);
 	// 대충 룸 정보와 다른 정보를 넣을 같이 보낼 예정
 	leave->create_header();
 
 	manager->Send(user, leave);
 
-	manager->PushPacket(leave);
+	MinNetPool::packetPool->push(leave);
 }
 
 void MinNetRoom::RemoveUsers()
@@ -250,9 +243,10 @@ void MinNetRoom::AddObject(MinNetGameObject * object)
 {
 	object_list.push_back(object);
 	object_map.insert(make_pair(object->GetID(), object));
+	object->ChangeRoom(this);
 	if (object->owner != nullptr)
 	{
-		object->owner->autoDeleteObjectList.push_back(object);
+		object->owner->autoDeleteObjectList.push_back(object);// 주인이 정해져 있는 오브젝트는 주인이 게임에서 나갈때 함께 제거됨
 	}
 }
 
@@ -265,6 +259,8 @@ void MinNetRoom::RemoveObject(MinNetGameObject * object)
 	{
 		object->owner->autoDeleteObjectList.remove(object);
 	}
+
+	MinNetPool::gameobjectPool->push(object);
 }
 
 void MinNetRoom::RemoveObject(int id)
@@ -289,6 +285,11 @@ void MinNetRoom::RemoveObjects()
 	}
 }
 
+MinNetGameObject * MinNetRoom::GetGameObject(int id)
+{
+	return object_map[id];
+}
+
 int MinNetRoom::GetUserCount()
 {
 	return user_list.size();
@@ -306,6 +307,14 @@ void MinNetRoom::ObjectRPC(MinNetUser * user, MinNetPacket * packet)
 	string methodName = packet->pop_string();
 	int target = packet->pop_int();
 
+	auto obj = GetGameObject(id);
+	if (obj == nullptr)
+	{
+		cout << __FUNCTION__ << endl;
+		return;
+	}
+	obj->ObjectRPC(componentName, methodName, packet);
+
 	switch (MinNetRpcTarget(target))
 	{
 		case MinNetRpcTarget::All:
@@ -316,7 +325,51 @@ void MinNetRoom::ObjectRPC(MinNetUser * user, MinNetPacket * packet)
 		case MinNetRpcTarget::AllViaServer:
 			manager->Send(this, packet);
 			break;
+
+		case MinNetRpcTarget::Server:
+
+			break;
 	}
+}
+
+void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters)
+{
+	MinNetPacket * rpcPacket = MinNetPool::packetPool->pop();
+	rpcPacket->create_packet((int)Defines::MinNetPacketType::RPC);
+	rpcPacket->push(objectId);
+	rpcPacket->push(componentName);
+	rpcPacket->push(methodName);
+	rpcPacket->push(int(target));
+
+	if (parameters != nullptr)
+	{
+		memcpy(&rpcPacket->buffer[rpcPacket->buffer_position], &parameters[6], parameters->size() - 6);// 보낼 rpc패킷 뒤에 파라미터로 받은 인자들을 넣음
+		MinNetPool::packetPool->push(parameters);
+	}
+
+	rpcPacket->create_header();
+	
+	MinNetUser * except = nullptr;
+	auto obj = GetGameObject(objectId);
+
+	if (target == MinNetRpcTarget::All || target == MinNetRpcTarget::AllViaServer)
+	{
+		rpcPacket->buffer_position = 6;
+		obj->ObjectRPC(componentName, methodName, rpcPacket);
+		except = nullptr;
+	}
+
+	if(target == MinNetRpcTarget::Others)
+	{
+		if (obj->owner != nullptr)
+		{
+			except = obj->owner;
+		}
+	}
+
+	manager->Send(this, rpcPacket, except);
+
+	MinNetPool::packetPool->push(rpcPacket);
 }
 
 void MinNetRoom::ObjectInstantiate(MinNetUser * user, MinNetPacket * packet)
@@ -337,13 +390,6 @@ void MinNetRoom::ObjectDestroy(MinNetUser * user, MinNetPacket * packet)
 MinNetRoomManager::MinNetRoomManager(MinNetIOCP * minnet)
 {
 	this->minnet = minnet;
-	room_pool.SetOnPush([](MinNetRoom * room){
-		room->RemoveUsers();
-		room->RemoveObjects();
-		room->SetManager(nullptr);
-
-	});
-	room_pool.AddObject(10);
 }
 
 MinNetRoom * MinNetRoomManager::GetPeacefulRoom()
@@ -351,7 +397,7 @@ MinNetRoom * MinNetRoomManager::GetPeacefulRoom()
 	if (room_list.empty())// 룸이 존재하지 않으면 새로운 룸을 만듦
 	{
 		cout << "룸이 존재하지 않아 새로움 룸을 만들었습니다" << endl;
-		room_list.push_back(room_pool.pop());
+		room_list.push_back(MinNetPool::roomPool->pop());
 	}
 
 	for (MinNetRoom * room : room_list)// 여유로운 룸을 체크함
@@ -363,21 +409,11 @@ MinNetRoom * MinNetRoomManager::GetPeacefulRoom()
 		}
 	}
 
-	MinNetRoom * room = room_pool.pop();// 여유로움 룸이 없다면 새로운 룸을 만듦
+	MinNetRoom * room = MinNetPool::roomPool->pop();// 여유로움 룸이 없다면 새로운 룸을 만듦
 	room->SetManager(this);
 	room_list.push_back(room);
 	cout << "여유로운 룸이 존재하지 않아 새로움 룸을 만들었습니다" << endl;
 	return room;
-}
-
-MinNetPacket * MinNetRoomManager::PopPacket()
-{
-	return minnet->PopPacket();
-}
-
-void MinNetRoomManager::PushPacket(MinNetPacket * packet)
-{
-	minnet->PushPacket(packet);
 }
 
 void MinNetRoomManager::Send(MinNetRoom * room, MinNetPacket * packet, MinNetUser * except)
@@ -421,29 +457,4 @@ void MinNetRoomManager::PacketHandler(MinNetUser * user, MinNetPacket * packet)
 	default:
 		break;
 	}
-}
-
-void MinNetRoomManager::PushRoom(MinNetRoom * room)
-{
-	room_pool.push(room);
-}
-
-void MinNetGameObject::SetID(int id)
-{
-	this->id = id;
-}
-
-int MinNetGameObject::GetID()
-{
-	return id;
-}
-
-void MinNetGameObject::SetName(string name)
-{
-	this->name = name;
-}
-
-string MinNetGameObject::GetName()
-{
-	return name;
 }

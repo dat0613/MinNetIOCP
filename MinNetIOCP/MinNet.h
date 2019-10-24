@@ -14,11 +14,27 @@ using namespace std;
 class MinNetRoom;
 class MinNetGameObject;
 
+enum class MinNetRpcTarget { All, Others, AllViaServer, Server };
+
 class Defines
 {
 public:
 	static const short HEADERSIZE = 2 + 4;
-	enum MinNetPacketType { OTHER_USER_ENTER_ROOM = -8200, OTHER_USER_LEAVE_ROOM, USER_ENTER_ROOM, USER_LEAVE_ROOM, OBJECT_INSTANTIATE, OBJECT_DESTROY, PING, PONG, PING_CAST, RPC, ID_CAST, USER_WAITNG_ROOM };
+	enum MinNetPacketType 
+	{
+		OTHER_USER_ENTER_ROOM = -8200, 
+		OTHER_USER_LEAVE_ROOM, 
+		USER_ENTER_ROOM, 
+		USER_LEAVE_ROOM,
+		OBJECT_INSTANTIATE, 
+		OBJECT_DESTROY, 
+		PING,
+		PONG, 
+		PING_CAST,
+		RPC, 
+		ID_CAST, 
+		USER_WAITNG_ROOM 
+	};
 };
 
 static class BitConverter
@@ -75,6 +91,18 @@ public:
 	friend ostream& operator<< (ostream& o, const Vector2& vector2);
 };
 
+class f	// Lua에서 int와 float을 구분하기 위한 Wrapping 클래스
+{
+public:
+
+	f(float value)
+	{
+		this->value = value;
+	}
+
+	float value;
+};
+
 class MinNetPacket
 {
 	friend class MinNetUser;
@@ -96,8 +124,10 @@ public:
 	void push(int data);
 	void push(bool data);
 	void push(short data);
+	void push(f data);
 	void push(float data);
 	void push(string str);
+	void push(const char * str);
 	void push(Vector2 data);
 	void push(Vector3 data);
 
@@ -106,6 +136,7 @@ public:
 	short pop_short();
 	float pop_float();
 	string pop_string();
+	const char * pop_const_char();
 	Vector2 pop_vector2();
 	Vector3 pop_vector3();
 	int Parse(byte * arr, int length);

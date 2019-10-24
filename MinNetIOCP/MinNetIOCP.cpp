@@ -1,6 +1,8 @@
 #include "MinNetIOCP.h"
 
 #include "MinNet.h"
+#include "MinNetPool.h"
+#include "MinNetPool.h"
 
 MinNetIOCP::MinNetIOCP() : room_manager(this)
 {
@@ -65,7 +67,7 @@ void MinNetIOCP::StartServer()
 	ZeroMemory(&serverAddr, sizeof(serverAddr));
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_addr.s_addr = htonl(ADDR_ANY);
-	serverAddr.sin_port = htons(8200);
+	serverAddr.sin_port = htons(8300);
 
 	char iSockOpt = 1;
 	setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, &iSockOpt, sizeof(iSockOpt));
@@ -101,7 +103,7 @@ void MinNetIOCP::StartServer()
 		return;
 	}
 
-	CreatePool();
+	MinNetPool::Init();
 
 	StartAccept();
 }
@@ -122,7 +124,7 @@ void MinNetIOCP::ServerLoop()
 			last_heart_beat = cur_time;
 		}
 
-		recvq_spin_lock.lock();
+		messageQ_spin_lock.lock();
 
 		while (!recvQ.empty())
 		{
@@ -132,26 +134,17 @@ void MinNetIOCP::ServerLoop()
 
 			room_manager.PacketHandler(user, packet);
 
-			packet_pool.push(packet);
+			MinNetPool::packetPool->push(packet);
 
 			recvQ.pop();
 		}
 
-		recvq_spin_lock.unlock();
+		messageQ_spin_lock.unlock();
 
 		_sleep(sleep_time);
 	}
 }
 
-MinNetPacket * MinNetIOCP::PopPacket()
-{
-	return packet_pool.pop();
-}
-
-void MinNetIOCP::PushPacket(MinNetPacket * packet)
-{
-	packet_pool.push(packet);
-}
 
 string MinNetIOCP::GetIP()
 {
@@ -284,7 +277,7 @@ void MinNetIOCP::PingTest()
 
 void MinNetIOCP::SendPing(MinNetUser * user)
 {
-	MinNetPacket * packet = packet_pool.pop();
+	MinNetPacket * packet = MinNetPool::packetPool->pop();
 
 	user->last_ping = clock();
 
@@ -293,75 +286,12 @@ void MinNetIOCP::SendPing(MinNetUser * user)
 
 	StartSend(user, packet);
 
-	packet_pool.push(packet);
-}
-
-void MinNetIOCP::CreatePool()
-{
-	user_pool.SetOnPush([](MinNetUser * user) {
-		user->ID = -1;
-		user->isConnected = false;
-		user->last_ping = user->last_pong = user->ping = -1;
-		user->sock = INVALID_SOCKET;
-		user->ChangeRoom(nullptr);
-		user->autoDeleteObjectList.clear();
-		user->buffer_position = 0;
-		ZeroMemory(user->temporary_buffer, 2048);
-	});
-	user_pool.AddObject(100);
-
-
-	accept_overlapped_pool.SetOnPush([](MinNetAcceptOverlapped * overlap) {
-		ZeroMemory(overlap, sizeof(MinNetAcceptOverlapped));
-		overlap->type = MinNetOverlapped::TYPE::ACCEPT;
-		overlap->socket = INVALID_SOCKET;
-		overlap->socket = WSASocket(PF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
-	});
-	accept_overlapped_pool.AddObject(20);
-
-	close_overlapped_pool.SetOnPush([](MinNetCloseOverlapped * overlap) {
-		ZeroMemory(overlap, sizeof(MinNetCloseOverlapped));
-		overlap->type = MinNetOverlapped::TYPE::CLOSE;
-	});
-	close_overlapped_pool.AddObject(20);
-
-	send_overlapped_pool.SetConstructor([](MinNetSendOverlapped * overlap){
-		overlap->wsabuf.buf = new char[1024];
-	});
-	send_overlapped_pool.SetOnPush([](MinNetSendOverlapped * overlap){
-		ZeroMemory(overlap, sizeof(MinNetOverlapped));
-		overlap->type = MinNetOverlapped::TYPE::SEND;
-		ZeroMemory(overlap->wsabuf.buf, 1024);
-	});
-	send_overlapped_pool.AddObject(100);
-
-	recv_overlapped_pool.SetConstructor([](MinNetRecvOverlapped * overlap) {
-		overlap->wsabuf.buf = new char[1024];
-		overlap->wsabuf.len = 1024;
-	});
-	recv_overlapped_pool.SetDestructor([](MinNetRecvOverlapped * overlap){
-		delete[] overlap->wsabuf.buf;
-	});
-	recv_overlapped_pool.SetOnPush([](MinNetRecvOverlapped * overlap){
-		ZeroMemory(overlap, sizeof(MinNetOverlapped));
-		overlap->type = MinNetOverlapped::TYPE::RECV;
-
-		ZeroMemory(overlap->wsabuf.buf, 1024);
-		overlap->wsabuf.len = 1024;
-	});
-	recv_overlapped_pool.AddObject(100);
-
-	packet_pool.SetOnPush([](MinNetPacket * packet){
-		packet->buffer_position = 0;
-		packet->body_size = 0;
-		ZeroMemory(packet->buffer, 1024);
-	});
-	packet_pool.AddObject(10);
+	MinNetPool::packetPool->push(packet);
 }
 
 void MinNetIOCP::StartAccept()
 {
-	MinNetAcceptOverlapped * overlap = accept_overlapped_pool.pop();
+	MinNetAcceptOverlapped * overlap = MinNetPool::acceptOverlappedPool->pop();
 
 	bool error = !lpfnAcceptEx
 	(
@@ -390,7 +320,7 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 		// 대충 오류니까 overlap->socket 닫음
 		cout << "EndAccept error" << endl;
 
-		MinNetUser * user = user_pool.pop();
+		MinNetUser * user = MinNetPool::userPool->pop();
 		user->sock = overlap->socket;
 
 		StartClose(user);
@@ -421,24 +351,22 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 	if (hResult == NULL)
 		return;
 
-	MinNetUser * user = user_pool.pop();
+	MinNetUser * user = MinNetPool::userPool->pop();
 	user->sock = overlap->socket;
 
-	//user_list_spin_lock.lock();
 	user_list.push_back(user);
-	//user_list_spin_lock.unlock();
 
 	user->isConnected = true;
 
-	MinNetPacket * packet = packet_pool.pop();
+	MinNetPacket * packet = MinNetPool::packetPool->pop();
 	packet->create_packet(Defines::MinNetPacketType::USER_ENTER_ROOM);
 	packet->create_header();
 
-	recvq_spin_lock.lock();
+	messageQ_spin_lock.lock();
 	recvQ.push(make_pair(packet, user));
-	recvq_spin_lock.unlock();
+	messageQ_spin_lock.unlock();
 
-	accept_overlapped_pool.push(overlap);
+	MinNetPool::acceptOverlappedPool->push(overlap);
 
 	StartRecv(user);
 
@@ -447,7 +375,7 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 
 void MinNetIOCP::StartClose(MinNetUser * user)
 {
-	MinNetCloseOverlapped * overlap = close_overlapped_pool.pop();
+	MinNetCloseOverlapped * overlap = MinNetPool::closeOverlappedPool->pop();
 	overlap->user = user;
 
 	if (TransmitFile(overlap->user->sock, 0, 0, 0, overlap, 0, TF_DISCONNECT | TF_REUSE_SOCKET) == FALSE)
@@ -458,6 +386,7 @@ void MinNetIOCP::StartClose(MinNetUser * user)
 			if (error == WSAENOTCONN || error == WSAENOTSOCK)
 			{
 				cout << "이미 닫힌 소켓임 : " << overlap->user->sock << endl;
+				MinNetPool::closeOverlappedPool->push(overlap);
 				return;
 			}
 			cout << "Transmitfile error : " << error << endl;
@@ -473,16 +402,15 @@ void MinNetIOCP::EndClose(MinNetCloseOverlapped * overlap)
 {
 	cout << "유저가 나감 : " << overlap->user->sock << endl;
 
-
 	user_list.remove(overlap->user);
-	user_pool.push(overlap->user);
+	MinNetPool::userPool->push(overlap->user);
 
-	close_overlapped_pool.push(overlap);
+	MinNetPool::closeOverlappedPool->push(overlap);
 }
 
 void MinNetIOCP::StartRecv(MinNetUser * user)
 {
-	MinNetRecvOverlapped * overlap = recv_overlapped_pool.pop();
+	MinNetRecvOverlapped * overlap = MinNetPool::recvOverlappedPool->pop();
 
 	overlap->user = user;
 
@@ -519,14 +447,14 @@ void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
 	while (true)
 	{
 
-		MinNetPacket * packet = packet_pool.pop();
+		MinNetPacket * packet = MinNetPool::packetPool->pop();
 
 		int checked = packet->Parse(user->temporary_buffer, user->buffer_position);
 		user->buffer_position -= checked;
 
 		if (checked == 0)// 패킷을 완성하지 못함
 		{
-			packet_pool.push(packet);// 없앰
+			MinNetPool::packetPool->push(packet);
 			break;
 		}
 
@@ -534,14 +462,15 @@ void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
 			OnPong(user, packet);
 		else
 		{
-			recvq_spin_lock.lock();
+			messageQ_spin_lock.lock();
 			recvQ.push(make_pair(packet, user));
-			recvq_spin_lock.unlock();
+			messageQ_spin_lock.unlock();
 		}
 	}
 
 	StartRecv(user);
-	recv_overlapped_pool.push(overlap);
+
+	MinNetPool::recvOverlappedPool->push(overlap);
 }
 
 void MinNetIOCP::StartSend(MinNetUser * user, MinNetPacket * packet)
@@ -549,7 +478,7 @@ void MinNetIOCP::StartSend(MinNetUser * user, MinNetPacket * packet)
 	if (user == nullptr)
 		return;
 
-	MinNetSendOverlapped * overlap = send_overlapped_pool.pop();
+	MinNetSendOverlapped * overlap = MinNetPool::sendOverlappedPool->pop();
 	memcpy(overlap->wsabuf.buf, packet->buffer, packet->size());
 	overlap->wsabuf.len = packet->size();
 
@@ -565,23 +494,24 @@ void MinNetIOCP::StartSend(MinNetUser * user, MinNetPacket * packet)
 
 void MinNetIOCP::EndSend(MinNetSendOverlapped * overlap)
 {
-	send_overlapped_pool.push(overlap);
+	MinNetPool::sendOverlappedPool->push(overlap);
 }
 
 void MinNetIOCP::OnPong(MinNetUser * user, MinNetPacket * packet)
 {
 	user->last_pong = clock();
 	user->ping = user->last_pong - user->last_ping;
-	packet_pool.push(packet);
+	MinNetPool::packetPool->push(packet);
 
-	MinNetPacket * cast = packet_pool.pop();
+	MinNetPacket * cast = MinNetPool::packetPool->pop();
 
 	cast->create_packet(Defines::MinNetPacketType::PING_CAST);
 	cast->push(user->ping);
 	cast->create_header();
 
 	StartSend(user, cast);
-	packet_pool.push(cast);
+
+	MinNetPool::packetPool->push(cast);
 }
 
 void MinNetSpinLock::lock()

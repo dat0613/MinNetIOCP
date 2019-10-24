@@ -1,14 +1,12 @@
-﻿  MinNetIOCP.cpp
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(38): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(50): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(142): warning C4244: '인수': 'float'에서 'unsigned long'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(142): warning C4996: '_sleep': This function or variable has been superceded by newer library or operating system functionality. Consider using Sleep instead. See online help for details.
-  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdlib.h(1266): note: '_sleep' 선언을 참조하십시오.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(164): warning C4996: 'gethostbyname': Use getaddrinfo() or GetAddrInfoW() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
-  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(2238): note: 'gethostbyname' 선언을 참조하십시오.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(166): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
-  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1868): note: 'inet_ntoa' 선언을 참조하십시오.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(223): warning C4996: '_sleep': This function or variable has been superceded by newer library or operating system functionality. Consider using Sleep instead. See online help for details.
-  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdlib.h(1266): note: '_sleep' 선언을 참조하십시오.
+﻿  MinNetComponent.cpp
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(54): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(66): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetlua.h(21): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetLua' 왼쪽은 무시됩니다.
+  Unknown compiler version - please run the configure tests and report the results
+c:\users\asus\desktop\luabind-0.9.1\luabind\detail\call_function.hpp(266): warning C4297: 'luabind::detail::proxy_function_void_caller<boost::tuples::tuple<MinNetPacket *const *,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type>>::~proxy_function_void_caller': 함수는 예외를 Throw하지 않도록 지정되었으나 예외를 Throw했습니다.
+  c:\users\asus\desktop\luabind-0.9.1\luabind\detail\call_function.hpp(266): note: 소멸자 또는 비할당자는 가능하면 암시적으로 throw되지 않는 예외 사양을 사용합니다.
+  c:\users\asus\desktop\luabind-0.9.1\luabind\detail\call_function.hpp(253): note: 클래스 템플릿 멤버 함수 'luabind::detail::proxy_function_void_caller<boost::tuples::tuple<MinNetPacket *const *,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type>>::~proxy_function_void_caller(void)'을(를) 컴파일하고 있습니다.
+  c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetcomponent.cpp(49): note: 컴파일 중인 함수 템플릿 인스턴스화 'luabind::detail::proxy_function_void_caller<boost::tuples::tuple<MinNetPacket *const *,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type>>::~proxy_function_void_caller(void)'에 대한 참조를 확인하십시오.
+  c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetcomponent.cpp(49): note: 컴파일 중인 클래스 템플릿 인스턴스화 'luabind::detail::proxy_function_void_caller<boost::tuples::tuple<MinNetPacket *const *,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type>>'에 대한 참조를 확인하십시오.
   MinNetIOCP.vcxproj -> C:\Users\ASUS\Documents\GitHub\MinNetIOCP\MinNetIOCP\Debug\MinNetIOCP.exe
   MinNetIOCP.vcxproj -> C:\Users\ASUS\Documents\GitHub\MinNetIOCP\MinNetIOCP\Debug\MinNetIOCP.pdb (Full PDB)

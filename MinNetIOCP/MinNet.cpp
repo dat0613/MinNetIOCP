@@ -178,6 +178,11 @@ void MinNetPacket::push(short data)					//short형 데이터를 패킷에 넣는 함수
 	buffer_position += sizeof(data);
 }
 
+void MinNetPacket::push(f data)
+{
+	push(data.value);
+}
+
 void MinNetPacket::push(float data)					//float형 데이터를 패킷에 넣는 함수
 {
 	byte* temp_buffer = BitConverter::GetBytes(data);
@@ -193,6 +198,12 @@ void MinNetPacket::push(string str)
 
 	memcpy(&buffer[buffer_position], (byte *)utf8.c_str(), len);
 	buffer_position += len;
+}
+
+void MinNetPacket::push(const char * str)
+{
+	auto str2 = std::string(str);
+	push(str2);
 }
 
 void MinNetPacket::push(Vector2 data)				//Vector2형 데이터를 패킷에 넣는 함수
@@ -252,6 +263,12 @@ string MinNetPacket::pop_string()
 	buffer_position += len;
 
 	return StringConverter::UTF8ToMultibyte(utf8);
+}
+
+const char * MinNetPacket::pop_const_char()
+{
+	auto str = pop_string();
+	return str.c_str();
 }
 
 Vector2 MinNetPacket::pop_vector2()			//vector2형 데이터를 패킷에서 빼오는 함수
