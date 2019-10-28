@@ -7,8 +7,6 @@
 #include "MinNet.h"
 #include "MinNetOptimizer.h"
 
-using namespace std;
-
 class MinNetIOCP;
 class MinNetUser;
 class MinNetPacket;
@@ -24,18 +22,18 @@ public:
 	MinNetRoom();
 	~MinNetRoom();
 
-	void SetName(string name);
-	string GetName();
+	void SetName(std::string name);
+	std::string GetName();
 	void SetNumber(int number);
 	void SetMaxUser(int max);
 	int UserCount();
 	int GetNumber();
 	bool IsPeaceful();
 
-	list<MinNetUser *> * GetUserList();
+	std::list<MinNetUser *> * GetUserList();
 
-	MinNetGameObject * Instantiate(string prefabName, Vector3 position, Vector3 euler, int id, bool casting = false, MinNetUser * except = nullptr, bool autoDelete = false);
-	void Destroy(string prefabName, int id, bool casting = false, MinNetUser * except = nullptr);
+	std::shared_ptr<MinNetGameObject> Instantiate(std::string prefabName, Vector3 position, Vector3 euler, int id, bool casting = false, MinNetUser * except = nullptr, bool autoDelete = false);
+	void Destroy(std::string prefabName, int id, bool casting = false, MinNetUser * except = nullptr);
 
 	void ObjectInstantiate(MinNetUser * user, MinNetPacket * packet);
 	void ObjectDestroy(MinNetUser * user, MinNetPacket * packet);
@@ -46,11 +44,11 @@ public:
 	void RemoveUser(MinNetUser * user);
 	void RemoveUsers();
 
-	void AddObject(MinNetGameObject * object);
-	void RemoveObject(MinNetGameObject * object);
+	void AddObject(std::shared_ptr<MinNetGameObject> object);
+	void RemoveObject(std::shared_ptr<MinNetGameObject> object);
 	void RemoveObject(int id);
 	void RemoveObjects();
-	MinNetGameObject * GetGameObject(int id);
+	std::shared_ptr<MinNetGameObject> GetGameObject(int id);
 
 	int GetUserCount();
 
@@ -62,15 +60,15 @@ public:
 
 private:
 
-	string name = "";
+	std::string name = "";
 	int room_number = 0;
 	int max_user = 10;
 
 	int id_count = 0;
 
-	list<MinNetUser *> user_list;
-	map<int, MinNetGameObject *> object_map;
-	list<MinNetGameObject *> object_list;
+	std::list<MinNetUser *> user_list;
+	std::map<int, std::shared_ptr<MinNetGameObject>> object_map;
+	std::list<std::shared_ptr<MinNetGameObject>> object_list;
 	MinNetRoomManager * manager = nullptr;
 
 };
@@ -87,6 +85,6 @@ public:
 	void PacketHandler(MinNetUser * user, MinNetPacket * packet);
 private:
 
-	list<MinNetRoom *> room_list;
+	std::list<MinNetRoom *> room_list;
 	MinNetIOCP * minnet;
 };

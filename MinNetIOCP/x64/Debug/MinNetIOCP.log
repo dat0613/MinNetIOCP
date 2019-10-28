@@ -1,0 +1,5 @@
+﻿  MinNetComponent.cpp
+c:\users\asus\desktop\테스트\minnetiocp\minnetiocp\minnet.h(52): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
+c:\users\asus\desktop\테스트\minnetiocp\minnetiocp\minnet.h(64): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
+  MinNetIOCP.vcxproj -> C:\Users\ASUS\Desktop\테스트\MinNetIOCP\MinNetIOCP\x64\Debug\MinNetIOCP.exe
+  MinNetIOCP.vcxproj -> C:\Users\ASUS\Desktop\테스트\MinNetIOCP\MinNetIOCP\x64\Debug\MinNetIOCP.pdb (Full PDB)

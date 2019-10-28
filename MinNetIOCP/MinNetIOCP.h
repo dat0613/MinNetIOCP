@@ -12,8 +12,6 @@
 #pragma comment (lib, "mswsock.lib")
 #pragma pack(1)
 
-using namespace std;
-
 
 class MinNetUser;
 class MinNetPacket;
@@ -28,7 +26,7 @@ public:
 	void StartServer();
 	void ServerLoop();
 
-	string GetIP();
+	std::string GetIP();
 	void StartSend(MinNetUser * user, MinNetPacket * packet);
 
 private:
@@ -45,7 +43,7 @@ private:
 
 	MinNetSpinLock messageQ_spin_lock;
 
-	list<MinNetUser *> user_list;
+	std::list<MinNetUser *> user_list;
 	DWORD WINAPI WorkThread(LPVOID arg);
 
 	sockaddr_in * SOCKADDRtoSOCKADDR_IN(sockaddr * addr);
@@ -53,7 +51,7 @@ private:
 	SOCKET listen_socket;
 
 	CRITICAL_SECTION recvQ_section;
-	queue<pair<MinNetPacket *, MinNetUser *>> recvQ;
+	std::queue<std::pair<MinNetPacket *, MinNetUser *>> recvQ;
 
 	void PacketHandler(MinNetUser * user, MinNetPacket * packet);
 

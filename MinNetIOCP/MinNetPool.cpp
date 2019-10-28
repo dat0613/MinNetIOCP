@@ -1,18 +1,16 @@
 #include "MinNetPool.h"
-#include "MinNetGameObject.h"
 #include "MinNetRoom.h"
-#include "MinNetComponent.h"
-#include <lua.hpp>
+
 
 MinNetObjectPool<MinNetRoom> * MinNetPool::roomPool = nullptr;
 MinNetObjectPool<MinNetAcceptOverlapped> * MinNetPool::acceptOverlappedPool = nullptr;
 MinNetObjectPool<MinNetCloseOverlapped> * MinNetPool::closeOverlappedPool = nullptr;
 MinNetObjectPool<MinNetSendOverlapped> * MinNetPool::sendOverlappedPool = nullptr;
 MinNetObjectPool<MinNetRecvOverlapped> * MinNetPool::recvOverlappedPool = nullptr;
-MinNetObjectPool<MinNetGameObject> * MinNetPool::gameobjectPool = nullptr;
+//MinNetObjectPool<MinNetGameObject> * MinNetPool::gameobjectPool = nullptr;
 MinNetObjectPool<MinNetUser> * MinNetPool::userPool = nullptr;
 MinNetObjectPool<MinNetPacket> * MinNetPool::packetPool = nullptr;
-MinNetObjectPool<MinNetComponent> * MinNetPool::componentPool = nullptr;
+//MinNetObjectPool<MinNetComponent> * MinNetPool::componentPool = nullptr;
 
 MinNetPool::MinNetPool()
 {
@@ -29,10 +27,10 @@ void MinNetPool::Init()
 	closeOverlappedPool = new MinNetObjectPool<MinNetCloseOverlapped>();
 	sendOverlappedPool = new MinNetObjectPool<MinNetSendOverlapped>();
 	recvOverlappedPool = new MinNetObjectPool<MinNetRecvOverlapped>();
-	gameobjectPool = new MinNetObjectPool<MinNetGameObject>();
+	//gameobjectPool = new MinNetObjectPool<MinNetGameObject>();
 	userPool = new MinNetObjectPool<MinNetUser>();
 	packetPool = new MinNetObjectPool<MinNetPacket>();
-	componentPool = new MinNetObjectPool<MinNetComponent>();
+	//componentPool = new MinNetObjectPool<MinNetComponent>();
 
 	roomPool->SetOnPush([](MinNetRoom * room) {
 		room->RemoveUsers();
@@ -102,33 +100,21 @@ void MinNetPool::Init()
 	});
 	packetPool->AddObject(10);
 
-	gameobjectPool->SetOnPush([](MinNetGameObject * obj) {
-		obj->rotation = obj->position = { 0.0f, 0.0f, 0.0f };
-		obj->scale = { 1.0f, 1.0f, 1.0f };
-		obj->SetID(-1);
-		obj->SetName("");
-		obj->owner = nullptr;
-		obj->ChangeRoom(nullptr);
-		obj->DelComponent();
+	//gameobjectPool->SetOnPush([](MinNetGameObject * obj) {
+	//	obj->rotation = obj->position = { 0.0f, 0.0f, 0.0f };
+	//	obj->scale = { 1.0f, 1.0f, 1.0f };
+	//	obj->SetID(-1);
+	//	obj->SetName("");
+	//	obj->owner = nullptr;
+	//	obj->ChangeRoom(nullptr);
+	//	obj->DelComponent();
+	//});
+	//gameobjectPool->AddObject(30);
 
-		//if (obj->lua != nullptr)
-		//{
-		//	lua_close(obj->lua);
-		//	obj->lua = nullptr;
-		//}
+	//componentPool->SetOnPush([](MinNetComponent * comp) {
+	//	comp->SetName("");
+	//	comp->gameObject = nullptr;
 
-	});
-	gameobjectPool->AddObject(30);
-
-	componentPool->SetOnPush([](MinNetComponent * comp) {
-		comp->SetName("");
-		comp->gameObject = nullptr;
-
-		if (comp->state != nullptr)
-		{
-			lua_close(comp->state);
-			comp->state = nullptr;
-		}
-	});
-	componentPool->AddObject(100);
+	//});
+	//componentPool->AddObject(100);
 }

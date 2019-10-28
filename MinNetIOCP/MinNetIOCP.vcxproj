@@ -71,7 +71,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\ASUS\Desktop\boost_1_55_0;C:\Users\ASUS\Desktop\luabind-0.9.1;C:\Users\ASUS\Desktop\LuaJIT-2.0.5\Header;$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\ASUS\Documents\GitHub\MinNetIOCP\MinNetIOCP;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -94,7 +94,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>lua51.lib;LuaBind.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -145,11 +145,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="FirstPersonController.h" />
     <ClInclude Include="MinNet.h" />
     <ClInclude Include="MinNetCache.h" />
     <ClInclude Include="MinNetComponent.h" />
     <ClInclude Include="MinNetIOCP.h" />
-    <ClInclude Include="MinNetLua.h" />
     <ClInclude Include="MinNetOptimizer.h" />
     <ClInclude Include="MinNetOverlapped.h" />
     <ClInclude Include="MinNetPool.h" />
@@ -157,21 +157,17 @@
     <ClInclude Include="MinNetGameObject.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FirstPersonController.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MinNet.cpp" />
     <ClCompile Include="MinNetCache.cpp" />
     <ClCompile Include="MinNetComponent.cpp" />
     <ClCompile Include="MinNetGameObject.cpp" />
     <ClCompile Include="MinNetIOCP.cpp" />
-    <ClCompile Include="MinNetLua.cpp" />
     <ClCompile Include="MinNetOptimizer.cpp" />
     <ClCompile Include="MinNetOverlapped.cpp" />
     <ClCompile Include="MinNetPool.cpp" />
     <ClCompile Include="MinNetRoom.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="FirstPersonController.lua" />
-    <None Include="FPSController.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

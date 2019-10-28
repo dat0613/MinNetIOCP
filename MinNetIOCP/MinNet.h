@@ -9,8 +9,6 @@
 #include <map>
 #include <list>
 
-using namespace std;
-
 class MinNetRoom;
 class MinNetGameObject;
 
@@ -56,12 +54,12 @@ public:
 static class StringConverter
 {
 public:
-	static wstring MultibyteToUnicode(string multibyte);
-	static string UnicodeToMultibyte(wstring unicode);
-	static string UnicodeToUTF8(wstring unicode);
-	static wstring UTF8ToUnicode(string utf8);
-	static string MultibyteToUTF8(string multibyte);
-	static string UTF8ToMultibyte(string utf8);
+	static std::wstring MultibyteToUnicode(std::string multibyte);
+	static std::string UnicodeToMultibyte(std::wstring unicode);
+	static std::string UnicodeToUTF8(std::wstring unicode);
+	static std::wstring UTF8ToUnicode(std::string utf8);
+	static std::string MultibyteToUTF8(std::string multibyte);
+	static std::string UTF8ToMultibyte(std::string utf8);
 
 };
 
@@ -75,7 +73,7 @@ public:
 
 	Vector3();
 	Vector3(float x, float y, float z);
-	friend ostream& operator<< (ostream& o, const Vector3& vector3);
+	friend std::ostream& operator<< (std::ostream& o, const Vector3& vector3);
 
 };
 
@@ -88,7 +86,7 @@ public:
 
 	Vector2();
 	Vector2(float x, float y);
-	friend ostream& operator<< (ostream& o, const Vector2& vector2);
+	friend std::ostream& operator<< (std::ostream& o, const Vector2& vector2);
 };
 
 class f	// Lua에서 int와 float을 구분하기 위한 Wrapping 클래스
@@ -126,7 +124,7 @@ public:
 	void push(short data);
 	void push(f data);
 	void push(float data);
-	void push(string str);
+	void push(std::string str);
 	void push(const char * str);
 	void push(Vector2 data);
 	void push(Vector3 data);
@@ -135,7 +133,7 @@ public:
 	bool pop_bool();
 	short pop_short();
 	float pop_float();
-	string pop_string();
+	std::string pop_string();
 	const char * pop_const_char();
 	Vector2 pop_vector2();
 	Vector3 pop_vector3();
@@ -164,7 +162,7 @@ public:
 	clock_t last_ping = -1;
 	clock_t last_pong = -1;
 
-	list<MinNetGameObject *> autoDeleteObjectList;
+	std::list<std::shared_ptr<MinNetGameObject>> autoDeleteObjectList;
 
 	MinNetUser();
 	~MinNetUser();

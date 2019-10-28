@@ -1,12 +1,13 @@
-﻿  MinNetComponent.cpp
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(54): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(66): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetlua.h(21): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetLua' 왼쪽은 무시됩니다.
-  Unknown compiler version - please run the configure tests and report the results
-c:\users\asus\desktop\luabind-0.9.1\luabind\detail\call_function.hpp(266): warning C4297: 'luabind::detail::proxy_function_void_caller<boost::tuples::tuple<MinNetPacket *const *,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type>>::~proxy_function_void_caller': 함수는 예외를 Throw하지 않도록 지정되었으나 예외를 Throw했습니다.
-  c:\users\asus\desktop\luabind-0.9.1\luabind\detail\call_function.hpp(266): note: 소멸자 또는 비할당자는 가능하면 암시적으로 throw되지 않는 예외 사양을 사용합니다.
-  c:\users\asus\desktop\luabind-0.9.1\luabind\detail\call_function.hpp(253): note: 클래스 템플릿 멤버 함수 'luabind::detail::proxy_function_void_caller<boost::tuples::tuple<MinNetPacket *const *,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type>>::~proxy_function_void_caller(void)'을(를) 컴파일하고 있습니다.
-  c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetcomponent.cpp(49): note: 컴파일 중인 함수 템플릿 인스턴스화 'luabind::detail::proxy_function_void_caller<boost::tuples::tuple<MinNetPacket *const *,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type>>::~proxy_function_void_caller(void)'에 대한 참조를 확인하십시오.
-  c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetcomponent.cpp(49): note: 컴파일 중인 클래스 템플릿 인스턴스화 'luabind::detail::proxy_function_void_caller<boost::tuples::tuple<MinNetPacket *const *,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type,boost::tuples::null_type>>'에 대한 참조를 확인하십시오.
-  MinNetIOCP.vcxproj -> C:\Users\ASUS\Documents\GitHub\MinNetIOCP\MinNetIOCP\Debug\MinNetIOCP.exe
-  MinNetIOCP.vcxproj -> C:\Users\ASUS\Documents\GitHub\MinNetIOCP\MinNetIOCP\Debug\MinNetIOCP.pdb (Full PDB)
+﻿  MinNetCache.cpp
+c:\users\asus\desktop\테스트\minnetiocp\minnetiocp\minnetcache.h(26): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetCache' 왼쪽은 무시됩니다.
+c:\users\asus\desktop\테스트\minnetiocp\minnetiocp\minnet.h(52): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
+c:\users\asus\desktop\테스트\minnetiocp\minnetiocp\minnet.h(64): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
+  코드를 생성하고 있습니다...
+  건너뛰고 있습니다... (관련된 변경 내용 없음)
+  MinNetPool.cpp
+  main.cpp
+  MinNetRoom.cpp
+  MinNetGameObject.cpp
+  MinNetComponent.cpp
+  MinNetIOCP.vcxproj -> C:\Users\ASUS\Desktop\테스트\MinNetIOCP\MinNetIOCP\Debug\MinNetIOCP.exe
+  MinNetIOCP.vcxproj -> C:\Users\ASUS\Desktop\테스트\MinNetIOCP\MinNetIOCP\Debug\MinNetIOCP.pdb (Full PDB)

@@ -190,9 +190,9 @@ void MinNetPacket::push(float data)					//float형 데이터를 패킷에 넣는 함수
 	buffer_position += sizeof(data);
 }
 
-void MinNetPacket::push(string str)
+void MinNetPacket::push(std::string str)
 {
-	string utf8 = StringConverter::MultibyteToUTF8(str);
+	std::string utf8 = StringConverter::MultibyteToUTF8(str);
 	int len = utf8.size();
 	push(len);
 
@@ -255,11 +255,11 @@ float MinNetPacket::pop_float()						//float형 데이터를 패킷에서 빼오는 함수
 	return temp_num;
 }
 
-string MinNetPacket::pop_string()
+std::string MinNetPacket::pop_string()
 { 
 	int len = pop_int();
 
-	string utf8((char *)&buffer[buffer_position], len);
+	std::string utf8((char *)&buffer[buffer_position], len);
 	buffer_position += len;
 
 	return StringConverter::UTF8ToMultibyte(utf8);
@@ -339,9 +339,9 @@ Vector3::Vector3(float x, float y, float z)
 	this->z = z;
 }
 
-ostream & operator<<(ostream & o, const Vector3 & vector3)
+std::ostream & operator<<(std::ostream & o, const Vector3 & vector3)
 {
-	cout << "[" << vector3.x << ", " << vector3.y << ", " << vector3.z << "]";
+	std::cout << "[" << vector3.x << ", " << vector3.y << ", " << vector3.z << "]";
 
 	return o;
 }
@@ -358,9 +358,9 @@ Vector2::Vector2(float x, float y)
 	this->y = y;
 }
 
-ostream & operator<<(ostream & o, const Vector2 & vector2)
+std::ostream & operator<<(std::ostream & o, const Vector2 & vector2)
 {
-	cout << "[" << vector2.x << ", " << vector2.y << "]";
+	std::cout << "[" << vector2.x << ", " << vector2.y << "]";
 
 	return o;
 }
@@ -402,32 +402,32 @@ void MinNetUser::PacketTypeClientAnswerId(MinNetPacket * packet)
 	ID = packet->pop_int();
 }
 
-wstring StringConverter::MultibyteToUnicode(string multibyte)
+std::wstring StringConverter::MultibyteToUnicode(std::string multibyte)
 {
 	return CA2W(multibyte.c_str());
 }
 
-string StringConverter::UnicodeToMultibyte(wstring unicode)
+std::string StringConverter::UnicodeToMultibyte(std::wstring unicode)
 {
 	return CW2A(unicode.c_str());
 }
 
-string StringConverter::UnicodeToUTF8(wstring unicode)
+std::string StringConverter::UnicodeToUTF8(std::wstring unicode)
 {
 	return CW2A(unicode.c_str(), CP_UTF8);
 }
 
-wstring StringConverter::UTF8ToUnicode(string utf8)
+std::wstring StringConverter::UTF8ToUnicode(std::string utf8)
 {
 	return CA2W(utf8.c_str(), CP_UTF8);
 }
 
-string StringConverter::MultibyteToUTF8(string multibyte)
+std::string StringConverter::MultibyteToUTF8(std::string multibyte)
 {
 	return UnicodeToUTF8(MultibyteToUnicode(multibyte));
 }
 
-string StringConverter::UTF8ToMultibyte(string utf8)
+std::string StringConverter::UTF8ToMultibyte(std::string utf8)
 {
 	return UnicodeToMultibyte(UTF8ToUnicode(utf8));
 }

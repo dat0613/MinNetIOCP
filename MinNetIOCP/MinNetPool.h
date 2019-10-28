@@ -24,9 +24,9 @@ public:
 	static MinNetObjectPool<MinNetCloseOverlapped> * closeOverlappedPool;
 	static MinNetObjectPool<MinNetSendOverlapped> * sendOverlappedPool;
 	static MinNetObjectPool<MinNetRecvOverlapped> * recvOverlappedPool;
-	static MinNetObjectPool<MinNetGameObject> * gameobjectPool;
+	//static MinNetObjectPool<MinNetGameObject> * gameobjectPool;
 	static MinNetObjectPool<MinNetUser> * userPool;
 	static MinNetObjectPool<MinNetPacket> * packetPool;
-	static MinNetObjectPool<MinNetComponent> * componentPool;
+	// static MinNetObjectPool<MinNetComponent> * componentPool;
 
 };

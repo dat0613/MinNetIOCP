@@ -4,7 +4,6 @@
 #include "MinNetOptimizer.h"
 #include "MinNetPool.h"
 #include "MinNetGameObject.h"
-#include "MinNetLua.h"
 
 MinNetRoom::MinNetRoom()
 {
@@ -16,12 +15,12 @@ MinNetRoom::~MinNetRoom()
 
 }
 
-void MinNetRoom::SetName(string name)
+void MinNetRoom::SetName(std::string name)
 {
 	this->name = name;
 }
 
-string MinNetRoom::GetName()
+std::string MinNetRoom::GetName()
 {
 	return name;
 }
@@ -54,14 +53,14 @@ bool MinNetRoom::IsPeaceful()
 	return false;
 }
 
-list<MinNetUser*> * MinNetRoom::GetUserList()
+std::list<MinNetUser*> * MinNetRoom::GetUserList()
 {
 	return &user_list;
 }
 
-MinNetGameObject * MinNetRoom::Instantiate(string prefabName, Vector3 position, Vector3 euler, int id, bool casting, MinNetUser * except, bool autoDelete)
+std::shared_ptr<MinNetGameObject>  MinNetRoom::Instantiate(std::string prefabName, Vector3 position, Vector3 euler, int id, bool casting, MinNetUser * except, bool autoDelete)
 {
-	MinNetGameObject * obj = MinNetPool::gameobjectPool->pop();
+	auto obj = std::make_shared<MinNetGameObject>();
 
 	obj->SetName(prefabName);
 	obj->position = position;
@@ -102,17 +101,17 @@ MinNetGameObject * MinNetRoom::Instantiate(string prefabName, Vector3 position, 
 	}
 
 	AddObject(obj);
-
+	
 	return obj;
 }
 
-void MinNetRoom::Destroy(string prefabName, int id, bool casting, MinNetUser * except)
+void MinNetRoom::Destroy(std::string prefabName, int id, bool casting, MinNetUser * except)
 {
-	MinNetGameObject * obj = nullptr;
+	std::shared_ptr<MinNetGameObject>  obj = nullptr;
 
 	if (object_map.find(id) == object_map.end())
 	{
-		cout << "동기화 실패 감지" << endl;
+		std::cout << "동기화 실패 감지" << std::endl;
 		return;
 	}
 
@@ -153,9 +152,9 @@ void MinNetRoom::AddUser(MinNetUser * user)
 
 	MinNetPool::packetPool->push(enter);
 
-	cout << user << " 유저가 방으로 들어옴" << endl;
+	std::cout << user << " 유저가 방으로 들어옴" << std::endl;
 
-	for (MinNetGameObject * obj : object_list)
+	for (std::shared_ptr<MinNetGameObject>  obj : object_list)
 	{
 		MinNetPacket * packet = MinNetPool::packetPool->pop();
 		packet->create_packet(Defines::MinNetPacketType::OBJECT_INSTANTIATE);
@@ -187,11 +186,11 @@ void MinNetRoom::RemoveUser(MinNetUser * user)
 	if (user == nullptr)
 		return;
 
-	cout << user << " 유저가 방에서 나감" << endl;
+	std::cout << user << " 유저가 방에서 나감" << std::endl;
 
 	user_list.remove(user); 
 
-	queue<MinNetGameObject *> deleteQ;
+	std::queue<std::shared_ptr<MinNetGameObject>> deleteQ;
 
 	for (auto it = user->autoDeleteObjectList.begin(); it != user->autoDeleteObjectList.end(); it++)
 	{
@@ -226,7 +225,7 @@ void MinNetRoom::RemoveUser(MinNetUser * user)
 
 void MinNetRoom::RemoveUsers()
 {
-	queue<MinNetUser *> deleteQ;
+	std::queue<MinNetUser *> deleteQ;
 	for (MinNetUser * user : user_list)
 	{
 		deleteQ.push(user);
@@ -239,10 +238,10 @@ void MinNetRoom::RemoveUsers()
 	}
 }
 
-void MinNetRoom::AddObject(MinNetGameObject * object)
+void MinNetRoom::AddObject(std::shared_ptr<MinNetGameObject> object)
 {
 	object_list.push_back(object);
-	object_map.insert(make_pair(object->GetID(), object));
+	object_map.insert(std::make_pair(object->GetID(), object));
 	object->ChangeRoom(this);
 	if (object->owner != nullptr)
 	{
@@ -250,7 +249,7 @@ void MinNetRoom::AddObject(MinNetGameObject * object)
 	}
 }
 
-void MinNetRoom::RemoveObject(MinNetGameObject * object)
+void MinNetRoom::RemoveObject(std::shared_ptr<MinNetGameObject> object)
 {
 	object_list.remove(object);
 	object_map.erase(object->GetID());
@@ -259,8 +258,6 @@ void MinNetRoom::RemoveObject(MinNetGameObject * object)
 	{
 		object->owner->autoDeleteObjectList.remove(object);
 	}
-
-	MinNetPool::gameobjectPool->push(object);
 }
 
 void MinNetRoom::RemoveObject(int id)
@@ -270,22 +267,22 @@ void MinNetRoom::RemoveObject(int id)
 
 void MinNetRoom::RemoveObjects()
 {
-	queue<MinNetGameObject *> deleteQ;
+	std::queue<std::shared_ptr<MinNetGameObject> > deleteQ;
 
-	for (MinNetGameObject * obj : object_list)
+	for (std::shared_ptr<MinNetGameObject> obj : object_list)
 	{
 		deleteQ.push(obj);
 	}
 
 	while (!deleteQ.empty())
 	{
-		MinNetGameObject * obj = deleteQ.front();
+		std::shared_ptr<MinNetGameObject>  obj = deleteQ.front();
 		Destroy(obj->GetName(), obj->GetID(), true);
 		deleteQ.pop();
 	}
 }
 
-MinNetGameObject * MinNetRoom::GetGameObject(int id)
+std::shared_ptr<MinNetGameObject>  MinNetRoom::GetGameObject(int id)
 {
 	return object_map[id];
 }
@@ -303,14 +300,14 @@ int MinNetRoom::GetNewID()
 void MinNetRoom::ObjectRPC(MinNetUser * user, MinNetPacket * packet)
 {
 	int id = packet->pop_int();
-	string componentName = packet->pop_string();
-	string methodName = packet->pop_string();
+	std::string componentName = packet->pop_string();
+	std::string methodName = packet->pop_string();
 	int target = packet->pop_int();
 
 	auto obj = GetGameObject(id);
 	if (obj == nullptr)
 	{
-		cout << __FUNCTION__ << endl;
+		std::cout << __FUNCTION__ << std::endl;
 		return;
 	}
 	obj->ObjectRPC(componentName, methodName, packet);
@@ -374,12 +371,13 @@ void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string me
 
 void MinNetRoom::ObjectInstantiate(MinNetUser * user, MinNetPacket * packet)
 {
-	string prefabName = packet->pop_string();
+	std::string prefabName = packet->pop_string();
 	Vector3 position = packet->pop_vector3();
 	Vector3 rotation = packet->pop_vector3();
 	bool autoDelete = packet->pop_bool();
 
-	Instantiate(prefabName, position, rotation, GetNewID(), true, user, autoDelete);
+	auto obj = Instantiate(prefabName, position, rotation, GetNewID(), true, user, autoDelete);
+	//obj->intList.push_back(1);
 }
 
 void MinNetRoom::ObjectDestroy(MinNetUser * user, MinNetPacket * packet)
@@ -396,7 +394,7 @@ MinNetRoom * MinNetRoomManager::GetPeacefulRoom()
 {
 	if (room_list.empty())// 룸이 존재하지 않으면 새로운 룸을 만듦
 	{
-		cout << "룸이 존재하지 않아 새로움 룸을 만들었습니다" << endl;
+		std::cout << "룸이 존재하지 않아 새로움 룸을 만들었습니다" << std::endl;
 		room_list.push_back(MinNetPool::roomPool->pop());
 	}
 
@@ -412,7 +410,7 @@ MinNetRoom * MinNetRoomManager::GetPeacefulRoom()
 	MinNetRoom * room = MinNetPool::roomPool->pop();// 여유로움 룸이 없다면 새로운 룸을 만듦
 	room->SetManager(this);
 	room_list.push_back(room);
-	cout << "여유로운 룸이 존재하지 않아 새로움 룸을 만들었습니다" << endl;
+	std::cout << "여유로운 룸이 존재하지 않아 새로움 룸을 만들었습니다" << std::endl;
 	return room;
 }
 

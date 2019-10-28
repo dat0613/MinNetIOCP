@@ -30,9 +30,6 @@
     <ClInclude Include="MinNetOptimizer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="MinNetLua.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="MinNetPool.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -43,6 +40,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="MinNetCache.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="FirstPersonController.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -65,9 +65,6 @@
     <ClCompile Include="MinNetOptimizer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="MinNetLua.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="MinNetPool.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -80,13 +77,8 @@
     <ClCompile Include="MinNetCache.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="FPSController.lua">
+    <ClCompile Include="FirstPersonController.cpp">
       <Filter>소스 파일</Filter>
-    </None>
-    <None Include="FirstPersonController.lua">
-      <Filter>소스 파일</Filter>
-    </None>
+    </ClCompile>
   </ItemGroup>
 </Project>

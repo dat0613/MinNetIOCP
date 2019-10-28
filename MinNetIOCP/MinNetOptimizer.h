@@ -80,7 +80,7 @@ public:
 		spinLock.lock();
 		if (pool.empty())
 		{// 풀이 비어있음
-			cout << typeid(T).name() << " 풀의 객체가 고갈되어 새로운 객체를 생성합니다" << endl;
+			std::cout << typeid(T).name() << " 풀의 객체가 고갈되어 새로운 객체를 생성합니다" << std::endl;
 			retval = CreateNewObject();
 		}
 		else

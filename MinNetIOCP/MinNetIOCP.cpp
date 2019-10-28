@@ -42,7 +42,7 @@ void MinNetIOCP::StartServer()
 	hPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
 	if (hPort == nullptr)
 	{
-		cout << "CreateIoCompletionPort error" << endl;
+		std::cout << "CreateIoCompletionPort error" << std::endl;
 		return;
 	}
 
@@ -51,7 +51,7 @@ void MinNetIOCP::StartServer()
 
 	for (int i = 0; i < (int)si.dwNumberOfProcessors * 2; i++)
 	{
-		thread * hThread = new thread([&]() { WorkThread(hPort); });
+		std::thread * hThread = new std::thread([&]() { WorkThread(hPort); });
 		if (hThread == NULL)
 			return;
 	}
@@ -146,7 +146,7 @@ void MinNetIOCP::ServerLoop()
 }
 
 
-string MinNetIOCP::GetIP()
+std::string MinNetIOCP::GetIP()
 {
 	char name[255];
 	char *ip;
@@ -177,7 +177,7 @@ DWORD WINAPI MinNetIOCP::WorkThread(LPVOID arg)
 		(
 			hcp,
 			&cbTransferred,
-			(LPDWORD)&sock,
+			(PULONG_PTR)&sock,
 			(LPOVERLAPPED *)&overlap,
 			INFINITE
 		);
@@ -239,7 +239,7 @@ void MinNetIOCP::JoinPeacefulRoom(MinNetUser * user)
 
 void MinNetIOCP::PingTest()
 {
-	queue<MinNetUser *> removeQ;
+	std::queue<MinNetUser *> removeQ;
 	if (user_list.size() > 0)
 	{
 		for (auto it = user_list.begin(); it != user_list.end(); it++)
@@ -250,7 +250,7 @@ void MinNetIOCP::PingTest()
 			{
 				if (user->ping > 500)
 				{
-					cout << user << " 이 응답하지 않아 연결 끊음" << endl;
+					std::cout << user << " 이 응답하지 않아 연결 끊음" << std::endl;
 					removeQ.push(user);
 				}
 				else
@@ -308,7 +308,7 @@ void MinNetIOCP::StartAccept()
 	if (error)
 		if (WSAGetLastError() != WSA_IO_PENDING)
 		{
-			cout << "accept 실패 : " << WSAGetLastError() << endl;
+			std::cout << "accept 실패 : " << WSAGetLastError() << std::endl;
 			return;
 		}
 }
@@ -318,7 +318,7 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 	if (setsockopt(overlap->socket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (const char*)&listen_socket, sizeof(SOCKET)) == SOCKET_ERROR)
 	{
 		// 대충 오류니까 overlap->socket 닫음
-		cout << "EndAccept error" << endl;
+		std::cout << "EndAccept error" << std::endl;
 
 		MinNetUser * user = MinNetPool::userPool->pop();
 		user->sock = overlap->socket;
@@ -345,7 +345,7 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 
 	//cout << inet_ntoa(sin->sin_addr) << endl;
 
-	cout << "새로운 유저 접속 : " << overlap->socket << endl;
+	std::cout << "새로운 유저 접속 : " << overlap->socket << std::endl;
 
 	HANDLE hResult = CreateIoCompletionPort((HANDLE)overlap->socket, hPort, (DWORD)overlap->socket, 0);
 	if (hResult == NULL)
@@ -363,7 +363,7 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 	packet->create_header();
 
 	messageQ_spin_lock.lock();
-	recvQ.push(make_pair(packet, user));
+	recvQ.push(std::make_pair(packet, user));
 	messageQ_spin_lock.unlock();
 
 	MinNetPool::acceptOverlappedPool->push(overlap);
@@ -385,22 +385,22 @@ void MinNetIOCP::StartClose(MinNetUser * user)
 		{
 			if (error == WSAENOTCONN || error == WSAENOTSOCK)
 			{
-				cout << "이미 닫힌 소켓임 : " << overlap->user->sock << endl;
+				std::cout << "이미 닫힌 소켓임 : " << overlap->user->sock << std::endl;
 				MinNetPool::closeOverlappedPool->push(overlap);
 				return;
 			}
-			cout << "Transmitfile error : " << error << endl;
+			std::cout << "Transmitfile error : " << error << std::endl;
 		}
 	}
 	else
 	{
-		cout << "성공적으로 호출 함" << endl;
+		std::cout << "성공적으로 호출 함" << std::endl;
 	}
 }
 
 void MinNetIOCP::EndClose(MinNetCloseOverlapped * overlap)
 {
-	cout << "유저가 나감 : " << overlap->user->sock << endl;
+	std::cout << "유저가 나감 : " << overlap->user->sock << std::endl;
 
 	user_list.remove(overlap->user);
 	MinNetPool::userPool->push(overlap->user);
@@ -463,7 +463,7 @@ void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
 		else
 		{
 			messageQ_spin_lock.lock();
-			recvQ.push(make_pair(packet, user));
+			recvQ.push(std::make_pair(packet, user));
 			messageQ_spin_lock.unlock();
 		}
 	}
@@ -516,10 +516,10 @@ void MinNetIOCP::OnPong(MinNetUser * user, MinNetPacket * packet)
 
 void MinNetSpinLock::lock()
 {
-	while (locker.test_and_set(memory_order_acquire));
+	while (locker.test_and_set(std::memory_order_acquire));
 }
 
 void MinNetSpinLock::unlock()
 {
-	locker.clear(memory_order_release);
+	locker.clear(std::memory_order_release);
 }
