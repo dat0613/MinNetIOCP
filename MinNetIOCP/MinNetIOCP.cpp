@@ -240,6 +240,7 @@ void MinNetIOCP::JoinPeacefulRoom(MinNetUser * user)
 void MinNetIOCP::PingTest()
 {
 	std::queue<MinNetUser *> removeQ;
+
 	if (user_list.size() > 0)
 	{
 		for (auto it = user_list.begin(); it != user_list.end(); it++)
@@ -261,6 +262,7 @@ void MinNetIOCP::PingTest()
 			else
 			{
 				SendPing(user);
+				SyncTime(user);
 			}
 		}
 	}
@@ -285,6 +287,23 @@ void MinNetIOCP::SendPing(MinNetUser * user)
 	packet->create_header();
 
 	StartSend(user, packet);
+
+	MinNetPool::packetPool->push(packet);
+}
+
+void MinNetIOCP::SyncTime(MinNetUser * user)
+{
+	MinNetPacket * packet = MinNetPool::packetPool->pop();
+
+
+
+	packet->create_packet(Defines::MinNetPacketType::PING);
+	packet->create_header();
+
+	StartSend(user, packet);
+
+
+
 
 	MinNetPool::packetPool->push(packet);
 }
@@ -370,7 +389,7 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 
 	StartRecv(user);
 
-	StartAccept();
+	StartAccept();// 다음 클라이언트를 받을 준비를 함
 }
 
 void MinNetIOCP::StartClose(MinNetUser * user)
@@ -485,11 +504,13 @@ void MinNetIOCP::StartSend(MinNetUser * user, MinNetPacket * packet)
 	int retval = WSASend(user->sock, &overlap->wsabuf, 1, nullptr, 0, overlap, nullptr);
 
 	if (retval == SOCKET_ERROR)
+	{
 		if (WSAGetLastError() != WSA_IO_PENDING)
 		{
 			StartClose(user);
 			return;
 		}
+	}
 }
 
 void MinNetIOCP::EndSend(MinNetSendOverlapped * overlap)
@@ -499,7 +520,8 @@ void MinNetIOCP::EndSend(MinNetSendOverlapped * overlap)
 
 void MinNetIOCP::OnPong(MinNetUser * user, MinNetPacket * packet)
 {
-	user->last_pong = clock();
+	clock_t curTime = clock();
+	user->last_pong = curTime;
 	user->ping = user->last_pong - user->last_ping;
 	MinNetPool::packetPool->push(packet);
 
@@ -507,6 +529,7 @@ void MinNetIOCP::OnPong(MinNetUser * user, MinNetPacket * packet)
 
 	cast->create_packet(Defines::MinNetPacketType::PING_CAST);
 	cast->push(user->ping);
+	cast->push(curTime);
 	cast->create_header();
 
 	StartSend(user, cast);

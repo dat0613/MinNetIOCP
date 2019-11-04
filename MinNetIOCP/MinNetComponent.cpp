@@ -78,36 +78,47 @@ void MinNetComponent::PushRpcPacket(MinNetPacket * packet)
 
 void MinNetComponent::RPC(std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters)
 {
-	switch (target)
+	MinNetUser * user = nullptr;
+	if (parameters != nullptr)
 	{
-	case MinNetRpcTarget::All:
-	case MinNetRpcTarget::AllViaServer:
-		parameters->set_buffer_position(6);
-		break;
+		switch (target)
+		{
+		case MinNetRpcTarget::All:
+		case MinNetRpcTarget::AllViaServer:
+			parameters->set_buffer_position(6);
+			break;
 
-	case MinNetRpcTarget::Others:
-		break;
+		case MinNetRpcTarget::Others:
+			break;
 
-	case MinNetRpcTarget::Server:
-		return;
+		case MinNetRpcTarget::Server:
+			return;// RPC대상이 서버 이므로 브로드캐스트 하지 않음
+
+		default:// default는 특정 대상에게만 패킷을 보냄
+			user = gameObject->GetNowRoom()->GetUser(static_cast<int>(target));
+			break;
+		}
 	}
 
-	//gameObject->GetNowRoom()->SendRPC(gameObject->GetID(), name, methodName, target, parameters);
-	gameObject->GetNowRoom()->SendRPC(gameObject->GetID(), name, methodName, target, parameters);
+	gameObject->GetNowRoom()->SendRPC(gameObject->GetID(), name, methodName, target, parameters, user);
 }
 
 void MinNetComponent::CallRPC(std::string functionName, MinNetPacket * packet)
 {
-	auto f = RpcMap.find(functionName);
-	if (f == RpcMap.end())
+	auto value = RpcMap.find(functionName);
+	if (value == RpcMap.end())
 	{// 함수가 없음
 		std::cout << functionName.c_str() << " 함수는 아직 추가되지 않아 호출할 수 없습니다." << std::endl;
+		DefRPC(functionName, nullptr);
 	}
 	else
 	{// 
-		this->PushRpcPacket(packet);
-		f->second();
-		this->PushRpcPacket(nullptr);
+		auto rpcFunction = value->second;
+		if (rpcFunction != nullptr)
+		{
+			this->PushRpcPacket(packet);
+			rpcFunction();
+			this->PushRpcPacket(nullptr);
+		}
 	}
-
 }

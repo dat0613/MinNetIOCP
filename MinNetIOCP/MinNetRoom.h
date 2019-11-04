@@ -42,6 +42,7 @@ public:
 
 	void AddUser(MinNetUser * user);
 	void RemoveUser(MinNetUser * user);
+
 	void RemoveUsers();
 
 	void AddObject(std::shared_ptr<MinNetGameObject> object);
@@ -54,9 +55,10 @@ public:
 
 	int GetNewID();
 
-	void ObjectRPC(MinNetUser * user, MinNetPacket * packet);
+	MinNetUser * GetUser(int id);
 
-	void SendRPC(int objectId, std::string componentName, std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters);
+	void ObjectRPC(MinNetUser * user, MinNetPacket * packet);
+	void SendRPC(int objectId, std::string componentName, std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters, MinNetUser * user = nullptr);
 
 private:
 
@@ -66,6 +68,7 @@ private:
 
 	int id_count = 0;
 
+	std::map<int, MinNetUser *> user_map;
 	std::list<MinNetUser *> user_list;
 	std::map<int, std::shared_ptr<MinNetGameObject>> object_map;
 	std::list<std::shared_ptr<MinNetGameObject>> object_list;

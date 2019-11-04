@@ -28,6 +28,7 @@ private:
 	int objectId = -1;
 
 public:
+
 	MinNetGameObject();
 	~MinNetGameObject();
 	void SetID(int id);
@@ -89,5 +90,4 @@ public:
 			shared->InitRPC();
 		}
 	}
-
 };

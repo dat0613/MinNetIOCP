@@ -177,6 +177,7 @@ void MinNetRoom::AddUser(MinNetUser * user)
 	manager->Send(this, other_enter);
 
 	user_list.push_back(user);// 유저 리스트에 새로운 유저 추가
+	user_map.insert(std::make_pair(user->ID, user));
 
 	MinNetPool::packetPool->push(other_enter);
 }
@@ -188,6 +189,7 @@ void MinNetRoom::RemoveUser(MinNetUser * user)
 
 	std::cout << user << " 유저가 방에서 나감" << std::endl;
 
+	user_map.erase(user->ID);
 	user_list.remove(user); 
 
 	std::queue<std::shared_ptr<MinNetGameObject>> deleteQ;
@@ -233,6 +235,7 @@ void MinNetRoom::RemoveUsers()
 
 	while (!deleteQ.empty())
 	{
+
 		RemoveUser(deleteQ.front());
 		deleteQ.pop();
 	}
@@ -297,6 +300,16 @@ int MinNetRoom::GetNewID()
 	return id_count++;
 }
 
+MinNetUser * MinNetRoom::GetUser(int id)
+{
+	auto pair =  user_map.find(id);
+
+	if (pair == user_map.end())
+		return nullptr;// 해당 id를 가지는 유저가 없음
+	else
+		return pair->second;
+}
+
 void MinNetRoom::ObjectRPC(MinNetUser * user, MinNetPacket * packet)
 {
 	int id = packet->pop_int();
@@ -327,34 +340,43 @@ void MinNetRoom::ObjectRPC(MinNetUser * user, MinNetPacket * packet)
 
 			break;
 	}
+
+	//MinNetPool::packetPool->push(packet);
 }
 
-void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters)
+void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters, MinNetUser * user)
 {
 	MinNetPacket * rpcPacket = MinNetPool::packetPool->pop();
 	rpcPacket->create_packet((int)Defines::MinNetPacketType::RPC);
+
 	rpcPacket->push(objectId);
 	rpcPacket->push(componentName);
 	rpcPacket->push(methodName);
 	rpcPacket->push(int(target));
 
+	MinNetUser * except = nullptr;
+	auto obj = GetGameObject(objectId);
+
+
 	if (parameters != nullptr)
 	{
-		memcpy(&rpcPacket->buffer[rpcPacket->buffer_position], &parameters[6], parameters->size() - 6);// 보낼 rpc패킷 뒤에 파라미터로 받은 인자들을 넣음
+		int packetSize = rpcPacket->buffer_position;
+		int parameterSize = parameters->size() - Defines::HEADERSIZE;
+
+		memcpy(&rpcPacket->buffer[packetSize], &parameters->buffer[Defines::HEADERSIZE], parameterSize);// 보낼 rpc패킷 뒤에 파라미터로 받은 인자들을 넣음
+		rpcPacket->buffer_position += (parameterSize);
+
+		if (target == MinNetRpcTarget::All || target == MinNetRpcTarget::AllViaServer)
+		{
+			parameters->set_buffer_position(Defines::HEADERSIZE);
+			obj->ObjectRPC(componentName, methodName, parameters);
+			except = nullptr;
+		}
+
 		MinNetPool::packetPool->push(parameters);
 	}
 
 	rpcPacket->create_header();
-	
-	MinNetUser * except = nullptr;
-	auto obj = GetGameObject(objectId);
-
-	if (target == MinNetRpcTarget::All || target == MinNetRpcTarget::AllViaServer)
-	{
-		rpcPacket->buffer_position = 6;
-		obj->ObjectRPC(componentName, methodName, rpcPacket);
-		except = nullptr;
-	}
 
 	if(target == MinNetRpcTarget::Others)
 	{
@@ -364,7 +386,14 @@ void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string me
 		}
 	}
 
-	manager->Send(this, rpcPacket, except);
+	if (user == nullptr)
+	{
+		manager->Send(this, rpcPacket, except);
+	}
+	else
+	{
+		manager->Send(user, rpcPacket);
+	}
 
 	MinNetPool::packetPool->push(rpcPacket);
 }
@@ -377,7 +406,6 @@ void MinNetRoom::ObjectInstantiate(MinNetUser * user, MinNetPacket * packet)
 	bool autoDelete = packet->pop_bool();
 
 	auto obj = Instantiate(prefabName, position, rotation, GetNewID(), true, user, autoDelete);
-	//obj->intList.push_back(1);
 }
 
 void MinNetRoom::ObjectDestroy(MinNetUser * user, MinNetPacket * packet)

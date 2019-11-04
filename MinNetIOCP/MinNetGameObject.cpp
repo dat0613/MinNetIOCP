@@ -7,14 +7,10 @@
 
 MinNetGameObject::MinNetGameObject()
 {
-	std::cout << "생성자 호출" << std::endl;
-
-	//AddComponent<FirstPersonController>();
 }
 
 MinNetGameObject::~MinNetGameObject()
 {
-	std::cout << "소멸자 호출" << std::endl;
 }
 
 void MinNetGameObject::SetID(int id)
@@ -35,8 +31,6 @@ void MinNetGameObject::SetName(std::string name)
 	{
 		return;
 	}
-
-	std::cout << "그냥 주소 : " << this << std::endl;
 	AddComponent();
 }
 
@@ -67,6 +61,7 @@ MinNetRoom * MinNetGameObject::GetNowRoom()
 void MinNetGameObject::ObjectRPC(std::string componentName, std::string methodName, MinNetPacket * parameters)
 {
 	auto com = GetComponent(componentName);
+
 	if (com == nullptr)
 	{// 컴포넌트를 추가 시켜줄지 패킷 손상으로 할것인지 고민중,..
 

@@ -5,21 +5,20 @@
 #include "MinNetCache.h"
 #include "MinNetGameObject.h"
 #include "FirstPersonController.h"
+#include "PlayerMove.h"
 
 void main()
 {
-	MinNetCache::componentCache.insert(std::make_pair("FPSController", [](MinNetGameObject * object)
+	MinNetCache::SetComponentCache("ThirdPersonPlayer", [](MinNetGameObject * object)
 	{
-		std::cout << "람다에서의 주소 : " << object << std::endl;
-		object->AddComponent<FirstPersonController>();
-	}));
+		object->AddComponent<PlayerMove>();
+	});
 
 	MinNetIOCP * iocp = new MinNetIOCP();
 	iocp->SetTickrate(20);
 
 	iocp->StartServer();
 	iocp->ServerLoop();
-
 
 	_getch();
 }

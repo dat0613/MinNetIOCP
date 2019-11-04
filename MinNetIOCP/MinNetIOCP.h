@@ -60,6 +60,7 @@ private:
 
 	void PingTest();
 	void SendPing(MinNetUser * user);
+	void SyncTime(MinNetUser * user);
 
 	void StartAccept();
 	void EndAccept(MinNetAcceptOverlapped * overlap);

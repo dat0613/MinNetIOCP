@@ -12,7 +12,7 @@
 class MinNetRoom;
 class MinNetGameObject;
 
-enum class MinNetRpcTarget { All, Others, AllViaServer, Server };
+enum class MinNetRpcTarget { All = -1000, Others, AllViaServer, Server };
 
 class Defines
 {
@@ -30,8 +30,7 @@ public:
 		PONG, 
 		PING_CAST,
 		RPC, 
-		ID_CAST, 
-		USER_WAITNG_ROOM 
+		ID_CAST
 	};
 };
 
@@ -125,7 +124,7 @@ public:
 	void push(f data);
 	void push(float data);
 	void push(std::string str);
-	void push(const char * str);
+	//void push(const char * str);
 	void push(Vector2 data);
 	void push(Vector3 data);
 
@@ -134,7 +133,7 @@ public:
 	short pop_short();
 	float pop_float();
 	std::string pop_string();
-	const char * pop_const_char();
+	//const char * pop_const_char();
 	Vector2 pop_vector2();
 	Vector3 pop_vector3();
 	int Parse(byte * arr, int length);

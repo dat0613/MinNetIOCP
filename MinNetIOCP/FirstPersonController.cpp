@@ -1,8 +1,10 @@
 #include "FirstPersonController.h"
-
+#include "MinNetPool.h"
+#include "MinNet.h"
 
 FirstPersonController::~FirstPersonController()
 {
+
 }
 
 void FirstPersonController::InitRPC()
@@ -17,7 +19,4 @@ void FirstPersonController::SyncPosition()
 	auto cameraEuler = rpcPacket->pop_vector3();
 
 	gameObject->position = position;
-
-	std::cout << gameObject->position << std::endl;
-
 }

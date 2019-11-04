@@ -126,7 +126,7 @@ MinNetPacket::~MinNetPacket()				//패킷의 소멸자
 	delete[] buffer;
 }
 
-int MinNetPacket::size()
+int MinNetPacket::size()// body_size + head_size
 {
 	return body_size + 6;
 }
@@ -200,11 +200,11 @@ void MinNetPacket::push(std::string str)
 	buffer_position += len;
 }
 
-void MinNetPacket::push(const char * str)
-{
-	auto str2 = std::string(str);
-	push(str2);
-}
+//void MinNetPacket::push(const char * str)
+//{
+//	auto str2 = std::string(str);
+//	push(str2);
+//}
 
 void MinNetPacket::push(Vector2 data)				//Vector2형 데이터를 패킷에 넣는 함수
 {
@@ -265,11 +265,11 @@ std::string MinNetPacket::pop_string()
 	return StringConverter::UTF8ToMultibyte(utf8);
 }
 
-const char * MinNetPacket::pop_const_char()
-{
-	auto str = pop_string();
-	return str.c_str();
-}
+//const char * MinNetPacket::pop_const_char()
+//{
+//	auto str = pop_string();
+//	return str.c_str();
+//}
 
 Vector2 MinNetPacket::pop_vector2()			//vector2형 데이터를 패킷에서 빼오는 함수
 {
