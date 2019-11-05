@@ -11,6 +11,7 @@ public:
 	void InitRPC() override;
 
 	void SyncPosition();
+	void HitSync();
 
 private:
 	Vector3 chestRotation;

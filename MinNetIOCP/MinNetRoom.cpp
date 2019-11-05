@@ -344,7 +344,7 @@ void MinNetRoom::ObjectRPC(MinNetUser * user, MinNetPacket * packet)
 	//MinNetPool::packetPool->push(packet);
 }
 
-void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters, MinNetUser * user)
+void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters)
 {
 	MinNetPacket * rpcPacket = MinNetPool::packetPool->pop();
 	rpcPacket->create_packet((int)Defines::MinNetPacketType::RPC);
@@ -362,7 +362,7 @@ void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string me
 	{
 		int packetSize = rpcPacket->buffer_position;
 		int parameterSize = parameters->size() - Defines::HEADERSIZE;
-
+		
 		memcpy(&rpcPacket->buffer[packetSize], &parameters->buffer[Defines::HEADERSIZE], parameterSize);// 보낼 rpc패킷 뒤에 파라미터로 받은 인자들을 넣음
 		rpcPacket->buffer_position += (parameterSize);
 
@@ -386,14 +386,35 @@ void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string me
 		}
 	}
 
-	if (user == nullptr)
+	manager->Send(this, rpcPacket, except);
+
+	MinNetPool::packetPool->push(rpcPacket);
+}
+
+void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string methodName, MinNetUser * target, MinNetPacket * parameters)
+{
+	MinNetPacket * rpcPacket = MinNetPool::packetPool->pop();
+	rpcPacket->create_packet((int)Defines::MinNetPacketType::RPC);
+
+	rpcPacket->push(objectId);
+	rpcPacket->push(componentName);
+	rpcPacket->push(methodName);
+	rpcPacket->push((int)MinNetRpcTarget::One);
+
+	if (parameters != nullptr)
 	{
-		manager->Send(this, rpcPacket, except);
+		int packetSize = rpcPacket->buffer_position;
+		int parameterSize = parameters->size() - Defines::HEADERSIZE;
+
+		memcpy(&rpcPacket->buffer[packetSize], &parameters->buffer[Defines::HEADERSIZE], parameterSize);// 보낼 rpc패킷 뒤에 파라미터로 받은 인자들을 넣음
+		rpcPacket->buffer_position += (parameterSize);
+
+		MinNetPool::packetPool->push(parameters);
 	}
-	else
-	{
-		manager->Send(user, rpcPacket);
-	}
+
+	rpcPacket->create_header();
+
+	manager->Send(target, rpcPacket);
 
 	MinNetPool::packetPool->push(rpcPacket);
 }

@@ -2,6 +2,7 @@
 #include "MinNetIOCP.h"
 #include "MinNetRoom.h"
 #include <atlstr.h>
+#include <cmath>
 
 //////////////////////
 //BitConverter class//
@@ -137,6 +138,11 @@ void MinNetPacket::create_packet(int packet_type)	//패킷을 만들고자 할때 무조건�
 	this->packet_type = packet_type;
 	//ZeroMemory(&buffer, sizeof(buffer));
 	//memset(&buffer, 0, 1024);
+}
+
+void MinNetPacket::create_packet()
+{
+	create_packet(0);
 }
 
 void MinNetPacket::set_buffer_position(unsigned int pos)
@@ -337,6 +343,70 @@ Vector3::Vector3(float x, float y, float z)
 	this->x = x;
 	this->y = y;
 	this->z = z;
+}
+
+float Vector3::magnitude()
+{
+	return sqrt(sqrMagnitude());
+}
+
+float Vector3::sqrMagnitude()
+{
+	return x * x + y * y + z * z;
+}
+
+Vector3 Vector3::Normalize()
+{
+	float len = magnitude();
+	return *this / len;
+}
+
+Vector3 Vector3::operator+(Vector3 & v)
+{
+	return Vector3(x + v.x, y + v.y, z + v.z);
+}
+
+Vector3 Vector3::operator+=(Vector3 & v)
+{
+	x += v.x;
+	y += v.y;
+	z += v.z;
+
+	return *this;
+}
+
+Vector3 Vector3::operator-(Vector3 & v)
+{
+	return Vector3(x - v.x, y - v.y, z - v.z);
+}
+
+Vector3 Vector3::operator-=(Vector3 & v)
+{
+	x -= v.x;
+	y -= v.y;
+	z -= v.z;
+
+	return *this;
+}
+
+Vector3 Vector3::operator*(float f)
+{
+	return Vector3(x * f, y * f, z * f);
+}
+
+Vector3 Vector3::operator/(float f)
+{
+	return Vector3(x / f, y / f, z / f);
+}
+
+float Vector3::distance(Vector3 & v1, Vector3 & v2)
+{
+	return (v1 - v2).magnitude();
+}
+
+float Vector3::sqrDistance(Vector3 & v1, Vector3 & v2)
+{
+	return (v1 - v2).sqrMagnitude();
 }
 
 std::ostream & operator<<(std::ostream & o, const Vector3 & vector3)

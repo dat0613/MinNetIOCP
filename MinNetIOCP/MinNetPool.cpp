@@ -7,10 +7,8 @@ MinNetObjectPool<MinNetAcceptOverlapped> * MinNetPool::acceptOverlappedPool = nu
 MinNetObjectPool<MinNetCloseOverlapped> * MinNetPool::closeOverlappedPool = nullptr;
 MinNetObjectPool<MinNetSendOverlapped> * MinNetPool::sendOverlappedPool = nullptr;
 MinNetObjectPool<MinNetRecvOverlapped> * MinNetPool::recvOverlappedPool = nullptr;
-//MinNetObjectPool<MinNetGameObject> * MinNetPool::gameobjectPool = nullptr;
 MinNetObjectPool<MinNetUser> * MinNetPool::userPool = nullptr;
 MinNetObjectPool<MinNetPacket> * MinNetPool::packetPool = nullptr;
-//MinNetObjectPool<MinNetComponent> * MinNetPool::componentPool = nullptr;
 
 MinNetPool::MinNetPool()
 {
@@ -27,10 +25,8 @@ void MinNetPool::Init()
 	closeOverlappedPool = new MinNetObjectPool<MinNetCloseOverlapped>();
 	sendOverlappedPool = new MinNetObjectPool<MinNetSendOverlapped>();
 	recvOverlappedPool = new MinNetObjectPool<MinNetRecvOverlapped>();
-	//gameobjectPool = new MinNetObjectPool<MinNetGameObject>();
 	userPool = new MinNetObjectPool<MinNetUser>();
 	packetPool = new MinNetObjectPool<MinNetPacket>();
-	//componentPool = new MinNetObjectPool<MinNetComponent>();
 
 	roomPool->SetOnPush([](MinNetRoom * room) {
 		room->RemoveUsers();
@@ -99,22 +95,4 @@ void MinNetPool::Init()
 		ZeroMemory(packet->buffer, 1024);
 	});
 	packetPool->AddObject(10);
-
-	//gameobjectPool->SetOnPush([](MinNetGameObject * obj) {
-	//	obj->rotation = obj->position = { 0.0f, 0.0f, 0.0f };
-	//	obj->scale = { 1.0f, 1.0f, 1.0f };
-	//	obj->SetID(-1);
-	//	obj->SetName("");
-	//	obj->owner = nullptr;
-	//	obj->ChangeRoom(nullptr);
-	//	obj->DelComponent();
-	//});
-	//gameobjectPool->AddObject(30);
-
-	//componentPool->SetOnPush([](MinNetComponent * comp) {
-	//	comp->SetName("");
-	//	comp->gameObject = nullptr;
-
-	//});
-	//componentPool->AddObject(100);
 }

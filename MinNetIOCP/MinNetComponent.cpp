@@ -3,16 +3,15 @@
 #include "MinNet.h"
 #include "MinNetGameObject.h"
 #include "MinNetRoom.h"
+#include "MinNetPool.h"
 
 
 MinNetComponent::MinNetComponent()
 {
-	std::cout << "컴포넌트의 생성자 호출" << std::endl;
 }
 
 MinNetComponent::~MinNetComponent()
 {
-	std::cout << "컴포넌트의 소멸자 호출" << std::endl;
 }
 
 void MinNetComponent::DefRPC(std::string functionName, std::function<void(void)> function)
@@ -37,8 +36,6 @@ void MinNetComponent::SetName(std::string name)
 		
 		return;
 	}
-
-	std::cout << "컴포넌트의 이름 : " << name.c_str() << std::endl;
 }
 
 std::string MinNetComponent::GetName()
@@ -76,32 +73,46 @@ void MinNetComponent::PushRpcPacket(MinNetPacket * packet)
 	this->rpcPacket = packet;
 }
 
-void MinNetComponent::RPC(std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters)
+
+
+
+void MinNetComponent::VariableArgumentReader(MinNetPacket * packet)
 {
-	MinNetUser * user = nullptr;
-	if (parameters != nullptr)
-	{
-		switch (target)
-		{
-		case MinNetRpcTarget::All:
-		case MinNetRpcTarget::AllViaServer:
-			parameters->set_buffer_position(6);
-			break;
-
-		case MinNetRpcTarget::Others:
-			break;
-
-		case MinNetRpcTarget::Server:
-			return;// RPC대상이 서버 이므로 브로드캐스트 하지 않음
-
-		default:// default는 특정 대상에게만 패킷을 보냄
-			user = gameObject->GetNowRoom()->GetUser(static_cast<int>(target));
-			break;
-		}
-	}
-
-	gameObject->GetNowRoom()->SendRPC(gameObject->GetID(), name, methodName, target, parameters, user);
 }
+
+//void MinNetComponent::RPC(std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters)
+//{
+//	if (parameters != nullptr)
+//	{
+//		switch (target)
+//		{
+//		case MinNetRpcTarget::All:
+//		case MinNetRpcTarget::AllViaServer:
+//			parameters->set_buffer_position(6);
+//			break;
+//
+//		case MinNetRpcTarget::Others:
+//			break;
+//
+//		case MinNetRpcTarget::Server:
+//			return;// RPC대상이 서버 이므로 브로드캐스트 하지 않음
+//		}
+//	}
+//
+//	gameObject->GetNowRoom()->SendRPC(gameObject->GetID(), name, methodName, target, parameters);
+//}
+//
+//void MinNetComponent::RPC(std::string methodName, MinNetUser * target, MinNetPacket * parameters)
+//{
+//	if (target == nullptr)
+//	{
+//		if (parameters != nullptr)
+//			MinNetPool::packetPool->push(parameters);
+//		return;
+//	}
+//
+//	gameObject->GetNowRoom()->SendRPC(gameObject->GetID(), name, methodName, target, parameters);
+//}
 
 void MinNetComponent::CallRPC(std::string functionName, MinNetPacket * packet)
 {

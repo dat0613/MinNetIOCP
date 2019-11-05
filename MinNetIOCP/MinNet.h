@@ -12,7 +12,7 @@
 class MinNetRoom;
 class MinNetGameObject;
 
-enum class MinNetRpcTarget { All = -1000, Others, AllViaServer, Server };
+enum class MinNetRpcTarget { All = -1000, Others, AllViaServer, Server, One };
 
 class Defines
 {
@@ -74,6 +74,19 @@ public:
 	Vector3(float x, float y, float z);
 	friend std::ostream& operator<< (std::ostream& o, const Vector3& vector3);
 
+	inline float magnitude();
+	inline float sqrMagnitude();
+	Vector3 Normalize();
+
+	Vector3 operator+(Vector3 & v);
+	Vector3 operator+=(Vector3 & v);
+	Vector3 operator-(Vector3 & v);
+	Vector3 operator-=(Vector3 & v);
+	Vector3 operator*(float f);
+	Vector3 operator/(float f);
+
+	static float distance(Vector3 & v1, Vector3 & v2);
+	static float sqrDistance(Vector3 & v1, Vector3 & v2);
 };
 
 class Vector2
@@ -115,6 +128,7 @@ public:
 	int size();
 
 	void create_packet(int packet_type);
+	void create_packet();
 	void create_header();
 	void set_buffer_position(unsigned int pos);
 
