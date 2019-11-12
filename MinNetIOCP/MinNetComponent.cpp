@@ -14,7 +14,7 @@ MinNetComponent::~MinNetComponent()
 {
 }
 
-void MinNetComponent::DefRPC(std::string functionName, std::function<void(void)> function)
+void MinNetComponent::DefRPC(std::string functionName, std::function<void(MinNetPacket *)> function)
 {
 	auto f = RpcMap.find(functionName);
 	if (f == RpcMap.end())
@@ -68,51 +68,9 @@ void MinNetComponent::SetParent(MinNetGameObject * parent)
 	this->gameObject = parent;
 }
 
-void MinNetComponent::PushRpcPacket(MinNetPacket * packet)
-{
-	this->rpcPacket = packet;
-}
-
-
-
-
 void MinNetComponent::VariableArgumentReader(MinNetPacket * packet)
-{
+{// 빈 함수
 }
-
-//void MinNetComponent::RPC(std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters)
-//{
-//	if (parameters != nullptr)
-//	{
-//		switch (target)
-//		{
-//		case MinNetRpcTarget::All:
-//		case MinNetRpcTarget::AllViaServer:
-//			parameters->set_buffer_position(6);
-//			break;
-//
-//		case MinNetRpcTarget::Others:
-//			break;
-//
-//		case MinNetRpcTarget::Server:
-//			return;// RPC대상이 서버 이므로 브로드캐스트 하지 않음
-//		}
-//	}
-//
-//	gameObject->GetNowRoom()->SendRPC(gameObject->GetID(), name, methodName, target, parameters);
-//}
-//
-//void MinNetComponent::RPC(std::string methodName, MinNetUser * target, MinNetPacket * parameters)
-//{
-//	if (target == nullptr)
-//	{
-//		if (parameters != nullptr)
-//			MinNetPool::packetPool->push(parameters);
-//		return;
-//	}
-//
-//	gameObject->GetNowRoom()->SendRPC(gameObject->GetID(), name, methodName, target, parameters);
-//}
 
 void MinNetComponent::CallRPC(std::string functionName, MinNetPacket * packet)
 {
@@ -127,9 +85,7 @@ void MinNetComponent::CallRPC(std::string functionName, MinNetPacket * packet)
 		auto rpcFunction = value->second;
 		if (rpcFunction != nullptr)
 		{
-			this->PushRpcPacket(packet);
-			rpcFunction();
-			this->PushRpcPacket(nullptr);
+			rpcFunction(packet);
 		}
 	}
 }

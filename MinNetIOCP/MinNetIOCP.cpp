@@ -139,6 +139,8 @@ void MinNetIOCP::ServerLoop()
 			recvQ.pop();
 		}
 
+		room_manager.Update();
+
 		messageQ_spin_lock.unlock();
 
 		_sleep(sleep_time);
@@ -234,7 +236,7 @@ void MinNetIOCP::PacketHandler(MinNetUser * user, MinNetPacket * packet)
 
 void MinNetIOCP::JoinPeacefulRoom(MinNetUser * user)
 {
-	user->ChangeRoom(room_manager.GetPeacefulRoom());
+	user->ChangeRoom(room_manager.GetPeacefulRoom("Main"));
 }
 
 void MinNetIOCP::PingTest()
@@ -379,6 +381,8 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 
 	MinNetPacket * packet = MinNetPool::packetPool->pop();
 	packet->create_packet(Defines::MinNetPacketType::USER_ENTER_ROOM);
+	packet->push(-2);// 나중에 방 번호로 입장 기능을 만들때 쓸것
+	packet->push("Main");
 	packet->create_header();
 
 	messageQ_spin_lock.lock();

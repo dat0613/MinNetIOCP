@@ -53,7 +53,12 @@ public:
 	void DelComponent(std::string componentName);
 	void DelComponent();
 
+	void Update();
+
 	std::shared_ptr<MinNetComponent> GetComponent(std::string componentName);
+
+	template <typename T>
+	T * GetComponent();
 
 public:
 
@@ -71,7 +76,7 @@ public:
 
 		T* temp = new T();
 		MinNetComponent * comp = dynamic_cast<MinNetComponent *>(temp);
-
+		comp->ComponentName = typeName;
 		if (comp == nullptr)
 		{
 			std::cout << typeName.c_str() << "은 MinNetComponent를 상속하지 않습니다." << std::endl;
@@ -91,3 +96,29 @@ public:
 		}
 	}
 };
+
+template<typename T>
+inline T * MinNetGameObject::GetComponent()
+{
+	std::string name = typeid(T*).name();
+
+	std::vector<std::string> vec;
+
+	std::istringstream iss(name);
+	std::copy(std::istream_iterator<std::string>(iss), std::istream_iterator<std::string>(), std::back_inserter(vec));
+
+	std::string typeName = vec[1];
+
+	GetComponent(typeName);
+
+	auto set = componentMap.find(typeName);
+
+	if (set == componentMap.end())
+	{// 찾는 컴포넌트가 없음
+		return nullptr;
+	}
+	else
+	{
+		return static_cast<T *>(set->second.get());
+	}
+}

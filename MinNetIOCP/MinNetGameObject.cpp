@@ -104,7 +104,24 @@ void MinNetGameObject::DelComponent()
 	componentMap.clear();
 }
 
+void MinNetGameObject::Update()
+{
+	for (auto component : componentList)
+	{
+		component->Update();
+	}
+}
+
 std::shared_ptr<MinNetComponent> MinNetGameObject::GetComponent(std::string componentName)
 {
-	return componentMap[componentName];
+	auto set = componentMap.find(componentName);
+
+	if (set == componentMap.end())
+	{// 찾는 컴포넌트가 없음
+		return nullptr;
+	}
+	else
+	{
+		return set->second;
+	}
 }

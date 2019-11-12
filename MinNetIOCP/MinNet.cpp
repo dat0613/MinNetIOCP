@@ -206,11 +206,11 @@ void MinNetPacket::push(std::string str)
 	buffer_position += len;
 }
 
-//void MinNetPacket::push(const char * str)
-//{
-//	auto str2 = std::string(str);
-//	push(str2);
-//}
+void MinNetPacket::push(const char * str)
+{
+	auto str2 = std::string(str);
+	push(str2);
+}
 
 void MinNetPacket::push(Vector2 data)				//Vector2형 데이터를 패킷에 넣는 함수
 {

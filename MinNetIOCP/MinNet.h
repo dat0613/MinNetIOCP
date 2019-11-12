@@ -30,7 +30,8 @@ public:
 		PONG, 
 		PING_CAST,
 		RPC, 
-		ID_CAST
+		ID_CAST,
+		CREATE_ROOM
 	};
 };
 
@@ -138,7 +139,7 @@ public:
 	void push(f data);
 	void push(float data);
 	void push(std::string str);
-	//void push(const char * str);
+	void push(const char * str);
 	void push(Vector2 data);
 	void push(Vector3 data);
 
@@ -153,8 +154,6 @@ public:
 	int Parse(byte * arr, int length);
 
 private:
-
-
 };
 
 class MinNetUser
@@ -171,6 +170,8 @@ public:
 	bool isConnected = false;
 
 	void ChangeRoom(MinNetRoom * room);
+	void ChangeRoom(std::string roomName);
+
 	MinNetRoom * GetRoom();
 	clock_t last_ping = -1;
 	clock_t last_pong = -1;

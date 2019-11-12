@@ -12,7 +12,7 @@ public:
 	
 	void InitRPC() override;
 
-	void SyncPosition();
+	void SyncPosition(MinNetPacket * rpcPacket);
 
 private:
 

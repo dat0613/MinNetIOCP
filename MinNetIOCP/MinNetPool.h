@@ -19,7 +19,6 @@ public:
 
 public:
 
-	static MinNetObjectPool<MinNetRoom> * roomPool;
 	static MinNetObjectPool<MinNetAcceptOverlapped> * acceptOverlappedPool;
 	static MinNetObjectPool<MinNetCloseOverlapped> * closeOverlappedPool;
 	static MinNetObjectPool<MinNetSendOverlapped> * sendOverlappedPool;

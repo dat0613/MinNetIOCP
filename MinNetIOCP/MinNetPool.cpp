@@ -2,7 +2,6 @@
 #include "MinNetRoom.h"
 
 
-MinNetObjectPool<MinNetRoom> * MinNetPool::roomPool = nullptr;
 MinNetObjectPool<MinNetAcceptOverlapped> * MinNetPool::acceptOverlappedPool = nullptr;
 MinNetObjectPool<MinNetCloseOverlapped> * MinNetPool::closeOverlappedPool = nullptr;
 MinNetObjectPool<MinNetSendOverlapped> * MinNetPool::sendOverlappedPool = nullptr;
@@ -20,21 +19,12 @@ MinNetPool::~MinNetPool()
 
 void MinNetPool::Init()
 {
-	roomPool = new MinNetObjectPool<MinNetRoom>();
 	acceptOverlappedPool = new MinNetObjectPool<MinNetAcceptOverlapped>();
 	closeOverlappedPool = new MinNetObjectPool<MinNetCloseOverlapped>();
 	sendOverlappedPool = new MinNetObjectPool<MinNetSendOverlapped>();
 	recvOverlappedPool = new MinNetObjectPool<MinNetRecvOverlapped>();
 	userPool = new MinNetObjectPool<MinNetUser>();
 	packetPool = new MinNetObjectPool<MinNetPacket>();
-
-	roomPool->SetOnPush([](MinNetRoom * room) {
-		room->RemoveUsers();
-		room->RemoveObjects();
-		room->SetManager(nullptr);
-
-	});
-	roomPool->AddObject(10);
 
 	userPool->SetOnPush([](MinNetUser * user) {
 		user->ID = -1;

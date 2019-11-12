@@ -51,6 +51,8 @@ public:
 	void RemoveObjects();
 	std::shared_ptr<MinNetGameObject> GetGameObject(int id);
 
+	void Update();
+
 	int GetUserCount();
 
 	int GetNewID();
@@ -80,13 +82,19 @@ class MinNetRoomManager
 {
 public:
 	MinNetRoomManager(MinNetIOCP * minnet);
-	MinNetRoom * GetPeacefulRoom();
+	MinNetRoom * GetPeacefulRoom(std::string roomName);
 
 	void Send(MinNetRoom * room, MinNetPacket * packet, MinNetUser * except = nullptr);
 	void Send(MinNetUser * user, MinNetPacket * packet);
 
 	void PacketHandler(MinNetUser * user, MinNetPacket * packet);
+	
+	void Update();
+
 private:
+
+	int roomNumberCount = 0;
+	MinNetRoom * CreateRoom(std::string roomName);
 
 	std::list<MinNetRoom *> room_list;
 	MinNetIOCP * minnet;
