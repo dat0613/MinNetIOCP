@@ -53,8 +53,6 @@ public:
 
 	void Update();
 
-	int GetUserCount();
-
 	int GetNewID();
 
 	MinNetUser * GetUser(int id);
@@ -93,7 +91,7 @@ public:
 
 private:
 
-	int roomNumberCount = 0;
+	int roomNumberCount = -1;
 	MinNetRoom * CreateRoom(std::string roomName);
 
 	std::list<MinNetRoom *> room_list;

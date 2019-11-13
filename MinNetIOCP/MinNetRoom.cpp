@@ -14,7 +14,7 @@ MinNetRoom::MinNetRoom()
 
 MinNetRoom::~MinNetRoom()
 {
-
+	std::cout << "룸 파괴" << std::endl;
 }
 
 void MinNetRoom::SetName(std::string name)
@@ -302,11 +302,6 @@ void MinNetRoom::Update()
 	}
 }
 
-int MinNetRoom::GetUserCount()
-{
-	return user_list.size();
-}
-
 int MinNetRoom::GetNewID()
 {
 	return id_count++;
@@ -453,7 +448,6 @@ MinNetRoomManager::MinNetRoomManager(MinNetIOCP * minnet)
 
 MinNetRoom * MinNetRoomManager::GetPeacefulRoom(std::string roomName)
 {
-	std::cout << roomName.c_str() << std::endl;
 	if (room_list.empty())// 룸이 존재하지 않으면 새로운 룸을 만듦
 	{
 		std::cout << "룸이 존재하지 않아 새로움 룸을 만들었습니다" << std::endl;
@@ -462,7 +456,7 @@ MinNetRoom * MinNetRoomManager::GetPeacefulRoom(std::string roomName)
 
 	for (MinNetRoom * room : room_list)// 여유로운 룸을 체크함
 	{
-		if (room->GetName().compare(roomName) && room->IsPeaceful())
+		if (room->GetName() == roomName && room->IsPeaceful())
 		{
 			return room;
 		}
@@ -495,7 +489,7 @@ void MinNetRoomManager::PacketHandler(MinNetUser * user, MinNetPacket * packet)
 		break;
 
 	case Defines::MinNetPacketType::USER_ENTER_ROOM:
-		std::cout << packet->pop_int() << std::endl;// 나중에 방 번호로 입장 기능을 만들때 사용할것
+		packet->pop_int();// 나중에 방 번호로 입장 기능을 만들때 사용할것
 		user->ChangeRoom(GetPeacefulRoom(packet->pop_string()));
 		break;
 
@@ -535,11 +529,10 @@ MinNetRoom * MinNetRoomManager::CreateRoom(std::string roomName)
 	room->SetManager(this);
 	room->SetName(roomName);
 	room->SetNumber(roomNumberCount++);
+
 	MinNetCache::AddRoom(room);
 
 	room_list.push_back(room);
-
-	std::cout << roomName.c_str() << " 의 이름을 가진 룸을 만듦" << std::endl;
 
 	return room;
 }

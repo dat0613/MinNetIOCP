@@ -14,6 +14,11 @@ void main()
 		object->AddComponent<PlayerMove>();
 	});
 
+	MinNetCache::SetRoomCache("Main", [](MinNetRoom * room)
+	{
+		room->SetMaxUser(100);
+	});
+
 	MinNetIOCP * iocp = new MinNetIOCP();
 	iocp->SetTickrate(20);
 

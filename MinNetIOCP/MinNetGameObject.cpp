@@ -75,11 +75,6 @@ std::shared_ptr<MinNetGameObject>  MinNetGameObject::Instantiate(std::string pre
 	return nowRoom->Instantiate(prefabName, position, euler, nowRoom->GetNewID(), true);
 }
 
-void MinNetGameObject::PrintSomeThing()
-{
-	std::cout << "½Ã¹ß" << std::endl;
-}
-
 void MinNetGameObject::AddComponent()
 {
 	MinNetCache::AddComponent(static_cast<MinNetGameObject *>(this));

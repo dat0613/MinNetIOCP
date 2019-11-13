@@ -3,6 +3,7 @@
 #include "MinNet.h"
 #include "MinNetPool.h"
 #include "MinNetPool.h"
+#include "MinNetRoom.h"
 
 MinNetIOCP::MinNetIOCP() : room_manager(this)
 {
@@ -106,6 +107,8 @@ void MinNetIOCP::StartServer()
 	MinNetPool::Init();
 
 	StartAccept();
+
+	room_manager.GetPeacefulRoom("Main");// 기본적으로 있어야 하는 룸을 만듦
 }
 
 void MinNetIOCP::ServerLoop()

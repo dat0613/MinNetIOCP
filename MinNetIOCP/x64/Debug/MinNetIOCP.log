@@ -1,71 +1,8 @@
-﻿  MinNetIOCP.cpp
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(52): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(64): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetpool.h(28): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetPool' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(146): warning C4244: '인수': 'float'에서 'unsigned long'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(146): warning C4996: '_sleep': This function or variable has been superceded by newer library or operating system functionality. Consider using Sleep instead. See online help for details.
-  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdlib.h(1266): note: '_sleep' 선언을 참조하십시오.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(159): warning C4996: 'gethostbyname': Use getaddrinfo() or GetAddrInfoW() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
-  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(2238): note: 'gethostbyname' 선언을 참조하십시오.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(161): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
-  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1868): note: 'inet_ntoa' 선언을 참조하십시오.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(218): warning C4996: '_sleep': This function or variable has been superceded by newer library or operating system functionality. Consider using Sleep instead. See online help for details.
-  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdlib.h(1266): note: '_sleep' 선언을 참조하십시오.
-  MinNet.cpp
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(52): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(64): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(28): warning C4806: '&': 안전하지 않은 연산입니다. 'bool' 형식의 값('int' 형식으로 확장)이 주어진 상수와 같을 수 없습니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(71): warning C4800: 'int': 'true' 또는 'false'로 bool 값을 강제하고 있습니다(성능 경고).
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(90): warning C4244: '초기화 중': 'float'에서 'unsigned long'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(202): warning C4267: '초기화 중': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(477): warning C4927: 변환이 잘못되었습니다. 사용자 정의 변환이 암시적으로 두 번 이상 적용되었습니다.
-  c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(477): note: 'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string(const _Elem *)' 생성자를 호출하는 동안
-          with
-          [
-              _Elem=wchar_t
-          ]
-  c:\program files (x86)\microsoft visual studio 14.0\vc\include\xstring(834): note: 'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string' 선언을 참조하십시오.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(482): warning C4927: 변환이 잘못되었습니다. 사용자 정의 변환이 암시적으로 두 번 이상 적용되었습니다.
-  c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(482): note: 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const _Elem *)' 생성자를 호출하는 동안
-          with
-          [
-              _Elem=char
-          ]
-  c:\program files (x86)\microsoft visual studio 14.0\vc\include\xstring(834): note: 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string' 선언을 참조하십시오.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(487): warning C4927: 변환이 잘못되었습니다. 사용자 정의 변환이 암시적으로 두 번 이상 적용되었습니다.
-  c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(487): note: 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const _Elem *)' 생성자를 호출하는 동안
-          with
-          [
-              _Elem=char
-          ]
-  c:\program files (x86)\microsoft visual studio 14.0\vc\include\xstring(834): note: 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string' 선언을 참조하십시오.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(492): warning C4927: 변환이 잘못되었습니다. 사용자 정의 변환이 암시적으로 두 번 이상 적용되었습니다.
-  c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(492): note: 'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string(const _Elem *)' 생성자를 호출하는 동안
-          with
-          [
-              _Elem=wchar_t
-          ]
-  c:\program files (x86)\microsoft visual studio 14.0\vc\include\xstring(834): note: 'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string' 선언을 참조하십시오.
-  코드를 생성하고 있습니다...
-  컴파일하고 있습니다...
-  PlayerMove.cpp
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(52): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(64): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetpool.h(28): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetPool' 왼쪽은 무시됩니다.
-  MinNetRoom.cpp
+﻿  MinNetRoom.cpp
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(52): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(64): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetpool.h(28): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetPool' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetcache.h(33): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetCache' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetroom.cpp(42): warning C4267: 'return': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetroom.cpp(307): warning C4267: 'return': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  코드를 생성하고 있습니다...
-  건너뛰고 있습니다... (관련된 변경 내용 없음)
-  main.cpp
-  MinNetPool.cpp
-  MinNetGameObject.cpp
-  MinNetComponent.cpp
-  MinNetCache.cpp
-  FirstPersonController.cpp
   MinNetIOCP.vcxproj -> C:\Users\ASUS\Documents\GitHub\MinNetIOCP\MinNetIOCP\x64\Debug\MinNetIOCP.exe
   MinNetIOCP.vcxproj -> C:\Users\ASUS\Documents\GitHub\MinNetIOCP\MinNetIOCP\x64\Debug\MinNetIOCP.pdb (Full PDB)
