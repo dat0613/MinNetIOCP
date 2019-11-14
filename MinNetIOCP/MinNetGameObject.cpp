@@ -99,6 +99,14 @@ void MinNetGameObject::DelComponent()
 	componentMap.clear();
 }
 
+void MinNetGameObject::Awake()
+{
+	for (auto comp : componentList)
+	{
+		comp->Awake();
+	}
+}
+
 void MinNetGameObject::Update()
 {
 	for (auto component : componentList)

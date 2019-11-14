@@ -10,7 +10,7 @@
 
 #pragma comment (lib,"ws2_32.lib")
 #pragma comment (lib, "mswsock.lib")
-#pragma pack(1)
+//#pragma pack(1)
 
 
 class MinNetUser;
@@ -54,9 +54,6 @@ private:
 	std::queue<std::pair<MinNetPacket *, MinNetUser *>> recvQ;
 
 	void PacketHandler(MinNetUser * user, MinNetPacket * packet);
-
-	void JoinPeacefulRoom(MinNetUser * user);
-
 
 	void PingTest();
 	void SendPing(MinNetUser * user);

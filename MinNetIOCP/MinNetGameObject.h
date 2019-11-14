@@ -29,6 +29,7 @@ private:
 
 public:
 
+
 	MinNetGameObject();
 	~MinNetGameObject();
 	void SetID(int id);
@@ -41,6 +42,7 @@ public:
 	Vector3 rotation = { 0.0f, 0.0f, 0.0f };
 	Vector3 scale = { 1.0f, 1.0f, 1.0f };
 
+	bool isNetworkObject = true;// 클라이언트와 동기화 할지
 	MinNetUser * owner = nullptr;
 
 	void ChangeRoom(MinNetRoom * room);
@@ -48,11 +50,11 @@ public:
 	void ObjectRPC(std::string componentName, std::string methodName, MinNetPacket * parameters);
 	std::shared_ptr<MinNetGameObject> Instantiate(std::string prefabName, Vector3 position, Vector3 euler);
 
-	void PrintSomeThing();
 	void AddComponent();
 	void DelComponent(std::string componentName);
 	void DelComponent();
 
+	void Awake();
 	void Update();
 
 	std::shared_ptr<MinNetComponent> GetComponent(std::string componentName);
@@ -93,6 +95,9 @@ public:
 			this->componentMap.insert(make_pair(typeName, shared));
 
 			shared->InitRPC();
+
+			if(this->nowRoom != nullptr)// 이미 한번 초기화된 게임 오브젝트에 추가로 컴포넌트를 붙힌 것임
+				shared->Awake();
 		}
 	}
 };

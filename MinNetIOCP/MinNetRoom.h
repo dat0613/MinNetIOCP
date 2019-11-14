@@ -32,6 +32,8 @@ public:
 
 	std::list<MinNetUser *> * GetUserList();
 
+	std::shared_ptr<MinNetGameObject> Instantiate(std::string prefabName);
+	std::shared_ptr<MinNetGameObject> Instantiate(std::string prefabName, Vector3 position, Vector3 euler);
 	std::shared_ptr<MinNetGameObject> Instantiate(std::string prefabName, Vector3 position, Vector3 euler, int id, bool casting = false, MinNetUser * except = nullptr, bool autoDelete = false);
 	void Destroy(std::string prefabName, int id, bool casting = false, MinNetUser * except = nullptr);
 
@@ -51,6 +53,9 @@ public:
 	void RemoveObjects();
 	std::shared_ptr<MinNetGameObject> GetGameObject(int id);
 
+	std::shared_ptr<MinNetGameObject> GetGameObject(std::string prefabName);
+	std::vector<std::shared_ptr<MinNetGameObject>> & GetGameObjects(std::string prefabName);
+
 	void Update();
 
 	int GetNewID();
@@ -60,6 +65,7 @@ public:
 	void ObjectRPC(MinNetUser * user, MinNetPacket * packet);
 	void SendRPC(int objectId, std::string componentName, std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters);
 	void SendRPC(int objectId, std::string componentName, std::string methodName, MinNetUser * target, MinNetPacket * parameters);
+
 private:
 
 	std::string name = "";
@@ -73,7 +79,6 @@ private:
 	std::map<int, std::shared_ptr<MinNetGameObject>> object_map;
 	std::list<std::shared_ptr<MinNetGameObject>> object_list;
 	MinNetRoomManager * manager = nullptr;
-
 };
 
 class MinNetRoomManager

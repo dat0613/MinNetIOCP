@@ -3,6 +3,7 @@
 #include "MinNetGameObject.h"
 #include "MinNetRoom.h"
 #include "MinNetPool.h"
+#include "BattleFieldManager.h"
 
 void PlayerMove::InitRPC()
 {
@@ -14,9 +15,6 @@ void PlayerMove::SyncPosition(MinNetPacket * rpcPacket)
 {
 	gameObject->position = rpcPacket->pop_vector3();
 	chestRotation = rpcPacket->pop_vector3();
-
-	//std::cout << gameObject->position << std::endl;
-	//std::cout << "ID " << gameObject->GetID() << " 가 받은 각도 : " << chestRotation << std::endl;
 }
 
 void PlayerMove::HitSync(MinNetPacket * rpcPacket)
@@ -66,6 +64,12 @@ void PlayerMove::Hit(int damage, PlayerMove * shooter)
 void PlayerMove::ChangeState(State state)
 {
 	this->state = state;
+}
+
+void PlayerMove::Awake()
+{
+	battleFieldManager = gameObject->GetNowRoom()->GetGameObject("BattleFieldManager")->GetComponent<BattleFieldManager>();
+	std::cout << battleFieldManager << std::endl;
 }
 
 void PlayerMove::Update()

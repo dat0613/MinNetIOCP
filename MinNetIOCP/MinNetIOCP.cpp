@@ -237,11 +237,6 @@ void MinNetIOCP::PacketHandler(MinNetUser * user, MinNetPacket * packet)
 {
 }
 
-void MinNetIOCP::JoinPeacefulRoom(MinNetUser * user)
-{
-	user->ChangeRoom(room_manager.GetPeacefulRoom("Main"));
-}
-
 void MinNetIOCP::PingTest()
 {
 	std::queue<MinNetUser *> removeQ;
@@ -300,15 +295,10 @@ void MinNetIOCP::SyncTime(MinNetUser * user)
 {
 	MinNetPacket * packet = MinNetPool::packetPool->pop();
 
-
-
 	packet->create_packet(Defines::MinNetPacketType::PING);
 	packet->create_header();
 
 	StartSend(user, packet);
-
-
-
 
 	MinNetPool::packetPool->push(packet);
 }

@@ -1,6 +1,8 @@
 #pragma once
 #include "MinNetComponent.h"
 #include "MinNet.h"
+
+class BattleFieldManager;
 class PlayerMove :
 	public MinNetComponent
 {
@@ -9,6 +11,7 @@ public:
 	enum class Team { Red, Blue, Spectator, Individual };
 	enum class State { Alive, Die };
 
+	BattleFieldManager * battleFieldManager = nullptr;
 	Team team = Team::Spectator;
 
 	int maxHP = 100;
@@ -29,6 +32,7 @@ public:
 	void Hit(int damage, PlayerMove * shooter);
 
 	void ChangeState(State state);
+	void Awake() override;
 	void Update() override;
 
 private:

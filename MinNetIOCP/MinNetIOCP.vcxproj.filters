@@ -48,6 +48,9 @@
     <ClInclude Include="PlayerMove.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="BattleFieldManager.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -84,6 +87,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="PlayerMove.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="BattleFieldManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

@@ -60,7 +60,17 @@ std::list<MinNetUser*> * MinNetRoom::GetUserList()
 	return &user_list;
 }
 
-std::shared_ptr<MinNetGameObject>  MinNetRoom::Instantiate(std::string prefabName, Vector3 position, Vector3 euler, int id, bool casting, MinNetUser * except, bool autoDelete)
+std::shared_ptr<MinNetGameObject> MinNetRoom::Instantiate(std::string prefabName)
+{
+	return Instantiate(prefabName, Vector3(), Vector3());
+}
+
+std::shared_ptr<MinNetGameObject> MinNetRoom::Instantiate(std::string prefabName, Vector3 position, Vector3 euler)
+{
+	return Instantiate(prefabName, position, euler, GetNewID(), false);
+}
+
+std::shared_ptr<MinNetGameObject> MinNetRoom::Instantiate(std::string prefabName, Vector3 position, Vector3 euler, int id, bool casting, MinNetUser * except, bool autoDelete)
 {
 	auto obj = std::make_shared<MinNetGameObject>();
 
@@ -69,57 +79,64 @@ std::shared_ptr<MinNetGameObject>  MinNetRoom::Instantiate(std::string prefabNam
 	obj->rotation = euler;
 	obj->SetID(id);
 
-	if (casting)
+	if (obj->isNetworkObject)
 	{
-		MinNetPacket * packet = MinNetPool::packetPool->pop();
-		packet->create_packet(Defines::MinNetPacketType::OBJECT_INSTANTIATE);
-		packet->push(prefabName);
-		packet->push(position);
-		packet->push(euler);
-		packet->push(id);
-		packet->create_header();
-
-		manager->Send(this, packet, except);
-
-		MinNetPool::packetPool->push(packet);
-
-		if (except != nullptr)
+		if (casting)
 		{
 			MinNetPacket * packet = MinNetPool::packetPool->pop();
-			packet->create_packet(Defines::MinNetPacketType::ID_CAST);
-			packet->push(obj->GetName());
-			packet->push(obj->GetID());
+			packet->create_packet(Defines::MinNetPacketType::OBJECT_INSTANTIATE);
+			packet->push(prefabName);
+			packet->push(position);
+			packet->push(euler);
+			packet->push(id);
 			packet->create_header();
 
-			manager->Send(except, packet);
-		
+			manager->Send(this, packet, except);
+
 			MinNetPool::packetPool->push(packet);
-	
-			if (autoDelete)
+
+			if (except != nullptr)
 			{
-				obj->owner = except;
+				MinNetPacket * packet = MinNetPool::packetPool->pop();
+				packet->create_packet(Defines::MinNetPacketType::ID_CAST);
+				packet->push(obj->GetName());
+				packet->push(obj->GetID());
+				packet->create_header();
+
+				manager->Send(except, packet);
+		
+				MinNetPool::packetPool->push(packet);
+	
+				if (autoDelete)
+				{
+					obj->owner = except;
+				}
 			}
 		}
 	}
 
 	AddObject(obj);
+
+	obj->Awake();
 	
 	return obj;
 }
 
 void MinNetRoom::Destroy(std::string prefabName, int id, bool casting, MinNetUser * except)
 {
-	std::shared_ptr<MinNetGameObject>  obj = nullptr;
+	std::shared_ptr<MinNetGameObject> obj = nullptr;
 
-	if (object_map.find(id) == object_map.end())
+	auto set = object_map.find(id);
+
+	if (set == object_map.end())
 	{
 		std::cout << "동기화 실패 감지" << std::endl;
 		return;
 	}
 
-	obj = object_map[id];
+	obj = set->second;
 
-	if (casting)
+	if (casting && obj->isNetworkObject)
 	{
 		MinNetPacket * packet = MinNetPool::packetPool->pop();
 		packet->create_packet(Defines::MinNetPacketType::OBJECT_DESTROY);
@@ -160,6 +177,9 @@ void MinNetRoom::AddUser(MinNetUser * user)
 
 	for (std::shared_ptr<MinNetGameObject>  obj : object_list)
 	{
+		if (!obj->isNetworkObject)
+			continue;
+
 		MinNetPacket * packet = MinNetPool::packetPool->pop();
 		packet->create_packet(Defines::MinNetPacketType::OBJECT_INSTANTIATE);
 		packet->push(obj->GetName());
@@ -206,8 +226,9 @@ void MinNetRoom::RemoveUser(MinNetUser * user)
 	while (!deleteQ.empty())
 	{
 		auto obj = deleteQ.front();
-		Destroy(obj->GetName(), obj->GetID(), true, user);
 		deleteQ.pop();
+
+		Destroy(obj->GetName(), obj->GetID(), true, user);
 	}
 
 	MinNetPacket * other_leave = MinNetPool::packetPool->pop();// 다른 유저들 에게 어떤 유저가 나갔다는것을 알림
@@ -250,7 +271,8 @@ void MinNetRoom::AddObject(std::shared_ptr<MinNetGameObject> object)
 	object_list.push_back(object);
 	object_map.insert(std::make_pair(object->GetID(), object));
 	object->ChangeRoom(this);
-	if (object->owner != nullptr)
+
+ 	if (object->owner != nullptr)
 	{
 		object->owner->autoDeleteObjectList.push_back(object);// 주인이 정해져 있는 오브젝트는 주인이 게임에서 나갈때 함께 제거됨
 	}
@@ -269,7 +291,15 @@ void MinNetRoom::RemoveObject(std::shared_ptr<MinNetGameObject> object)
 
 void MinNetRoom::RemoveObject(int id)
 {
-	RemoveObject(object_map[id]);
+	auto set = object_map.find(id);
+	if (set == object_map.end())
+	{
+
+	}
+	else
+	{
+		RemoveObject(set->second);
+	}
 }
 
 void MinNetRoom::RemoveObjects()
@@ -291,7 +321,47 @@ void MinNetRoom::RemoveObjects()
 
 std::shared_ptr<MinNetGameObject>  MinNetRoom::GetGameObject(int id)
 {
-	return object_map[id];
+	auto set = object_map.find(id);
+	if (set == object_map.end())
+	{
+		return nullptr;
+	}
+	else
+	{
+		return set->second;
+	}
+}
+
+std::shared_ptr<MinNetGameObject> MinNetRoom::GetGameObject(std::string prefabName)
+{
+	for (auto obj : object_list)
+	{
+		if (obj->GetName() == prefabName)
+			return obj;
+	}
+
+	return nullptr;
+}
+
+std::vector<std::shared_ptr<MinNetGameObject>> & MinNetRoom::GetGameObjects(std::string prefabName)
+{
+	std::list<std::shared_ptr<MinNetGameObject>> objectList;
+
+	for (auto obj : object_list)// 먼저 std::list에 오브젝트들을 넣고
+	{
+		if (obj->GetName() == prefabName)
+			objectList.push_back(obj);
+	}
+
+	std::vector<std::shared_ptr<MinNetGameObject>> objectVector(objectList.size());
+
+	int i = 0;
+	for (auto obj : objectList)// std::vector로 바꿈
+	{
+		objectVector[i++] = obj;
+	}
+
+	return objectVector;
 }
 
 void MinNetRoom::Update()
@@ -327,7 +397,6 @@ void MinNetRoom::ObjectRPC(MinNetUser * user, MinNetPacket * packet)
 	auto obj = GetGameObject(id);
 	if (obj == nullptr)
 	{
-		std::cout << __FUNCTION__ << std::endl;
 		return;
 	}
 	obj->ObjectRPC(componentName, methodName, packet);
@@ -347,8 +416,6 @@ void MinNetRoom::ObjectRPC(MinNetUser * user, MinNetPacket * packet)
 
 			break;
 	}
-
-	//MinNetPool::packetPool->push(packet);
 }
 
 void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters)

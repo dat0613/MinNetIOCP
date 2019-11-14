@@ -6,6 +6,7 @@
 #include "MinNetGameObject.h"
 #include "FirstPersonController.h"
 #include "PlayerMove.h"
+#include "BattleFieldManager.h"
 
 void main()
 {
@@ -14,10 +15,23 @@ void main()
 		object->AddComponent<PlayerMove>();
 	});
 
+	MinNetCache::SetComponentCache("BattleFieldManager", [](MinNetGameObject * object)
+	{
+		object->isNetworkObject = false;
+		object->AddComponent<BattleFieldManager>();
+	});
+
 	MinNetCache::SetRoomCache("Main", [](MinNetRoom * room)
 	{
 		room->SetMaxUser(100);
 	});
+
+	MinNetCache::SetRoomCache("BattleField", [](MinNetRoom * room)
+	{
+		room->SetMaxUser(10);
+		room->Instantiate("BattleFieldManager");
+	});
+
 
 	MinNetIOCP * iocp = new MinNetIOCP();
 	iocp->SetTickrate(20);
