@@ -17,7 +17,6 @@ void main()
 
 	MinNetCache::SetComponentCache("BattleFieldManager", [](MinNetGameObject * object)
 	{
-		object->isNetworkObject = false;
 		object->AddComponent<BattleFieldManager>();
 	});
 

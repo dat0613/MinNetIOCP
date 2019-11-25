@@ -1,6 +1,5 @@
 #include "MinNetComponent.h"
 
-#include "MinNet.h"
 #include "MinNetGameObject.h"
 #include "MinNetRoom.h"
 #include "MinNetPool.h"
@@ -12,6 +11,7 @@ MinNetComponent::MinNetComponent()
 
 MinNetComponent::~MinNetComponent()
 {
+	OnDestroy();
 }
 
 void MinNetComponent::DefRPC(std::string functionName, std::function<void(MinNetPacket *)> function)
@@ -45,22 +45,26 @@ std::string MinNetComponent::GetName()
 
 void MinNetComponent::InitRPC()
 {
+}
 
+void MinNetComponent::OnInstantiate(MinNetUser * user)
+{
 }
 
 void MinNetComponent::Awake()
 {
-
 }
 
 void MinNetComponent::Update()
 {
-
 }
 
 void MinNetComponent::LateUpdate()
 {
+}
 
+void MinNetComponent::OnDestroy()
+{
 }
 
 void MinNetComponent::SetParent(MinNetGameObject * parent)

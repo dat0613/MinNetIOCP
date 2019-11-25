@@ -157,6 +157,7 @@
     <ClInclude Include="MinNetRoom.h" />
     <ClInclude Include="MinNetGameObject.h" />
     <ClInclude Include="PlayerMove.h" />
+    <ClInclude Include="Time.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BattleFieldManager.cpp" />
@@ -172,6 +173,7 @@
     <ClCompile Include="MinNetPool.cpp" />
     <ClCompile Include="MinNetRoom.cpp" />
     <ClCompile Include="PlayerMove.cpp" />
+    <ClCompile Include="Time.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

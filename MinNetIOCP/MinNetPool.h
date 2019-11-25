@@ -9,7 +9,6 @@ class MinNetComponent;
 
 static class MinNetPool
 {
-
 public:
 
 	MinNetPool();

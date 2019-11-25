@@ -191,6 +191,8 @@ void MinNetRoom::AddUser(MinNetUser * user)
 		manager->Send(user, packet);
 
 		MinNetPool::packetPool->push(packet);
+
+		obj->OnInstantiate(user);
 	}
 
 	MinNetPacket * other_enter = MinNetPool::packetPool->pop();// 다른 유저들 에게 새로운 유저가 들어왔다는 것을 알림
@@ -426,11 +428,10 @@ void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string me
 	rpcPacket->push(objectId);
 	rpcPacket->push(componentName);
 	rpcPacket->push(methodName);
-	rpcPacket->push(int(target));
+	rpcPacket->push(static_cast<int>(target));
 
 	MinNetUser * except = nullptr;
 	auto obj = GetGameObject(objectId);
-
 
 	if (parameters != nullptr)
 	{
@@ -440,12 +441,12 @@ void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string me
 		memcpy(&rpcPacket->buffer[packetSize], &parameters->buffer[Defines::HEADERSIZE], parameterSize);// 보낼 rpc패킷 뒤에 파라미터로 받은 인자들을 넣음
 		rpcPacket->buffer_position += (parameterSize);
 
-		if (target == MinNetRpcTarget::All || target == MinNetRpcTarget::AllViaServer)
-		{
-			parameters->set_buffer_position(Defines::HEADERSIZE);
-			obj->ObjectRPC(componentName, methodName, parameters);
-			except = nullptr;
-		}
+		//if (target == MinNetRpcTarget::All || target == MinNetRpcTarget::AllViaServer)
+		//{
+		//	parameters->set_buffer_position(Defines::HEADERSIZE);
+		//	obj->ObjectRPC(componentName, methodName, parameters);
+		//	except = nullptr;
+		//}
 
 		MinNetPool::packetPool->push(parameters);
 	}
@@ -473,7 +474,7 @@ void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string me
 	rpcPacket->push(objectId);
 	rpcPacket->push(componentName);
 	rpcPacket->push(methodName);
-	rpcPacket->push((int)MinNetRpcTarget::One);
+	rpcPacket->push(static_cast<int>(MinNetRpcTarget::One));
 
 	if (parameters != nullptr)
 	{
@@ -505,7 +506,9 @@ void MinNetRoom::ObjectInstantiate(MinNetUser * user, MinNetPacket * packet)
 
 void MinNetRoom::ObjectDestroy(MinNetUser * user, MinNetPacket * packet)
 {
-	Destroy(packet->pop_string(), packet->pop_int(), true);
+	auto prefabName = packet->pop_string();
+	auto objectId = packet->pop_int();
+	Destroy(prefabName, objectId, true);
 }
 
 MinNetRoomManager::MinNetRoomManager(MinNetIOCP * minnet)

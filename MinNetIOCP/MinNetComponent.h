@@ -4,18 +4,22 @@
 #include <iostream>
 #include <functional>
 #include <map>
+#include <ctime>
+#include "Time.h"
+#include "MinNetPool.h"
+#include "MinNet.h"
 
 class MinNetGameObject;
 class MinNetPacket;
 class MinNetUser;
 enum class MinNetRpcTarget;
 
-class MinNetComponent
+class MinNetComponent : public std::enable_shared_from_this<MinNetComponent>
 {
 public:
 
 	MinNetComponent();
-	~MinNetComponent();
+	virtual ~MinNetComponent();
 
 	void DefRPC(std::string functionName, std::function<void(MinNetPacket *)> function);
 
@@ -23,9 +27,11 @@ public:
 	std::string GetName();
 
 	virtual void InitRPC();
+	virtual void OnInstantiate(MinNetUser * user);
 	virtual void Awake();
 	virtual void Update();
 	virtual void LateUpdate();
+	virtual void OnDestroy();
 
 	void SetParent(MinNetGameObject * parent);
 
@@ -54,34 +60,43 @@ private:
 template<typename ...args>
 inline void MinNetComponent::RPC(std::string methodName, MinNetRpcTarget target, args && ...parameters)
 {
-	MinNetPacket * packet = nullptr;
+	MinNetPacket * parametersPacket = nullptr;
 	
 	if (sizeof...(parameters) > 0)
 	{
-		packet = MinNetPool::packetPool->pop();
-		packet->create_packet();
-		VariableArgumentReader(packet, parameters...);
-		packet->create_header();
+		parametersPacket = MinNetPool::packetPool->pop();
+		parametersPacket->create_packet();
+		VariableArgumentReader(parametersPacket, parameters...);
+		parametersPacket->create_header();
 	}
 
-	if (packet != nullptr)
+	switch (target)
 	{
-		switch (target)
+	case MinNetRpcTarget::All:
+	case MinNetRpcTarget::AllViaServer:
+	case MinNetRpcTarget::Server:// RPC대상이 서버 이므로 브로드캐스트 하지 않음
+		if (parametersPacket != nullptr)
 		{
-		case MinNetRpcTarget::All:
-		case MinNetRpcTarget::AllViaServer:
-			packet->set_buffer_position(6);
-			break;
+			parametersPacket->set_buffer_position(Defines::HEADERSIZE);
+			this->CallRPC(methodName, parametersPacket);
+			parametersPacket->set_buffer_position(Defines::HEADERSIZE);
 
-		case MinNetRpcTarget::Others:
-			break;
-
-		case MinNetRpcTarget::Server:
-			return;// RPC대상이 서버 이므로 브로드캐스트 하지 않음
 		}
+		else
+		{
+			this->CallRPC(methodName, nullptr);
+		}
+		break;
+
+	case MinNetRpcTarget::Others:
+		break;
+
+	case MinNetRpcTarget::AllNotServer:
+		target = MinNetRpcTarget::All;
+		break;
 	}
 
-	gameObject->GetNowRoom()->SendRPC(gameObject->GetID(), name, methodName, target, packet);
+	gameObject->GetNowRoom()->SendRPC(gameObject->GetID(), name, methodName, target, parametersPacket);
 }
 
 template<typename ...args>

@@ -4,6 +4,7 @@
 #include "MinNetPool.h"
 #include "MinNetPool.h"
 #include "MinNetRoom.h"
+#include "Time.h"
 
 MinNetIOCP::MinNetIOCP() : room_manager(this)
 {
@@ -33,6 +34,8 @@ void MinNetIOCP::SetTickrate(int tick)
 
 void MinNetIOCP::StartServer()
 {	
+	srand(static_cast<unsigned int>(time(NULL)));
+
 	WSADATA wsa;
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
 	{
@@ -143,6 +146,7 @@ void MinNetIOCP::ServerLoop()
 		}
 
 		room_manager.Update();
+		Time::FrameEnd();
 
 		messageQ_spin_lock.unlock();
 

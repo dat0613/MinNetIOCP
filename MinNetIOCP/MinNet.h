@@ -12,7 +12,7 @@
 class MinNetRoom;
 class MinNetGameObject;
 
-enum class MinNetRpcTarget { All = -1000, Others, AllViaServer, Server, One };
+enum class MinNetRpcTarget { All = -1000, Others, AllViaServer, Server, One, AllNotServer };
 
 class Defines
 {

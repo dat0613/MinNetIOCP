@@ -54,6 +54,7 @@ public:
 	void DelComponent(std::string componentName);
 	void DelComponent();
 
+	void OnInstantiate(MinNetUser * user);
 	void Awake();
 	void Update();
 

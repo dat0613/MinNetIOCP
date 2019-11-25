@@ -99,6 +99,14 @@ void MinNetGameObject::DelComponent()
 	componentMap.clear();
 }
 
+void MinNetGameObject::OnInstantiate(MinNetUser * user)
+{
+	for (auto component : componentList)
+	{
+		component->OnInstantiate(user);
+	}
+}
+
 void MinNetGameObject::Awake()
 {
 	for (auto comp : componentList)

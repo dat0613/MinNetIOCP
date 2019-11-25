@@ -13,6 +13,12 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="소스 파일\BattleFieldManager">
+      <UniqueIdentifier>{164217ef-b313-4b45-90bb-74c0d3c02439}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\ThirdPersonPlayer">
+      <UniqueIdentifier>{2dee899a-1f7a-4b87-bfee-93a960a924fb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MinNetIOCP.h">
@@ -51,6 +57,9 @@
     <ClInclude Include="BattleFieldManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="Time.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -86,11 +95,14 @@
     <ClCompile Include="FirstPersonController.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerMove.cpp">
+    <ClCompile Include="Time.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="BattleFieldManager.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>소스 파일\BattleFieldManager</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerMove.cpp">
+      <Filter>소스 파일\ThirdPersonPlayer</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
