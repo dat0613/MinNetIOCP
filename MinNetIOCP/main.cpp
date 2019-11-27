@@ -7,12 +7,14 @@
 #include "FirstPersonController.h"
 #include "PlayerMove.h"
 #include "BattleFieldManager.h"
+#include "ComponentTest.h"
 
 void main()
 {
 	MinNetCache::SetComponentCache("ThirdPersonPlayer", [](MinNetGameObject * object)
 	{
 		object->AddComponent<PlayerMove>();
+		//object->AddComponent<ComponentTest>();
 	});
 
 	MinNetCache::SetComponentCache("BattleFieldManager", [](MinNetGameObject * object)
@@ -30,7 +32,6 @@ void main()
 		room->SetMaxUser(10);
 		room->Instantiate("BattleFieldManager");
 	});
-
 
 	MinNetIOCP * iocp = new MinNetIOCP();
 	iocp->SetTickrate(20);

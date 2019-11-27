@@ -146,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="BattleFieldManager.h" />
+    <ClInclude Include="ComponentTest.h" />
     <ClInclude Include="FirstPersonController.h" />
     <ClInclude Include="MinNet.h" />
     <ClInclude Include="MinNetCache.h" />
@@ -161,6 +162,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BattleFieldManager.cpp" />
+    <ClCompile Include="ComponentTest.cpp" />
     <ClCompile Include="FirstPersonController.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MinNet.cpp" />

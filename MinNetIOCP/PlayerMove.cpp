@@ -144,10 +144,17 @@ void PlayerMove::ChangeState(State state)
 		break;
 
 	case PlayerMove::State::Die:
+	{
 		RPC("PlayerDie", MinNetRpcTarget::All, lastHitPlayerID, lastHitPlayerName, lastHead);
+		auto killer = battleFieldManager->GetPlayer(lastHitPlayerID);
+		auto myKillCount = GetKillCount(lastHitPlayerID);// 내가 상대를 처치한 횟수
+		auto killersKillCount = killer->GetKillCount(gameObject->GetID());// 상대가 나를 처치한 횟수
+
+		RPC("DieInformation", gameObject->owner, lastHitPlayerID, myKillCount, killersKillCount);// 죽고죽인 횟수를 보여주면 경쟁하는 재미가 생기지 않지만 넣음
+		
 		dieTime = Time::curTime();
 		break;
-
+	}
 	default:
 		break;
 	}
@@ -236,6 +243,37 @@ void PlayerMove::Chat(std::string chat)
 	std::string str = playerName + " : " + chat;
 
 	RPC("Chat", MinNetRpcTarget::AllNotServer, str, r, g, b, a);
+}
+
+int PlayerMove::GetKillCount(int victimId)
+{
+	auto set = killCount.find(victimId);
+	auto retval = 0;
+
+	if (set == killCount.end())
+	{// 이 상대에 대한 기록이 없음
+		killCount.insert(std::make_pair(victimId, 0));// 처치가 0인 기록을 미리 만들어 둠
+	}
+	else
+	{// 기록이 있음
+		retval = set->second;
+	}
+
+	return retval;
+}
+
+void PlayerMove::AddKillCount(int victimId)
+{
+	auto set = killCount.find(victimId);
+
+	if (set == killCount.end())
+	{// 이 상대에 대한 기록이 없음
+		killCount.insert(std::make_pair(victimId, 1));// 첫 처치를 기록함
+	}
+	else
+	{// 처치 횟수를 올림
+		killCount[victimId] = set->second + 1;
+	}
 }
 
 bool PlayerMove::IsCanRespawn(clock_t playerRespawnDelay)

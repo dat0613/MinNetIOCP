@@ -27,6 +27,24 @@ void BattleFieldManager::ChangeState(BattleFieldState state, clock_t time)
 
 }
 
+PlayerMove * BattleFieldManager::GetPlayer(int id)
+{
+	for (auto component : playerList)
+	{
+		if (!component.expired())
+		{
+			auto player = static_cast<PlayerMove *>(component.lock().get());
+
+			if (player->gameObject->GetID() == id)
+			{
+				return player;
+			}
+		}
+	}
+
+	return nullptr;
+}
+
 void BattleFieldManager::InitRPC()
 {
 	DefRPC("ChangeState", [this](MinNetPacket * packet) {

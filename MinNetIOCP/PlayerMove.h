@@ -18,6 +18,9 @@ public:
 
 	bool lastHead = false;
 
+	int GetKillCount(int victimId);
+	void AddKillCount(int victimId);
+
 	enum class Team { Red, Blue, Spectator, Individual, None };
 	enum class State { Alive, Die, None };
 
@@ -65,7 +68,5 @@ public:
 private:
 
 	Vector3 chestRotation;
-	
-
-
+	std::map<int, int> killCount;// 키값을 id로 갖는 플레이어를 얼마나 사살 하였는지
 };

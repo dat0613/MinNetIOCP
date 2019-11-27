@@ -22,6 +22,8 @@ public:
 
 	void ChangeState(BattleFieldState state, clock_t time);
 
+	PlayerMove * GetPlayer(int id);
+
 	void InitRPC() override;
 	void Awake() override;
 	void Update() override;
@@ -54,7 +56,6 @@ private:
 	void setRespawnPoints();// 플레이어들의 리스폰 지점을 정함
 	Vector3 getRespawnPoint(PlayerMove::Team team);
 	
-
 	void PlayerRespawnUpdate(PlayerMove * player);
 	void PlayerDieUpdate(PlayerMove * player);
 	void SendChangeState(BattleFieldState state);
