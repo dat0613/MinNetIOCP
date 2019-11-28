@@ -157,25 +157,14 @@ void MinNetRoom::SetManager(MinNetRoomManager * manager)
 	this->manager = manager;
 }
 
-void MinNetRoom::AddUser(MinNetUser * user)
+void MinNetRoom::ObjectSyncing(MinNetUser * user)
 {
 	if (user == nullptr)
 		return;
-	
-	MinNetPacket * enter = MinNetPool::packetPool->pop();// 새롭게 들어온 유저에게 정상적으로 룸에 들어왔다는 것을 알림
-	enter->create_packet((int)Defines::MinNetPacketType::USER_ENTER_ROOM);
-	enter->push(user->GetRoom()->GetNumber());
-	enter->push(user->GetRoom()->GetName());
-	// 대충 룸 정보와 다른 정보를 넣을 같이 보낼 예정
-	enter->create_header();
 
-	manager->Send(user, enter);
+	user->loadingEnd = true;
 
-	MinNetPool::packetPool->push(enter);
-
-	std::cout << user << " 유저가 방으로 들어옴" << std::endl;
-
-	for (std::shared_ptr<MinNetGameObject>  obj : object_list)
+	for (std::shared_ptr<MinNetGameObject> obj : object_list)
 	{
 		if (!obj->isNetworkObject)
 			continue;
@@ -195,17 +184,57 @@ void MinNetRoom::AddUser(MinNetUser * user)
 		obj->OnInstantiate(user);
 	}
 
+	MinNetPacket * enter = MinNetPool::packetPool->pop();// 새롭게 들어온 유저에게 정상적으로 룸에 들어왔다는 것을 알림
+	enter->create_packet((int)Defines::MinNetPacketType::USER_ENTER_ROOM);
+	enter->push(user->GetRoom()->GetNumber());
+	enter->push(user->GetRoom()->GetName());
+	// 대충 룸 정보와 다른 정보를 같이 보낼 예정
+	enter->create_header();
+
+	manager->Send(user, enter);
+
+	MinNetPool::packetPool->push(enter);
+
 	MinNetPacket * other_enter = MinNetPool::packetPool->pop();// 다른 유저들 에게 새로운 유저가 들어왔다는 것을 알림
 	other_enter->create_packet((int)Defines::MinNetPacketType::OTHER_USER_ENTER_ROOM);
 	// 대충 룸 정보와 다른 정보를 넣을 같이 보낼 예정
 	other_enter->create_header();
 
-	manager->Send(this, other_enter);
-
-	user_list.push_back(user);// 유저 리스트에 새로운 유저 추가
-	user_map.insert(std::make_pair(user->ID, user));
+	manager->Send(this, other_enter, user);
 
 	MinNetPool::packetPool->push(other_enter);
+}
+
+void MinNetRoom::AddUser(MinNetUser * user)
+{
+	if (user == nullptr)
+		return;
+
+	// 여기서 씬 변경 보냄
+	std::string sceneName = MinNetCache::GetSceneCache(GetName());
+
+	if (sceneName != "")// 변경할 씬이 있다면
+	{
+		MinNetPacket * sceneChange = MinNetPool::packetPool->pop();
+		sceneChange->create_packet((int)Defines::MinNetPacketType::CHANGE_SCENE);
+		sceneChange->push(sceneName);
+		sceneChange->create_header();
+			
+		manager->Send(user, sceneChange);
+
+		MinNetPool::packetPool->push(sceneChange);
+
+		user->loadingEnd = false;// 클라이언트로 부터 로딩이 끝났다는것을 받은 후부터 해당 유저에게 캐스팅을 시작함
+	}
+	else
+	{// 씬 변경이 없기 때문에 로딩도 없음
+		ObjectSyncing(user);
+	}
+
+	std::cout << user << " 유저가 방으로 들어옴" << std::endl;
+
+	user_list.push_back(user);// 유저 리스트에 새로운 유저 추가 유저가 로딩되는 로딩이 빠른 유저가 새치기를 하면 안되기 때문에 로딩이 끝나기 전에 미리 넣어 둠
+	user_map.insert(std::make_pair(user->ID, user));
 }
 
 void MinNetRoom::RemoveUser(MinNetUser * user)
@@ -262,7 +291,6 @@ void MinNetRoom::RemoveUsers()
 
 	while (!deleteQ.empty())
 	{
-
 		RemoveUser(deleteQ.front());
 		deleteQ.pop();
 	}
@@ -535,6 +563,17 @@ MinNetRoom * MinNetRoomManager::GetPeacefulRoom(std::string roomName)
 	return CreateRoom(roomName);
 }
 
+MinNetRoom * MinNetRoomManager::GetRoom(int roomId)
+{
+	for (auto room : room_list)
+	{
+		if (room->GetNumber() == roomId)
+			return room;
+	}
+
+	return nullptr;
+}
+
 void MinNetRoomManager::Send(MinNetRoom * room, MinNetPacket * packet, MinNetUser * except)
 {
 	for (auto user : *room->GetUserList())
@@ -559,9 +598,40 @@ void MinNetRoomManager::PacketHandler(MinNetUser * user, MinNetPacket * packet)
 		break;
 
 	case Defines::MinNetPacketType::USER_ENTER_ROOM:
-		packet->pop_int();// 나중에 방 번호로 입장 기능을 만들때 사용할것
-		user->ChangeRoom(GetPeacefulRoom(packet->pop_string()));
+	{
+		int roomId = packet->pop_int();// 나중에 방 번호로 입장 기능을 만들때 사용할것
+		if (roomId == -2)
+		{
+			user->ChangeRoom(GetPeacefulRoom(packet->pop_string()));
+		}
+		else
+		{
+			auto room = GetRoom(roomId);
+			bool isNull = (room == nullptr);
+			bool isNotPeaceful = room->IsPeaceful();
+			if (isNull || isNotPeaceful)
+			{
+				MinNetPacket * failPacket = MinNetPool::packetPool->pop();
+				failPacket->create_packet(static_cast<int>(Defines::MinNetPacketType::USER_ENTER_ROOM_FAIL));
+				failPacket->push(roomId);
+				if (isNull)
+				{
+					failPacket->push("없는 방입니다");
+				}
+				else
+				{
+					failPacket->push("참여할 수 없는 방입니다");
+				}
+				Send(user, packet);
+				MinNetPool::packetPool->push(failPacket);
+			}
+			else
+			{
+				user->ChangeRoom(room);
+			}
+		}
 		break;
+	}
 
 	case Defines::MinNetPacketType::USER_LEAVE_ROOM:
 		user->ChangeRoom(nullptr);
@@ -577,6 +647,10 @@ void MinNetRoomManager::PacketHandler(MinNetUser * user, MinNetPacket * packet)
 
 	case Defines::MinNetPacketType::RPC:
 		user->GetRoom()->ObjectRPC(user, packet);
+		break;
+
+	case Defines::MinNetPacketType::CHANGE_SCENE_COMPLETE:
+		user->GetRoom()->ObjectSyncing(user);
 		break;
 
 	default:

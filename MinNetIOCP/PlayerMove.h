@@ -18,6 +18,11 @@ public:
 
 	bool lastHead = false;
 
+	int kill = 0;
+	int death = 0;
+
+	void AddScore(int kill, int death);
+
 	int GetKillCount(int victimId);
 	void AddKillCount(int victimId);
 
@@ -69,4 +74,6 @@ private:
 
 	Vector3 chestRotation;
 	std::map<int, int> killCount;// 키값을 id로 갖는 플레이어를 얼마나 사살 하였는지
+	void SyncScore();
+
 };

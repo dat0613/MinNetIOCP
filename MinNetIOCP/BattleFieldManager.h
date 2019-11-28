@@ -29,9 +29,9 @@ public:
 	void Update() override;
 	void OnInstantiate(MinNetUser * user) override;
 
+	clock_t playerRespawnDelay = 3000;
 private:
 
-	clock_t playerRespawnDelay = 3000;
 
 	clock_t readyStartTime = 0;
 	clock_t readyTime = 5000;// 준비시간은 잘 모르겠음

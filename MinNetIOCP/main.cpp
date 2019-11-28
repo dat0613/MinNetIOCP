@@ -33,6 +33,8 @@ void main()
 		room->Instantiate("BattleFieldManager");
 	});
 
+	MinNetCache::SetSceneCache("BattleField", "GameScene");
+
 	MinNetIOCP * iocp = new MinNetIOCP();
 	iocp->SetTickrate(20);
 

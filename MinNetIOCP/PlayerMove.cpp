@@ -62,17 +62,23 @@ void PlayerMove::HitSync(int hitObjectID, Vector3 hitPosition, Vector3 shotPosit
 	if (hitObj == nullptr)
 		return;
 
+	auto hitComponent = hitObj->GetComponent<PlayerMove>();
+
+	if ((hitComponent->team == team) && (hitObjectID != gameObject->GetID()))
+	{// 아군 사격은 불가능하지만 자신에게 피해를 입히는건 가능함
+		return;
+	}
+
 	float distance = Vector3::distance(hitPosition, hitObj->position);// 로컬과 서버의 위치 차이 계산
 
 	if (distance < 0.5f)// 위치 차이가 너무 많이 나면 동기화가 깨졌거나 해킹된 클라이언트라고 판단
 	{// 맞았다고 판단
 		int hitDamage = damage + static_cast<int>(isHead) * damage;
 		RPC("HitSuccess", gameObject->owner, isHead, hitDamage);// 적중하는데 성공했다고 알려줌
-		auto component = hitObj->GetComponent<PlayerMove>();
 
-		component->Hit(hitDamage, this);
-		component->lastHead = isHead;
-		component->RPC("HitCast", MinNetRpcTarget::AllNotServer, shotPosition, hitDamage, isHead);
+		hitComponent->Hit(hitDamage, this);
+		hitComponent->lastHead = isHead;
+		hitComponent->RPC("HitCast", MinNetRpcTarget::AllNotServer, shotPosition, hitDamage, isHead);
 	}
 	else
 	{// 맞지 않았다고 판단
@@ -145,12 +151,18 @@ void PlayerMove::ChangeState(State state)
 
 	case PlayerMove::State::Die:
 	{
+		if (battleFieldManager == nullptr)
+			break;
+
 		RPC("PlayerDie", MinNetRpcTarget::All, lastHitPlayerID, lastHitPlayerName, lastHead);
+
 		auto killer = battleFieldManager->GetPlayer(lastHitPlayerID);
+		death++;// 죽은 기록을 증가시킴
+		killer->AddKillCount(gameObject->GetID());
 		auto myKillCount = GetKillCount(lastHitPlayerID);// 내가 상대를 처치한 횟수
 		auto killersKillCount = killer->GetKillCount(gameObject->GetID());// 상대가 나를 처치한 횟수
 
-		RPC("DieInformation", gameObject->owner, lastHitPlayerID, myKillCount, killersKillCount);// 죽고죽인 횟수를 보여주면 경쟁하는 재미가 생기지 않지만 넣음
+		RPC("DieInformation", gameObject->owner, lastHitPlayerID, myKillCount, killersKillCount, battleFieldManager->playerRespawnDelay, Time::curTime());// 죽고죽인 횟수를 보여주면 경쟁하는 재미가 생기지 않지만 넣음
 		
 		dieTime = Time::curTime();
 		break;
@@ -164,7 +176,18 @@ void PlayerMove::ChangeState(State state)
 
 void PlayerMove::Awake()
 {
-	battleFieldManager = gameObject->GetNowRoom()->GetGameObject("BattleFieldManager")->GetComponent<BattleFieldManager>();
+	auto nowRoom = gameObject->GetNowRoom();
+	if (nowRoom == nullptr)
+		return;
+
+	auto battleFieldManagerObject = nowRoom->GetGameObject("BattleFieldManager");
+	if (battleFieldManagerObject == nullptr)
+		return;
+
+	battleFieldManager = battleFieldManagerObject->GetComponent<BattleFieldManager>();
+	if (battleFieldManager == nullptr)
+		return;
+
 	battleFieldManager->AddPlayer(shared_from_this());
 }
 
@@ -191,6 +214,7 @@ void PlayerMove::Update()
 void PlayerMove::OnInstantiate(MinNetUser * user)
 {
 	RPC("OnInstantiate", user, static_cast<int>(team), static_cast<int>(state), nowHP);
+	SyncScore();
 }
 
 void PlayerMove::HitInformationReset()
@@ -245,6 +269,19 @@ void PlayerMove::Chat(std::string chat)
 	RPC("Chat", MinNetRpcTarget::AllNotServer, str, r, g, b, a);
 }
 
+void PlayerMove::SyncScore()
+{
+	RPC("SyncScore", MinNetRpcTarget::AllNotServer, this->kill, this->death);
+}
+
+void PlayerMove::AddScore(int kill, int death)
+{
+	this->kill += kill;
+	this->death += death;
+
+	SyncScore();
+}
+
 int PlayerMove::GetKillCount(int victimId)
 {
 	auto set = killCount.find(victimId);
@@ -271,9 +308,11 @@ void PlayerMove::AddKillCount(int victimId)
 		killCount.insert(std::make_pair(victimId, 1));// 첫 처치를 기록함
 	}
 	else
-	{// 처치 횟수를 올림
+	{// 이 상대에 대한 처치 횟수를 올림
 		killCount[victimId] = set->second + 1;
 	}
+
+	kill++;// 전체 처치 기록도 올림
 }
 
 bool PlayerMove::IsCanRespawn(clock_t playerRespawnDelay)

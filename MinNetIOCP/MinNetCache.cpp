@@ -4,6 +4,7 @@
 
 ComponentCache MinNetCache::componentCache = ComponentCache();
 RoomCache MinNetCache::roomCache = RoomCache();
+SceneCache MinNetCache::sceneCache = SceneCache();
 
 MinNetCache::MinNetCache()
 {
@@ -72,4 +73,26 @@ void MinNetCache::AddRoom(MinNetRoom * room)
 		auto function = cache->second;
 		function(room);
 	}
+}
+
+void MinNetCache::SetSceneCache(std::string roomName, std::string sceneName)
+{
+	sceneCache.insert(std::make_pair(roomName, sceneName));
+}
+
+std::string MinNetCache::GetSceneCache(std::string roomName)
+{
+	std::string retval = "";
+
+	auto cache = sceneCache.find(roomName);
+	if (cache == sceneCache.end())
+	{// 저장된 캐시가 없음
+		SetSceneCache(roomName, retval);
+	}
+	else
+	{// 저장된 캐시가 있음
+		retval = cache->second;
+	}
+
+	return retval;
 }

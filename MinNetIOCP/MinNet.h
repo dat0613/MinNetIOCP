@@ -31,7 +31,10 @@ public:
 		PING_CAST,
 		RPC, 
 		ID_CAST,
-		CREATE_ROOM
+		CREATE_ROOM,
+		CHANGE_SCENE,
+		USER_ENTER_ROOM_FAIL,
+		CHANGE_SCENE_COMPLETE
 	};
 };
 
@@ -168,9 +171,11 @@ public:
 	int ID;
 	
 	bool isConnected = false;
+	bool loadingEnd = true;
 
 	void ChangeRoom(MinNetRoom * room);
 	void ChangeRoom(std::string roomName);
+	void ChangeRoom(int roomId);
 
 	MinNetRoom * GetRoom();
 	clock_t last_ping = -1;

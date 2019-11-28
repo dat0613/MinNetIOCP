@@ -111,6 +111,9 @@ void MinNetIOCP::StartServer()
 
 	StartAccept();
 
+	std::cout << "서버 시작" << std::endl;
+	std::cout << "IP : " << GetIP().c_str() << std::endl;
+
 	room_manager.GetPeacefulRoom("Main");// 기본적으로 있어야 하는 룸을 만듦
 }
 
@@ -495,7 +498,7 @@ void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
 
 void MinNetIOCP::StartSend(MinNetUser * user, MinNetPacket * packet)
 {
-	if (user == nullptr)
+	if (user == nullptr || user->loadingEnd == false)
 		return;
 
 	MinNetSendOverlapped * overlap = MinNetPool::sendOverlappedPool->pop();

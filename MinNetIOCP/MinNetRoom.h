@@ -37,10 +37,14 @@ public:
 	std::shared_ptr<MinNetGameObject> Instantiate(std::string prefabName, Vector3 position, Vector3 euler, int id, bool casting = false, MinNetUser * except = nullptr, bool autoDelete = false);
 	void Destroy(std::string prefabName, int id, bool casting = false, MinNetUser * except = nullptr);
 
+	void UserLoadingComplete(MinNetUser * user);
+
 	void ObjectInstantiate(MinNetUser * user, MinNetPacket * packet);
 	void ObjectDestroy(MinNetUser * user, MinNetPacket * packet);
 
 	void SetManager(MinNetRoomManager * manager);
+
+	void ObjectSyncing(MinNetUser * user);
 
 	void AddUser(MinNetUser * user);
 	void RemoveUser(MinNetUser * user);
@@ -86,6 +90,7 @@ class MinNetRoomManager
 public:
 	MinNetRoomManager(MinNetIOCP * minnet);
 	MinNetRoom * GetPeacefulRoom(std::string roomName);
+	MinNetRoom * GetRoom(int roomId);
 
 	void Send(MinNetRoom * room, MinNetPacket * packet, MinNetUser * except = nullptr);
 	void Send(MinNetUser * user, MinNetPacket * packet);

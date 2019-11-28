@@ -1,8 +1,39 @@
 ﻿  main.cpp
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(52): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(64): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetcache.h(33): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetCache' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(55): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(67): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetcache.h(38): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetCache' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\time.h(20): warning C4091: 'static ': 변수를 선언하지 않으면 'Time' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetpool.h(27): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetPool' 왼쪽은 무시됩니다.
+  MinNetRoom.cpp
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(55): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(67): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetpool.h(27): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetPool' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetcache.h(38): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetCache' 왼쪽은 무시됩니다.
+  MinNetIOCP.cpp
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(55): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(67): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetpool.h(27): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetPool' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\time.h(20): warning C4091: 'static ': 변수를 선언하지 않으면 'Time' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(156): warning C4244: '인수': 'float'에서 'unsigned long'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(156): warning C4996: '_sleep': This function or variable has been superceded by newer library or operating system functionality. Consider using Sleep instead. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdlib.h(1266): note: '_sleep' 선언을 참조하십시오.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(169): warning C4996: 'gethostbyname': Use getaddrinfo() or GetAddrInfoW() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(2238): note: 'gethostbyname' 선언을 참조하십시오.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(171): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1868): note: 'inet_ntoa' 선언을 참조하십시오.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(228): warning C4996: '_sleep': This function or variable has been superceded by newer library or operating system functionality. Consider using Sleep instead. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdlib.h(1266): note: '_sleep' 선언을 참조하십시오.
+  코드를 생성하고 있습니다...
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetroom.cpp(394): warning C4172: 지역 변수 또는 임시: objectVector의 주소를 반환하고 있습니다.
+  건너뛰고 있습니다... (관련된 변경 내용 없음)
+  PlayerMove.cpp
+  MinNetPool.cpp
+  MinNetGameObject.cpp
+  MinNetComponent.cpp
+  MinNetCache.cpp
+  MinNet.cpp
+  FirstPersonController.cpp
+  ComponentTest.cpp
+  BattleFieldManager.cpp
   MinNetIOCP.vcxproj -> C:\Users\ASUS\Documents\GitHub\MinNetIOCP\MinNetIOCP\Debug\MinNetIOCP.exe
   MinNetIOCP.vcxproj -> C:\Users\ASUS\Documents\GitHub\MinNetIOCP\MinNetIOCP\Debug\MinNetIOCP.pdb (Full PDB)
