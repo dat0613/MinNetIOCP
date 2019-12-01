@@ -50,8 +50,8 @@ private:
 
 	SOCKET listen_socket;
 
-	CRITICAL_SECTION recvQ_section;
 	std::queue<std::pair<MinNetPacket *, MinNetUser *>> recvQ;
+	std::queue<std::pair<MinNetPacket *, MinNetUser *>> messageQ;
 
 	void PacketHandler(MinNetUser * user, MinNetPacket * packet);
 

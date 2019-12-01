@@ -133,11 +133,17 @@ void MinNetIOCP::ServerLoop()
 			last_heart_beat = cur_time;
 		}
 
-		messageQ_spin_lock.lock();
-
+		messageQ_spin_lock.lock();// 오랫동안 lock 하는걸 막기위해 한번에 큐를 전부 비움
 		while (!recvQ.empty())
 		{
-			auto packet_info = recvQ.front();
+			messageQ.push(recvQ.front());
+			recvQ.pop();
+		}
+		messageQ_spin_lock.unlock();
+
+		while (!messageQ.empty())
+		{
+			auto packet_info = messageQ.front();
 			auto packet = packet_info.first;
 			auto user = packet_info.second;
 
@@ -145,13 +151,12 @@ void MinNetIOCP::ServerLoop()
 
 			MinNetPool::packetPool->push(packet);
 
-			recvQ.pop();
+			messageQ.pop();
 		}
 
 		room_manager.Update();
 		Time::FrameEnd();
 
-		messageQ_spin_lock.unlock();
 
 		_sleep(sleep_time);
 	}

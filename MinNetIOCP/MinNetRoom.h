@@ -6,12 +6,12 @@
 #include <map>
 #include "MinNet.h"
 #include "MinNetOptimizer.h"
+#include "EasyContainer.h"
 
 class MinNetIOCP;
 class MinNetUser;
 class MinNetPacket;
 class MinNetRoomManager;
-typedef struct lua_State lua_State;
 
 class MinNetGameObject;
 
@@ -25,9 +25,10 @@ public:
 	void SetName(std::string name);
 	std::string GetName();
 	void SetNumber(int number);
-	void SetMaxUser(int max);
-	int UserCount();
 	int GetNumber();
+	void SetMaxUser(int max);
+	int GetMaxUser();
+	int UserCount();
 	bool IsPeaceful();
 
 	std::list<MinNetUser *> * GetUserList();
@@ -35,6 +36,7 @@ public:
 	std::shared_ptr<MinNetGameObject> Instantiate(std::string prefabName);
 	std::shared_ptr<MinNetGameObject> Instantiate(std::string prefabName, Vector3 position, Vector3 euler);
 	std::shared_ptr<MinNetGameObject> Instantiate(std::string prefabName, Vector3 position, Vector3 euler, int id, bool casting = false, MinNetUser * except = nullptr, bool autoDelete = false);
+
 	void Destroy(std::string prefabName, int id, bool casting = false, MinNetUser * except = nullptr);
 
 	void UserLoadingComplete(MinNetUser * user);
@@ -43,11 +45,14 @@ public:
 	void ObjectDestroy(MinNetUser * user, MinNetPacket * packet);
 
 	void SetManager(MinNetRoomManager * manager);
+	MinNetRoomManager * GetManager();
 
 	void ObjectSyncing(MinNetUser * user);
 
 	void AddUser(MinNetUser * user);
 	void RemoveUser(MinNetUser * user);
+
+	EasyContainer roomOption;
 
 	void RemoveUsers();
 
@@ -70,7 +75,11 @@ public:
 	void SendRPC(int objectId, std::string componentName, std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters);
 	void SendRPC(int objectId, std::string componentName, std::string methodName, MinNetUser * target, MinNetPacket * parameters);
 
+	void SetSceneName(std::string sceneName);
+
 private:
+
+	std::string nowSceneName = "";
 
 	std::string name = "";
 	int room_number = 0;
@@ -80,6 +89,7 @@ private:
 
 	std::map<int, MinNetUser *> user_map;
 	std::list<MinNetUser *> user_list;
+
 	std::map<int, std::shared_ptr<MinNetGameObject>> object_map;
 	std::list<std::shared_ptr<MinNetGameObject>> object_list;
 	MinNetRoomManager * manager = nullptr;
@@ -99,10 +109,12 @@ public:
 	
 	void Update();
 
+	std::list<MinNetRoom *>& GetRoomList();
+
 private:
 
 	int roomNumberCount = -1;
-	MinNetRoom * CreateRoom(std::string roomName);
+	MinNetRoom * CreateRoom(std::string roomName, MinNetPacket * packet);
 
 	std::list<MinNetRoom *> room_list;
 	MinNetIOCP * minnet;

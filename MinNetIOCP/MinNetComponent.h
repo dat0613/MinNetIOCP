@@ -61,6 +61,19 @@ private:
 template<typename ...args>
 inline void MinNetComponent::RPC(std::string methodName, MinNetRpcTarget target, args && ...parameters)
 {
+	if (!gameObject->isSyncingObject)
+	{// 다른 클라이언트와 동기화 되지 않는 오브젝트는 오직 자신의 클라이언트 에게만 RPC호출을 할 수 있음
+		if (gameObject->owner != nullptr)
+		{
+			std::cout << "isSyncingObject가 false인 오브젝트는 자신의 owner에게만 RPC호출을 할 수 있습니다. 오브젝트 이름 : " << gameObject->GetName() << std::endl;
+		}
+		else
+		{
+			std::cout << "isSyncingObject가 false이며 owner가 없는 오브젝트의 RPC호출은 혀용되지 않습니다. 오브젝트 이름 : " << gameObject->GetName() << std::endl;
+		}
+		return;
+	}
+
 	MinNetPacket * parametersPacket = nullptr;
 	
 	if (sizeof...(parameters) > 0)
@@ -81,7 +94,6 @@ inline void MinNetComponent::RPC(std::string methodName, MinNetRpcTarget target,
 			parametersPacket->set_buffer_position(Defines::HEADERSIZE);
 			this->CallRPC(methodName, parametersPacket);
 			parametersPacket->set_buffer_position(Defines::HEADERSIZE);
-
 		}
 		else
 		{

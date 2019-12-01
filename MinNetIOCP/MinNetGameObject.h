@@ -11,6 +11,8 @@
 #include <iterator>
 #include <vector>
 
+#include "EasyContainer.h"
+
 struct lua_State;
 class MinNetRoom;
 class MinNetComponent;
@@ -42,7 +44,8 @@ public:
 	Vector3 rotation = { 0.0f, 0.0f, 0.0f };
 	Vector3 scale = { 1.0f, 1.0f, 1.0f };
 
-	bool isNetworkObject = true;// 클라이언트와 동기화 할지
+	//bool isNetworkObject = true;// 클라이언트와 동기화 할지
+	bool isSyncingObject = true;// 다른 클라이언트 에게 패킷을 보낼 수 있을지
 	MinNetUser * owner = nullptr;
 
 	void ChangeRoom(MinNetRoom * room);
@@ -62,6 +65,8 @@ public:
 
 	template <typename T>
 	T * GetComponent();
+
+	EasyContainer gameObjectOption;
 
 public:
 

@@ -1,6 +1,7 @@
 #include "MinNetCache.h"
 #include "MinNetGameObject.h"
 #include "MinNetRoom.h"
+#include "MinNet.h"
 
 ComponentCache MinNetCache::componentCache = ComponentCache();
 RoomCache MinNetCache::roomCache = RoomCache();
@@ -45,7 +46,7 @@ void MinNetCache::AddComponent(MinNetGameObject * object)
 	}
 }
 
-void MinNetCache::SetRoomCache(std::string prefabName, std::function<void(MinNetRoom*)> f)
+void MinNetCache::SetRoomCache(std::string prefabName, std::function<void(MinNetRoom *, MinNetPacket *)> f)
 {
 	if (roomCache.find(prefabName) == roomCache.end())
 	{// 중복 키값이 없음
@@ -57,7 +58,7 @@ void MinNetCache::SetRoomCache(std::string prefabName, std::function<void(MinNet
 	}
 }
 
-void MinNetCache::AddRoom(MinNetRoom * room)
+void MinNetCache::AddRoom(MinNetRoom * room, MinNetPacket * packet)
 {
 	//object->AddComponent<FirstPersonController>();
 	auto roomName = room->GetName();
@@ -66,13 +67,17 @@ void MinNetCache::AddRoom(MinNetRoom * room)
 
 	if (cache == roomCache.end())
 	{// 캐시가 없음
-		std::cout << roomName.c_str() << " 오브젝트는 캐시에 없습니다." << std::endl;
+		//std::cout << roomName.c_str() << " 오브젝트는 캐시에 없습니다." << std::endl;
+		roomCache.insert(std::make_pair(roomName, nullptr));
 	}
 	else
 	{
 		auto function = cache->second;
-		function(room);
+		if(function != nullptr)
+			function(room, packet);
 	}
+
+	room->SetSceneName(GetSceneCache(roomName));
 }
 
 void MinNetCache::SetSceneCache(std::string roomName, std::string sceneName)

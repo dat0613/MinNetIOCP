@@ -147,7 +147,9 @@
   <ItemGroup>
     <ClInclude Include="BattleFieldManager.h" />
     <ClInclude Include="ComponentTest.h" />
+    <ClInclude Include="EasyContainer.h" />
     <ClInclude Include="FirstPersonController.h" />
+    <ClInclude Include="LobbyUser.h" />
     <ClInclude Include="MinNet.h" />
     <ClInclude Include="MinNetCache.h" />
     <ClInclude Include="MinNetComponent.h" />
@@ -158,12 +160,15 @@
     <ClInclude Include="MinNetRoom.h" />
     <ClInclude Include="MinNetGameObject.h" />
     <ClInclude Include="PlayerMove.h" />
+    <ClInclude Include="ReadyRoomManager.h" />
     <ClInclude Include="Time.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BattleFieldManager.cpp" />
     <ClCompile Include="ComponentTest.cpp" />
+    <ClCompile Include="EasyContainer.cpp" />
     <ClCompile Include="FirstPersonController.cpp" />
+    <ClCompile Include="LobbyUser.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MinNet.cpp" />
     <ClCompile Include="MinNetCache.cpp" />
@@ -175,6 +180,7 @@
     <ClCompile Include="MinNetPool.cpp" />
     <ClCompile Include="MinNetRoom.cpp" />
     <ClCompile Include="PlayerMove.cpp" />
+    <ClCompile Include="ReadyRoomManager.cpp" />
     <ClCompile Include="Time.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

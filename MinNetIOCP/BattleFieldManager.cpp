@@ -85,8 +85,6 @@ void BattleFieldManager::Update()
 		if (Time::curTime() - readyStartTime > readyTime)
 		{// 게임 시작 해줌
 			SendChangeState(BattleFieldState::GameStart);
-
-
 			//for (auto component : playerList)
 			//{
 			//	if (!component.expired())
