@@ -8,6 +8,7 @@
 #include <process.h>
 #include <map>
 #include <list>
+#include "EasyContainer.h"
 
 class MinNetRoom;
 class MinNetGameObject;
@@ -34,7 +35,9 @@ public:
 		CREATE_ROOM,
 		CHANGE_SCENE,
 		USER_ENTER_ROOM_FAIL,
-		CHANGE_SCENE_COMPLETE
+		CHANGE_SCENE_COMPLETE,
+		SET_USER_VALUE,
+		GET_USER_VALUE
 	};
 };
 
@@ -185,6 +188,8 @@ public:
 
 	MinNetUser();
 	~MinNetUser();
+
+	EasyContainer userValue;
 
 protected:
 

@@ -161,6 +161,7 @@
     <ClInclude Include="MinNetGameObject.h" />
     <ClInclude Include="PlayerMove.h" />
     <ClInclude Include="ReadyRoomManager.h" />
+    <ClInclude Include="ReadyUser.h" />
     <ClInclude Include="Time.h" />
   </ItemGroup>
   <ItemGroup>
@@ -181,6 +182,7 @@
     <ClCompile Include="MinNetRoom.cpp" />
     <ClCompile Include="PlayerMove.cpp" />
     <ClCompile Include="ReadyRoomManager.cpp" />
+    <ClCompile Include="ReadyUser.cpp" />
     <ClCompile Include="Time.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

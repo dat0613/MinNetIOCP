@@ -123,6 +123,25 @@ std::shared_ptr<MinNetGameObject> MinNetRoom::Instantiate(std::string prefabName
 	AddObject(obj);
 
 	obj->Awake();
+
+	if (casting)
+	{
+		if (obj->isSyncingObject)
+		{
+			for (auto user : this->user_list)
+			{
+				if (user != except)
+				{
+					obj->OnInstantiate(user);
+				}
+			}
+		}
+
+		if (except != nullptr)
+		{
+			obj->OnInstantiate(except);
+		}
+	}
 	
 	return obj;
 }
@@ -671,6 +690,37 @@ void MinNetRoomManager::PacketHandler(MinNetUser * user, MinNetPacket * packet)
 	case Defines::MinNetPacketType::CHANGE_SCENE_COMPLETE:
 		user->GetRoom()->ObjectSyncing(user);
 		break;
+
+	case Defines::MinNetPacketType::SET_USER_VALUE:
+	{
+		auto key = packet->pop_string();
+		auto value = packet->pop_string();
+
+		user->userValue.SetValue(key, value);
+		break;
+	}
+	case Defines::MinNetPacketType::GET_USER_VALUE:
+	{
+		auto key = packet->pop_string();
+		auto value = user->userValue.GetValueString(key);
+
+		auto valuePacket = MinNetPool::packetPool->pop();
+
+		valuePacket->create_packet(static_cast<int>(Defines::MinNetPacketType::GET_USER_VALUE));
+
+		valuePacket->push(key);
+		valuePacket->push(value);
+
+		valuePacket->create_header();
+
+		Send(user, valuePacket);
+
+		MinNetPool::packetPool->push(valuePacket);
+
+		std::cout << key << " 를 키값으로 갖는 값 : " << value << std::endl;
+
+		break;
+	}
 
 	default:
 		break;

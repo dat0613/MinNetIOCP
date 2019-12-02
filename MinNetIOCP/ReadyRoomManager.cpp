@@ -11,6 +11,11 @@ ReadyRoomManager::~ReadyRoomManager()
 {
 }
 
+void ReadyRoomManager::OnInstantiate(MinNetUser * user)
+{
+	RPC("LoadRoomSetting", user, roomName, TeamNumber, CanBargeIn, OnlyHeadShot, TicketCount, RespawnTime, DefaultDamage, HeadShotDamageMultiple, PlayerMaxHP);
+}
+
 void ReadyRoomManager::SetOption(std::string roomName, int TeamNumber, bool CanBargeIn, bool OnlyHeadShot, int TicketCount, float RespawnTime, int DefaultDamage, float HeadShotDamageMultiple, int PlayerMaxHP)
 {
 

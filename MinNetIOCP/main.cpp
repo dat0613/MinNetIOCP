@@ -10,6 +10,7 @@
 #include "ComponentTest.h"
 #include "LobbyUser.h"
 #include "ReadyRoomManager.h"
+#include "ReadyUser.h"
 
 void main()
 {
@@ -73,6 +74,11 @@ void main()
 	});
 
 	MinNetCache::SetSceneCache("ReadyRoom", "ReadyScene");
+
+	MinNetCache::SetComponentCache("ReadyUser", [](MinNetGameObject * object) 
+	{
+		object->AddComponent<ReadyUser>();
+	});
 
 	MinNetCache::SetComponentCache("LobbyUser", [](MinNetGameObject * object) 
 	{

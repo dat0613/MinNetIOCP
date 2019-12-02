@@ -9,6 +9,7 @@
 #include "MinNetPool.h"
 #include "MinNet.h"
 #include "MinNetRoom.h"
+#include "MinNetGameObject.h"
 
 class MinNetGameObject;
 class MinNetPacket;

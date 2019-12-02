@@ -7,6 +7,8 @@ public:
 	ReadyRoomManager();
 	~ReadyRoomManager();
 	
+	void OnInstantiate(MinNetUser * user) override;
+
 	void SetOption(std::string roomName, int TeamNumber, bool CanBargeIn, bool OnlyHeadShot, int TicketCount, float RespawnTime, int DefaultDamage, float HeadShotDamageMultiple, int PlayerMaxHP);
 
 private:
