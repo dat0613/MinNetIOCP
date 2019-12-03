@@ -14,7 +14,6 @@ MinNetRoom::MinNetRoom()
 
 MinNetRoom::~MinNetRoom()
 {
-	std::cout << "룸 파괴" << std::endl;
 }
 
 void MinNetRoom::SetName(std::string name)
@@ -173,7 +172,29 @@ void MinNetRoom::Destroy(std::string prefabName, int id, bool casting, MinNetUse
 		MinNetPool::packetPool->push(packet);
 	}
 
+	obj->OnDestroy();
+
 	RemoveObject(obj);
+}
+
+void MinNetRoom::Destroy()
+{
+	if (object_list.size() == 0)
+		return;
+
+	std::queue<std::shared_ptr<MinNetGameObject>> deleteQ;
+
+	for (auto obj : object_list)
+	{
+		deleteQ.push(obj);
+	}
+
+	while (deleteQ.size() > 0)
+	{
+		auto obj = deleteQ.front();
+		Destroy(obj->GetName(), obj->GetID(), true);
+		deleteQ.pop();
+	}
 }
 
 void MinNetRoom::SetManager(MinNetRoomManager * manager)
@@ -238,9 +259,6 @@ void MinNetRoom::AddUser(MinNetUser * user)
 {
 	if (user == nullptr)
 		return;
-
-	// 여기서 씬 변경 보냄
-	//std::string sceneName = MinNetCache::GetSceneCache(GetName());
 	
 	if (nowSceneName != "")// 변경할 씬이 있다면
 	{
@@ -260,8 +278,6 @@ void MinNetRoom::AddUser(MinNetUser * user)
 		ObjectSyncing(user);
 	}
 
-	std::cout << user << " 유저가 방으로 들어옴" << std::endl;
-
 	user_list.push_back(user);// 유저 리스트에 새로운 유저 추가 유저가 로딩되는 로딩이 빠른 유저가 새치기를 하면 안되기 때문에 로딩이 끝나기 전에 미리 넣어 둠
 	user_map.insert(std::make_pair(user->ID, user));
 }
@@ -271,7 +287,7 @@ void MinNetRoom::RemoveUser(MinNetUser * user)
 	if (user == nullptr)
 		return;
 
-	std::cout << user << " 유저가 방에서 나감" << std::endl;
+	//std::cout << user << " 유저가 방에서 나감" << std::endl;
 
 	user_map.erase(user->ID);
 	user_list.remove(user); 
@@ -327,13 +343,13 @@ void MinNetRoom::RemoveUsers()
 
 void MinNetRoom::AddObject(std::shared_ptr<MinNetGameObject> object)
 {
-	object_list.push_back(object);
+	object_list.push_front(object);
 	object_map.insert(std::make_pair(object->GetID(), object));
 	object->ChangeRoom(this);
 
  	if (object->owner != nullptr)
 	{
-		object->owner->autoDeleteObjectList.push_back(object);// 주인이 정해져 있는 오브젝트는 주인이 게임에서 나갈때 함께 제거됨
+		object->owner->autoDeleteObjectList.push_front(object);// 주인이 정해져 있는 오브젝트는 주인이 게임에서 나갈때 함께 제거됨
 	}
 }
 
@@ -421,6 +437,15 @@ std::vector<std::shared_ptr<MinNetGameObject>> & MinNetRoom::GetGameObjects(std:
 	}
 
 	return objectVector;
+}
+
+void MinNetRoom::ChangeRoom(std::string roomName)
+{
+	if (roomName == "")
+		return;
+
+	changeRoomName = roomName;
+	changeRoom = true;
 }
 
 void MinNetRoom::Update()
@@ -645,7 +670,11 @@ void MinNetRoomManager::PacketHandler(MinNetUser * user, MinNetPacket * packet)
 		{
 			auto room = GetRoom(roomId);
 			bool isNull = (room == nullptr);
-			bool isNotPeaceful = !room->IsPeaceful();
+			bool isNotPeaceful = true;
+
+			if(!isNull)
+				 isNotPeaceful = !room->IsPeaceful();
+
 			if (isNull || isNotPeaceful)
 			{
 				MinNetPacket * failPacket = MinNetPool::packetPool->pop();
@@ -716,9 +745,6 @@ void MinNetRoomManager::PacketHandler(MinNetUser * user, MinNetPacket * packet)
 		Send(user, valuePacket);
 
 		MinNetPool::packetPool->push(valuePacket);
-
-		std::cout << key << " 를 키값으로 갖는 값 : " << value << std::endl;
-
 		break;
 	}
 
@@ -729,9 +755,58 @@ void MinNetRoomManager::PacketHandler(MinNetUser * user, MinNetPacket * packet)
 
 void MinNetRoomManager::Update()
 {
+	std::queue<MinNetRoom *> deleteQ;
+
 	for (auto room : room_list)
 	{
 		room->Update();
+		if (room->destroyWhenEmpty)
+		{
+			if (room->UserCount() < 1)
+			{
+				deleteQ.push(room);
+			}
+		}
+
+		if (room->changeRoom)
+		{// 룸을 변경해야 한다면
+			room->Destroy();// 룸에 있는 모든 객체 파괴
+
+			auto userList = room->GetUserList();
+			
+			std::queue<MinNetUser *> tempQ;
+			std::list<MinNetUser *> tempList;
+
+
+			for (auto user : *userList)
+			{
+				tempList.push_back(user);
+				tempQ.push(user);
+			}
+
+			for (auto user : tempList)
+				user->ChangeRoom(nullptr);
+
+			room->SetName(room->changeRoomName);
+
+			MinNetCache::AddRoom(room, nullptr);
+
+			while (!tempQ.empty())
+			{
+				auto front = tempQ.front();
+				front->ChangeRoom(room);
+				tempQ.pop();
+			}
+
+			room->changeRoomName = "";
+			room->changeRoom = false;
+		}
+	}
+
+	while (deleteQ.size() > 0)
+	{
+		DestroyRoom(deleteQ.front());
+		deleteQ.pop();
 	}
 }
 
@@ -753,4 +828,11 @@ MinNetRoom * MinNetRoomManager::CreateRoom(std::string roomName, MinNetPacket * 
 	room_list.push_back(room);
 
 	return room;
+}
+
+void MinNetRoomManager::DestroyRoom(MinNetRoom * room)
+{
+	room->Destroy();
+	room_list.remove(room);
+	delete room;
 }

@@ -34,6 +34,14 @@ void MinNetGameObject::SetName(std::string name)
 	AddComponent();
 }
 
+void MinNetGameObject::OnDestroy()
+{
+	for (auto component : componentList)
+	{
+		component->OnDestroy();
+	}
+}
+
 std::string MinNetGameObject::GetName()
 {
 	return name;

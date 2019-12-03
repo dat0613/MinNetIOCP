@@ -82,7 +82,7 @@ void PlayerMove::HitSync(int hitObjectID, Vector3 hitPosition, Vector3 shotPosit
 	}
 	else
 	{// 맞지 않았다고 판단
-		std::cout << "거리 차이가 너무 큼 : " << hitPosition << ", " << hitObj->position << ", " << distance << std::endl;
+		//std::cout << "거리 차이가 너무 큼 : " << hitPosition << ", " << hitObj->position << ", " << distance << std::endl;
 	}
 }
 
@@ -195,7 +195,7 @@ void PlayerMove::Update()
 {
 	if (lastHitPlayerID != -1)
 	{
-		if (Time::curTime() - dieTime > hitResetTime)
+		if (Time::curTime() - lastHit > hitResetTime)
 		{
 			HitInformationReset();
 		}
@@ -217,6 +217,14 @@ void PlayerMove::OnInstantiate(MinNetUser * user)
 	SyncScore();
 }
 
+void PlayerMove::OnDestroy()
+{
+	if (battleFieldManager != nullptr)
+	{
+		battleFieldManager->DelPlayer(shared_from_this());
+	}
+}
+
 void PlayerMove::HitInformationReset()
 {
 	lastHitPlayerID = -1;
@@ -234,7 +242,6 @@ void PlayerMove::Respawn(Vector3 position, int hp, PlayerMove::Team team)
 
 void PlayerMove::SelectTeam(Team team)
 {
-	std::cout << "다음 스폰때 팀을 바꿈 : " << static_cast<int>(team) << std::endl;
 	if (this->team != team) // 현재와 같은팀으로 바꾸는건 필요하지 않음
 		nextSpawnTeam = team;
 }

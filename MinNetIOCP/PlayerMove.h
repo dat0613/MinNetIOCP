@@ -62,6 +62,7 @@ public:
 	void Awake() override;
 	void Update() override;
 	void OnInstantiate(MinNetUser * user) override;
+	void OnDestroy() override;
 	void HitInformationReset();
 
 	void Respawn(Vector3 position, int hp, PlayerMove::Team team);

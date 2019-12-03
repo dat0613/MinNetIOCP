@@ -253,6 +253,8 @@ void MinNetIOCP::PingTest()
 {
 	std::queue<MinNetUser *> removeQ;
 
+	auto curTie = Time::curTime();
+
 	if (user_list.size() > 0)
 	{
 		for (auto it = user_list.begin(); it != user_list.end(); it++)
@@ -261,7 +263,7 @@ void MinNetIOCP::PingTest()
 
 			if (user->last_ping != -1)
 			{
-				if (user->ping > 500)
+				if (curTie - user->last_pong > 5000)
 				{
 					std::cout << user << " ÀÌ ÀÀ´äÇÏÁö ¾Ê¾Æ ¿¬°á ²÷À½" << std::endl;
 					removeQ.push(user);
@@ -413,7 +415,7 @@ void MinNetIOCP::StartClose(MinNetUser * user)
 		{
 			if (error == WSAENOTCONN || error == WSAENOTSOCK)
 			{
-				std::cout << "ÀÌ¹Ì ´ÝÈù ¼ÒÄÏÀÓ : " << overlap->user->sock << std::endl;
+				//std::cout << "ÀÌ¹Ì ´ÝÈù ¼ÒÄÏÀÓ : " << overlap->user->sock << std::endl;
 				MinNetPool::closeOverlappedPool->push(overlap);
 				return;
 			}

@@ -3,6 +3,6 @@ c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(58): warning C4091
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(70): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetpool.h(27): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetPool' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetcache.h(39): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetCache' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetroom.cpp(423): warning C4172: 지역 변수 또는 임시: objectVector의 주소를 반환하고 있습니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetroom.cpp(444): warning C4172: 지역 변수 또는 임시: objectVector의 주소를 반환하고 있습니다.
   MinNetIOCP.vcxproj -> C:\Users\ASUS\Documents\GitHub\MinNetIOCP\MinNetIOCP\Debug\MinNetIOCP.exe
   MinNetIOCP.vcxproj -> C:\Users\ASUS\Documents\GitHub\MinNetIOCP\MinNetIOCP\Debug\MinNetIOCP.pdb (Full PDB)

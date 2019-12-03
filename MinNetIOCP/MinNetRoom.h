@@ -33,11 +33,16 @@ public:
 
 	std::list<MinNetUser *> * GetUserList();
 
+	bool destroyWhenEmpty = false;
+	bool changeRoom = false; // 룸이 실행되는 도중 룸 옵션을 바꿀때 true로
+	std::string changeRoomName = "";
+
 	std::shared_ptr<MinNetGameObject> Instantiate(std::string prefabName);
 	std::shared_ptr<MinNetGameObject> Instantiate(std::string prefabName, Vector3 position, Vector3 euler);
 	std::shared_ptr<MinNetGameObject> Instantiate(std::string prefabName, Vector3 position, Vector3 euler, int id, bool casting = false, MinNetUser * except = nullptr, bool autoDelete = false);
 
 	void Destroy(std::string prefabName, int id, bool casting = false, MinNetUser * except = nullptr);
+	void Destroy();
 
 	void UserLoadingComplete(MinNetUser * user);
 
@@ -64,6 +69,8 @@ public:
 
 	std::shared_ptr<MinNetGameObject> GetGameObject(std::string prefabName);
 	std::vector<std::shared_ptr<MinNetGameObject>> & GetGameObjects(std::string prefabName);
+
+	void ChangeRoom(std::string roomName);
 
 	void Update();
 
@@ -115,6 +122,7 @@ private:
 
 	int roomNumberCount = -1;
 	MinNetRoom * CreateRoom(std::string roomName, MinNetPacket * packet);
+	void DestroyRoom(MinNetRoom * room);
 
 	std::list<MinNetRoom *> room_list;
 	MinNetIOCP * minnet;

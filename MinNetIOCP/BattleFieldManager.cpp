@@ -120,6 +120,11 @@ void BattleFieldManager::OnInstantiate(MinNetUser * user)
 	RPC("SyncState", user, static_cast<int>(state), getNowStateLeftTime());
 }
 
+void BattleFieldManager::OnDestroy()
+{
+
+}
+
 clock_t BattleFieldManager::getNowStateLeftTime()
 {
 	clock_t sendTime = 0;
@@ -146,8 +151,6 @@ clock_t BattleFieldManager::getNowStateLeftTime()
 	case BattleFieldManager::BattleFieldState::MAX:
 		break;
 	}
-
-	std::cout << "현재 상태에서 남은 시간 : " << (sendTime - delayedTime)  << " ms"<< std::endl;
 
 	return sendTime - delayedTime;
 }
@@ -318,7 +321,6 @@ void BattleFieldManager::PlayerDieUpdate(PlayerMove * player)
 	if (player->IsDie())
 	{// 플레이어가 죽었음
 		player->ChangeState(PlayerMove::State::Die);
-		std::cout << "플레이어 사망" << std::endl;
 	}
 }
 

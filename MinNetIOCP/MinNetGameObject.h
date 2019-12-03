@@ -37,6 +37,7 @@ public:
 	void SetID(int id);
 	int GetID();
 	void SetName(std::string name);
+	void OnDestroy();
 
 	std::string GetName();
 

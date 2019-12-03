@@ -28,6 +28,8 @@ public:
 	void Awake() override;
 	void Update() override;
 	void OnInstantiate(MinNetUser * user) override;
+	void OnDestroy() override;
+
 
 	clock_t playerRespawnDelay = 3000;
 private:
