@@ -1,6 +1,7 @@
 #include "ReadyRoomManager.h"
 
 #include "ReadyUser.h"
+#include "MinNet.h"
 
 ReadyRoomManager::ReadyRoomManager()
 {
@@ -115,7 +116,16 @@ void ReadyRoomManager::GameStart(std::weak_ptr<MinNetComponent> component)
 
 	if (reason == "")
 	{// 겜시작
-		std::cout << "게임 시작" << std::endl;
+
+		for (auto comp : userList)
+		{
+			if (!comp.expired())
+			{
+				auto readyUser = static_cast<ReadyUser *>(comp.lock().get());
+				readyUser->gameObject->owner->userValue.SetValue("Team", static_cast<int>(readyUser->GetTeam()));// 유저들의 팀을 임시 저장
+			}
+		}
+
 		gameObject->GetNowRoom()->ChangeRoom("BattleField");
 	}
 	else

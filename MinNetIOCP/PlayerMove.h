@@ -46,7 +46,6 @@ public:
 	bool IsCanRespawn(clock_t playerRespawnDelay);
 	bool IsDie();
 
-
 	PlayerMove();
 	~PlayerMove();
 
@@ -76,5 +75,7 @@ private:
 	Vector3 chestRotation;
 	std::map<int, int> killCount;// 키값을 id로 갖는 플레이어를 얼마나 사살 하였는지
 	void SyncScore();
+
+	void SetMaxHP(int maxHP);
 
 };

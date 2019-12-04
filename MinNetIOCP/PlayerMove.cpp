@@ -47,6 +47,13 @@ void PlayerMove::InitRPC()
 
 		Chat(chat);
 	});
+
+	DefRPC("SetMaxHP", [this](MinNetPacket * packet) {
+
+		auto maxHP = packet->pop_int();
+
+		this->SetMaxHP(maxHP);
+	});
 }
 
 void PlayerMove::SyncPosition(Vector3 position, Vector3 chestRotation)
@@ -57,6 +64,12 @@ void PlayerMove::SyncPosition(Vector3 position, Vector3 chestRotation)
 
 void PlayerMove::HitSync(int hitObjectID, Vector3 hitPosition, Vector3 shotPosition, bool isHead)
 {
+	if (battleFieldManager->onlyHeadShot)
+	{// 헤드샷 전 에서
+		if (!isHead)// 헤드샷이 아니면 피격 판정 안함
+			return;
+	}
+
 	auto hitObj = gameObject->GetNowRoom()->GetGameObject(hitObjectID);
 
 	if (hitObj == nullptr)
@@ -73,7 +86,7 @@ void PlayerMove::HitSync(int hitObjectID, Vector3 hitPosition, Vector3 shotPosit
 
 	if (distance < 0.5f)// 위치 차이가 너무 많이 나면 동기화가 깨졌거나 해킹된 클라이언트라고 판단
 	{// 맞았다고 판단
-		int hitDamage = damage + static_cast<int>(isHead) * damage;
+		int hitDamage = damage + static_cast<int>(isHead) * (battleFieldManager->headShotDamageMultiple - 1.0f) * damage;
 		RPC("HitSuccess", gameObject->owner, isHead, hitDamage);// 적중하는데 성공했다고 알려줌
 
 		hitComponent->Hit(hitDamage, this);
@@ -213,7 +226,7 @@ void PlayerMove::Update()
 
 void PlayerMove::OnInstantiate(MinNetUser * user)
 {
-	RPC("OnInstantiate", user, static_cast<int>(team), static_cast<int>(state), nowHP);
+	RPC("OnInstantiate", MinNetRpcTarget::AllNotServer, static_cast<int>(team), static_cast<int>(state), maxHP, user->userValue.GetValueString("NickName"));
 	SyncScore();
 }
 
@@ -254,15 +267,15 @@ void PlayerMove::Chat(std::string chat)
 	switch (team)
 	{
 	case PlayerMove::Team::Red:
-		r = 1.0f;
-		g = 0.0f;
-		b = 0.0f;
+		r = 84.0f / 255.0f;
+		g = 119.0f / 255.0f;
+		b = 151.0f / 255.0f;
 		break;
 
 	case PlayerMove::Team::Blue:
-		r = 0.0f;
-		g = 0.0f;
-		b = 1.0f;
+		r = 84.0f / 255.0f;
+		g = 100.0f / 255.0f;
+		b = 100.0f / 255.0f;
 		break;
 
 	case PlayerMove::Team::Spectator:
@@ -279,6 +292,11 @@ void PlayerMove::Chat(std::string chat)
 void PlayerMove::SyncScore()
 {
 	RPC("SyncScore", MinNetRpcTarget::AllNotServer, this->kill, this->death);
+}
+
+void PlayerMove::SetMaxHP(int maxHP)
+{
+	nowHP = this->maxHP = maxHP;
 }
 
 void PlayerMove::AddScore(int kill, int death)
