@@ -44,6 +44,8 @@ void main()
 
 	MinNetCache::SetRoomCache("ReadyRoom", [](MinNetRoom * room, MinNetPacket * packet) 
 	{
+		room->SetLock(false);
+
 		auto gameObject = room->Instantiate("ReadyRoomManager");
 		auto roomManager = gameObject->GetComponent<ReadyRoomManager>();
 		
@@ -57,7 +59,7 @@ void main()
 		float HeadShotDamageMultiple = 0.0f;
 		int PlayerMaxHP = 0;
 
-		if (packet != nullptr)// 처음으로 이 방을 만들었을때 nullptr 일때는 게임이 끝난 후 다시 대기실로 돌아왔을때 임
+		if (packet != nullptr)// 처음으로 이 방을 만들었을때, nullptr 일때는 게임이 끝난 후 다시 대기실로 돌아왔을때 임
 		{
 			room->destroyWhenEmpty = true;
 

@@ -53,10 +53,18 @@ int MinNetRoom::GetNumber()
 
 bool MinNetRoom::IsPeaceful()
 {
+	if (lock)
+		return false;
+
 	if (UserCount() < max_user)
 		return true;
 
 	return false;
+}
+
+void MinNetRoom::SetLock(bool lock)
+{
+	this->lock = lock;
 }
 
 std::list<MinNetUser*> * MinNetRoom::GetUserList()
@@ -653,6 +661,8 @@ void MinNetRoomManager::Send(MinNetUser * user, MinNetPacket * packet)
 void MinNetRoomManager::PacketHandler(MinNetUser * user, MinNetPacket * packet)
 {
 	packet->set_buffer_position(6);
+	auto nowRoom = user->GetRoom();
+
 	switch ((Defines::MinNetPacketType)packet->packet_type)
 	{
 	case Defines::MinNetPacketType::CREATE_ROOM:
@@ -705,19 +715,23 @@ void MinNetRoomManager::PacketHandler(MinNetUser * user, MinNetPacket * packet)
 		break;
 
 	case Defines::MinNetPacketType::OBJECT_INSTANTIATE:
-		user->GetRoom()->ObjectInstantiate(user, packet);
+		if (nowRoom != nullptr)
+			nowRoom->ObjectInstantiate(user, packet);
 		break;
 
 	case Defines::MinNetPacketType::OBJECT_DESTROY:
-		user->GetRoom()->ObjectDestroy(user, packet);
+		if (nowRoom != nullptr)
+			nowRoom->ObjectDestroy(user, packet);
 		break;
 
 	case Defines::MinNetPacketType::RPC:
-		user->GetRoom()->ObjectRPC(user, packet);
+		if (nowRoom != nullptr)
+			nowRoom->ObjectRPC(user, packet);
 		break;
 
 	case Defines::MinNetPacketType::CHANGE_SCENE_COMPLETE:
-		user->GetRoom()->ObjectSyncing(user);
+		if (nowRoom != nullptr)
+			nowRoom->ObjectSyncing(user);
 		break;
 
 	case Defines::MinNetPacketType::SET_USER_VALUE:
@@ -777,7 +791,6 @@ void MinNetRoomManager::Update()
 			std::queue<MinNetUser *> tempQ;
 			std::list<MinNetUser *> tempList;
 
-
 			for (auto user : *userList)
 			{
 				tempList.push_back(user);
@@ -788,7 +801,6 @@ void MinNetRoomManager::Update()
 				user->ChangeRoom(nullptr);
 
 			room->SetName(room->changeRoomName);
-
 			MinNetCache::AddRoom(room, nullptr);
 
 			while (!tempQ.empty())

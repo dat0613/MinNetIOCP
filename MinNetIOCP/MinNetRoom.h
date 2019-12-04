@@ -31,6 +31,8 @@ public:
 	int UserCount();
 	bool IsPeaceful();
 
+	void SetLock(bool lock);
+
 	std::list<MinNetUser *> * GetUserList();
 
 	bool destroyWhenEmpty = false;
@@ -93,6 +95,8 @@ private:
 	int max_user = 10;
 
 	int id_count = 0;
+
+	bool lock = false;// 방 접속 차단
 
 	std::map<int, MinNetUser *> user_map;
 	std::list<MinNetUser *> user_list;

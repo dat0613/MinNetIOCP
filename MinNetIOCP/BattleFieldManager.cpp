@@ -80,20 +80,20 @@ void BattleFieldManager::Awake()
 
 void BattleFieldManager::Update()
 {	
-		for (auto component : playerList)
+	for (auto component : playerList)
+	{
+		if (!component.expired())
 		{
-			if (!component.expired())
-			{
-				auto player = static_cast<PlayerMove *>(component.lock().get());
+			auto player = static_cast<PlayerMove *>(component.lock().get());
 
-				PlayerRespawnUpdate(player);
-				PlayerDieUpdate(player);
-			}
-			else
-			{// 제거 해주어야 함
-
-			}
+			PlayerRespawnUpdate(player);
+			PlayerDieUpdate(player);
 		}
+		else
+		{// 제거 해주어야 함
+
+		}
+	}
 
 	if (winnerTeam != PlayerMove::Team::None)
 	{//게임이 끝나고 플레이어들이 결과창을 보고있음
@@ -102,41 +102,6 @@ void BattleFieldManager::Update()
 			gameObject->GetNowRoom()->ChangeRoom("ReadyRoom");
 		}
 	}
-
-	//switch (state)
-	//{
-	//case BattleFieldManager::BattleFieldState::GameReady:
-	//	if (Time::curTime() - readyStartTime > readyTime)
-	//	{// 게임 시작 해줌
-	//		SendChangeState(BattleFieldState::GameStart);
-	//		//for (auto component : playerList)
-	//		//{
-	//		//	if (!component.expired())
-	//		//	{
-	//		//		auto player = static_cast<PlayerMove *>(component.lock().get());
-	//		//		auto team = getPeacefulTeam();
-	//		//		player->RPC("Respawn", MinNetRpcTarget::All, getRespawnPoint(team), player->maxHP, static_cast<int>(team));
-	//		//	}
-	//		//}
-	//	}
-	//	break;
-	//case BattleFieldManager::BattleFieldState::GameStart:
-	//	if (Time::curTime() - gameStartTime > gameTime)
-	//	{// 게임 끝내고 결과 정산함
-	//		SendChangeState(BattleFieldState::GameEnd);
-	//	}
-
-	//	break;
-	//case BattleFieldManager::BattleFieldState::GameEnd:
-	//	if (Time::curTime() - gameEndTime > endTime)
-	//	{// 잠시 대기했다가 점수 보여주고 넘김
-	//		SendChangeState(BattleFieldState::GameReady);
-	//	}
-
-	//	break;
-	//case BattleFieldManager::BattleFieldState::MAX:
-	//	break;
-	//}
 }
 
 void BattleFieldManager::OnInstantiate(MinNetUser * user)
@@ -147,36 +112,6 @@ void BattleFieldManager::OnDestroy()
 {
 
 }
-
-//clock_t BattleFieldManager::getNowStateLeftTime()
-//{
-//	clock_t sendTime = 0;
-//	clock_t delayedTime = 0;
-//	clock_t curTime = Time::curTime();
-//
-//	switch (state)
-//	{
-//	case BattleFieldManager::BattleFieldState::GameReady:
-//		delayedTime = curTime - readyStartTime;
-//		sendTime = readyTime;
-//		break;
-//
-//	case BattleFieldManager::BattleFieldState::GameStart:
-//		delayedTime = curTime - gameStartTime;
-//		sendTime = gameTime;
-//		break;
-//
-//	case BattleFieldManager::BattleFieldState::GameEnd:
-//		delayedTime = curTime - gameEndTime;
-//		sendTime = endTime;
-//		break;
-//
-//	case BattleFieldManager::BattleFieldState::MAX:
-//		break;
-//	}
-//
-//	return sendTime - delayedTime;
-//}
 
 PlayerMove::Team BattleFieldManager::getPeacefulTeam()
 {
@@ -380,36 +315,6 @@ void BattleFieldManager::PlayerDieUpdate(PlayerMove * player)
 		player->ChangeState(PlayerMove::State::Die);
 	}
 }
-
-//void BattleFieldManager::SendChangeState(BattleFieldState state)
-//{
-//	if (this->state == state)
-//		return;
-//
-//	clock_t curTime = Time::curTime();
-//
-//	switch (state)
-//	{
-//	case BattleFieldManager::BattleFieldState::GameReady:
-//		readyStartTime = curTime;
-//		break;
-//
-//	case BattleFieldManager::BattleFieldState::GameStart:
-//		gameStartTime = curTime;
-//		break;
-//
-//	case BattleFieldManager::BattleFieldState::GameEnd:
-//		gameEndTime = curTime;
-//		break;
-//
-//	case BattleFieldManager::BattleFieldState::MAX:
-//		break;
-//	}
-//
-//	this->state = state;
-//
-//	RPC("SyncState", MinNetRpcTarget::All, static_cast<int>(state), getNowStateLeftTime());
-//}
 
 void BattleFieldManager::SetGameOption()
 {

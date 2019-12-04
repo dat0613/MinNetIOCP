@@ -14,7 +14,19 @@ ReadyRoomManager::~ReadyRoomManager()
 
 void ReadyRoomManager::OnInstantiate(MinNetUser * user)
 {
-	RPC("LoadRoomSetting", user, roomName, TeamNumber, CanBargeIn, OnlyHeadShot, TicketCount, RespawnTime, DefaultDamage, HeadShotDamageMultiple, PlayerMaxHP);
+	RPC(
+		"LoadRoomSetting", 
+		user, 
+		roomName,
+		TeamNumber, 
+		CanBargeIn, 
+		OnlyHeadShot, 
+		TicketCount, 
+		RespawnTime, 
+		DefaultDamage, 
+		HeadShotDamageMultiple, 
+		PlayerMaxHP
+	);
 }
 
 void ReadyRoomManager::SetOption(std::string roomName, int TeamNumber, bool CanBargeIn, bool OnlyHeadShot, int TicketCount, float RespawnTime, int DefaultDamage, float HeadShotDamageMultiple, int PlayerMaxHP)
@@ -123,6 +135,7 @@ void ReadyRoomManager::GameStart(std::weak_ptr<MinNetComponent> component)
 			{
 				auto readyUser = static_cast<ReadyUser *>(comp.lock().get());
 				readyUser->gameObject->owner->userValue.SetValue("Team", static_cast<int>(readyUser->GetTeam()));// 유저들의 팀을 임시 저장
+				gameObject->GetNowRoom()->SetLock(!CanBargeIn);
 			}
 		}
 

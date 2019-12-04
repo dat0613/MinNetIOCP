@@ -350,7 +350,6 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 
 		MinNetUser * user = MinNetPool::userPool->pop();
 		user->sock = overlap->socket;
-
 		StartClose(user);
 		return;
 	}

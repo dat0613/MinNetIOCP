@@ -435,7 +435,6 @@ std::ostream & operator<<(std::ostream & o, const Vector2 & vector2)
 	return o;
 }
 
-
 void MinNetUser::ChangeRoom(MinNetRoom * room)
 {
 	if (now_room != nullptr)// 이미 룸에 들어가 있다면
