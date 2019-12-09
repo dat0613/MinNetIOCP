@@ -13,7 +13,7 @@ MinNetIOCP::MinNetIOCP() : room_manager(this)
 
 MinNetIOCP::~MinNetIOCP()
 {
-	closesocket(listen_socket);
+	closesocket(tcpSocket);
 
 	auto it = user_list.begin();
 
@@ -60,12 +60,13 @@ void MinNetIOCP::StartServer()
 			return;
 	}
 
-	listen_socket = WSASocket(PF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
-	if (listen_socket == INVALID_SOCKET)
+	tcpSocket = WSASocket(PF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+	if (tcpSocket == INVALID_SOCKET)
 	{
 		printf("WSASocket error");
 		return;
 	}
+
 
 	SOCKADDR_IN serverAddr;
 	ZeroMemory(&serverAddr, sizeof(serverAddr));
@@ -73,17 +74,29 @@ void MinNetIOCP::StartServer()
 	serverAddr.sin_addr.s_addr = htonl(ADDR_ANY);
 	serverAddr.sin_port = htons(8300);
 
-	char iSockOpt = 1;
-	setsockopt(listen_socket, SOL_SOCKET, SO_REUSEADDR, &iSockOpt, sizeof(iSockOpt));
+	udpSocket = WSASocket(PF_INET, SOCK_DGRAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+	if (bind(udpSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
+	{
+		printf("bind error");
+		return;
+	}
 
-	CreateIoCompletionPort((HANDLE)listen_socket, hPort, listen_socket, 0);
+
+	if(setsockopt(udpSocket, SOL_SOCKET, SO_RCVBUF, (const char*)))
+	
+	char iSockOpt = 1;
+	setsockopt(tcpSocket, SOL_SOCKET, SO_REUSEADDR, &iSockOpt, sizeof(iSockOpt));
+
+
+
+	CreateIoCompletionPort((HANDLE)tcpSocket, hPort, tcpSocket, 0);
 
 	BOOL on = TRUE;
-	if (setsockopt(listen_socket, SOL_SOCKET, SO_CONDITIONAL_ACCEPT, (char *)&on, sizeof(on)))
+	if (setsockopt(tcpSocket, SOL_SOCKET, SO_CONDITIONAL_ACCEPT, (char *)&on, sizeof(on)))
 		return;
 
 
-	int retval = ::bind(listen_socket, (sockaddr*)&serverAddr, sizeof(serverAddr));
+	int retval = bind(tcpSocket, (sockaddr*)&serverAddr, sizeof(serverAddr));
 	if (retval == SOCKET_ERROR)
 	{
 		printf("bind error");
@@ -91,7 +104,7 @@ void MinNetIOCP::StartServer()
 	}
 
 	DWORD dwBytes;
-	retval = WSAIoctl(listen_socket, SIO_GET_EXTENSION_FUNCTION_POINTER, &guidAcceptEx, sizeof(guidAcceptEx), &lpfnAcceptEx, sizeof(lpfnAcceptEx), &dwBytes, NULL, NULL);
+	retval = WSAIoctl(tcpSocket, SIO_GET_EXTENSION_FUNCTION_POINTER, &guidAcceptEx, sizeof(guidAcceptEx), &lpfnAcceptEx, sizeof(lpfnAcceptEx), &dwBytes, NULL, NULL);
 	if (retval == SOCKET_ERROR)
 		if (WSAGetLastError() != WSA_IO_PENDING)
 		{
@@ -100,7 +113,7 @@ void MinNetIOCP::StartServer()
 		}
 
 
-	retval = listen(listen_socket, SOMAXCONN);
+	retval = listen(tcpSocket, SOMAXCONN);
 	if (retval == SOCKET_ERROR)
 	{
 		printf("listen error");
@@ -321,7 +334,7 @@ void MinNetIOCP::StartAccept()
 
 	bool error = !lpfnAcceptEx
 	(
-		this->listen_socket,
+		this->tcpSocket,
 		overlap->socket,
 		(LPVOID)&overlap->buf,
 		0,
@@ -341,7 +354,7 @@ void MinNetIOCP::StartAccept()
 
 void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 {
-	if (setsockopt(overlap->socket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (const char*)&listen_socket, sizeof(SOCKET)) == SOCKET_ERROR)
+	if (setsockopt(overlap->socket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (const char*)&tcpSocket, sizeof(SOCKET)) == SOCKET_ERROR)
 	{
 		// 대충 오류니까 overlap->socket 닫음
 		std::cout << "EndAccept error : " << WSAGetLastError() << std::endl;
@@ -468,7 +481,6 @@ void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
 
 	MinNetUser * user = overlap->user;
 
-	//memcpy(&user->temporary_buffer[user->buffer_position], overlap->wsabuf.buf, len);
 	user->temproraryLock.lock();
 	memmove(&user->temporary_buffer[user->buffer_position], &overlap->wsabuf.buf[0], len);
 	user->buffer_position += len;

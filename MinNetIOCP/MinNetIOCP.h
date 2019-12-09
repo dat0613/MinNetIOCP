@@ -50,7 +50,8 @@ private:
 
 	sockaddr_in * SOCKADDRtoSOCKADDR_IN(sockaddr * addr);
 
-	SOCKET listen_socket;
+	SOCKET tcpSocket;
+	SOCKET udpSocket;
 
 	std::queue<std::pair<MinNetPacket *, MinNetUser *>> recvQ;
 	std::queue<std::pair<MinNetPacket *, MinNetUser *>> messageQ;
