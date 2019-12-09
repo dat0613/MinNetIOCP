@@ -34,7 +34,7 @@ void MinNetPool::Init()
 		user->ChangeRoom(nullptr);
 		user->autoDeleteObjectList.clear();
 		user->buffer_position = 0;
-		ZeroMemory(user->temporary_buffer, 2048);
+		ZeroMemory(user->temporary_buffer, Defines::TEMPORARYBUFFERSIZE);
 	});
 	userPool->AddObject(100);
 
@@ -54,18 +54,18 @@ void MinNetPool::Init()
 	closeOverlappedPool->AddObject(20);
 
 	sendOverlappedPool->SetConstructor([](MinNetSendOverlapped * overlap) {
-		overlap->wsabuf.buf = new char[1024];
+		overlap->wsabuf.buf = new char[Defines::BUFFERSIZE];
 	});
 	sendOverlappedPool->SetOnPush([](MinNetSendOverlapped * overlap) {
 		ZeroMemory(overlap, sizeof(MinNetOverlapped));
 		overlap->type = MinNetOverlapped::TYPE::SEND;
-		ZeroMemory(overlap->wsabuf.buf, 1024);
+		ZeroMemory(overlap->wsabuf.buf, Defines::BUFFERSIZE);
 	});
 	sendOverlappedPool->AddObject(100);
 
 	recvOverlappedPool->SetConstructor([](MinNetRecvOverlapped * overlap) {
-		overlap->wsabuf.buf = new char[1024];
-		overlap->wsabuf.len = 1024;
+		overlap->wsabuf.buf = new char[Defines::BUFFERSIZE];
+		overlap->wsabuf.len = Defines::BUFFERSIZE;
 	});
 	recvOverlappedPool->SetDestructor([](MinNetRecvOverlapped * overlap) {
 		delete[] overlap->wsabuf.buf;
@@ -74,15 +74,15 @@ void MinNetPool::Init()
 		ZeroMemory(overlap, sizeof(MinNetOverlapped));
 		overlap->type = MinNetOverlapped::TYPE::RECV;
 
-		ZeroMemory(overlap->wsabuf.buf, 1024);
-		overlap->wsabuf.len = 1024;
+		ZeroMemory(overlap->wsabuf.buf, Defines::BUFFERSIZE);
+		overlap->wsabuf.len = Defines::BUFFERSIZE;
 	});
 	recvOverlappedPool->AddObject(100);
 
 	packetPool->SetOnPush([](MinNetPacket * packet) {
 		packet->buffer_position = 0;
 		packet->body_size = 0;
-		ZeroMemory(packet->buffer, 1024);
+		ZeroMemory(packet->buffer, Defines::PACKETSIZE);
 	});
-	packetPool->AddObject(10);
+	packetPool->AddObject(3000);
 }

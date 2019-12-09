@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClInclude Include="BattleFieldManager.h" />
     <ClInclude Include="ComponentTest.h" />
+    <ClInclude Include="Debug.h" />
     <ClInclude Include="EasyContainer.h" />
     <ClInclude Include="FirstPersonController.h" />
     <ClInclude Include="LobbyUser.h" />
@@ -167,6 +168,7 @@
   <ItemGroup>
     <ClCompile Include="BattleFieldManager.cpp" />
     <ClCompile Include="ComponentTest.cpp" />
+    <ClCompile Include="Debug.cpp" />
     <ClCompile Include="EasyContainer.cpp" />
     <ClCompile Include="FirstPersonController.cpp" />
     <ClCompile Include="LobbyUser.cpp" />

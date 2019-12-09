@@ -1,6 +1,7 @@
 #pragma once
 
 #include <WinSock2.h>
+#include "MinNet.h"
 
 class MinNetUser;
 class MinNetPacket;
@@ -18,7 +19,7 @@ struct MinNetOverlapped : OVERLAPPED
 struct MinNetAcceptOverlapped : MinNetOverlapped
 {
 	SOCKET socket;
-	char buf[1024] = { '\0' };
+	char buf[Defines::BUFFERSIZE] = { '\0' };
 	DWORD dwBytes;
 };
 

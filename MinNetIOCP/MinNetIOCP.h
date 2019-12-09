@@ -29,6 +29,8 @@ public:
 	std::string GetIP();
 	void StartSend(MinNetUser * user, MinNetPacket * packet);
 
+	MinNetSpinLock consoleLock;
+
 private:
 
 	LPFN_ACCEPTEX lpfnAcceptEx = NULL;

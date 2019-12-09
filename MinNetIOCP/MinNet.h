@@ -9,6 +9,7 @@
 #include <map>
 #include <list>
 #include "EasyContainer.h"
+#include "MinNetOptimizer.h"
 
 class MinNetRoom;
 class MinNetGameObject;
@@ -19,6 +20,10 @@ class Defines
 {
 public:
 	static const short HEADERSIZE = 2 + 4;
+	static const short BUFFERSIZE = 4096;
+	static const short PACKETSIZE = 1024;
+	static const short TEMPORARYBUFFERSIZE = 10240;
+
 	enum MinNetPacketType 
 	{
 		OTHER_USER_ENTER_ROOM = -8200, 
@@ -166,7 +171,8 @@ class MinNetUser
 {
 public:
 
-	byte temporary_buffer[2048] = { '\0', };
+	MinNetSpinLock temproraryLock;
+	byte temporary_buffer[Defines::TEMPORARYBUFFERSIZE] = { '\0', };
 	int buffer_position = 0;
 	SOCKET sock;
 	int ping = -1;

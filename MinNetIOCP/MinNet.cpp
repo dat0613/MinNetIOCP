@@ -117,7 +117,7 @@ void BitConverter::ByteCopy(byte * dst, int dst_position, byte * src, int src_le
 
 MinNetPacket::MinNetPacket()				//패킷의 생성자
 {
-	buffer = new byte[1024]();
+	buffer = new byte[Defines::PACKETSIZE]();
 	//buffer = { 0, };
 	buffer_position = 0;
 }
@@ -300,31 +300,24 @@ int MinNetPacket::Parse(byte * arr, int length)
 {
 	buffer_position = 0;// 버퍼 위치를 0으로 초기화 시킴
 
-	if (length < 6 - 1)// 최소한 헤더만큼 있는지 확인
+	if (length < Defines::HEADERSIZE)// 최소한 헤더만큼 있는지 확인
 		return 0;
 
-	byte * real_buffer = buffer;// 현재 할당 되어있는 버퍼를 잠시 저장해둠
+	byte * real_buffer = buffer;// 현재 할당 되어있는 버퍼의 주소를 기억해둠
 
 	buffer = arr;// 메모리의 이동을 최소화 하기 위해 패킷의 버퍼를 잠시동안 arr로 변경한 후 검사함
 
 	body_size = pop_short();// 몸체 크기 받음
 	packet_type = pop_int();// 패킷 타입 받음
 
-	buffer = real_buffer;// arr에 필요한 데이터가 전부 있는것으로 판단되어 원래 버퍼로 돌아옴
+	buffer = real_buffer;// arr에 필요한 데이터가 전부 있는것으로 판단되어 원래 버퍼주소로 돌아옴
 
-	if (length < 6 + body_size - 1 - 1)// 몸체가 전부 있는지 체크
+	if (length < Defines::HEADERSIZE + body_size)// 몸체가 전부 있는지 체크
 		return 0;
 
-	memcpy(real_buffer, arr, length + body_size);// 몸체를 받아옴
+	memcpy(buffer, arr, Defines::HEADERSIZE + body_size);// 몸체를 파싱하기위해 패킷에 넣음
 
-	byte * arr_cpy = new byte[length];
-	memcpy(arr_cpy, arr, length);// arr을 임시 저장해둠
-
-	ZeroMemory(arr, length);// arr을 비움
-
-	memcpy(arr, &arr_cpy[body_size + 6], length - body_size - 6);// arr에 위에서 처리한 만큼의 데이터를 뺀채로 넣음
-
-	delete[] arr_cpy;
+	memmove(arr, &arr[body_size + Defines::HEADERSIZE], length - body_size - Defines::HEADERSIZE);// 빼낸 크기만큼 버퍼를 앞으로 당김
 
 	return body_size + 6;
 }

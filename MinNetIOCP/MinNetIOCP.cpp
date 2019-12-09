@@ -183,7 +183,7 @@ std::string MinNetIOCP::GetIP()
 DWORD WINAPI MinNetIOCP::WorkThread(LPVOID arg)
 {
 	HANDLE hcp = (HANDLE)arg;
-	int retval;
+	BOOL retval;
 	DWORD cbTransferred;
 	SOCKET sock;
 	MinNetOverlapped * overlap;
@@ -199,10 +199,7 @@ DWORD WINAPI MinNetIOCP::WorkThread(LPVOID arg)
 			INFINITE
 		);
 
-		//if (retval == 0 || cbTransferred == 0)
-		//	continue;
-
-		if (retval > 0)
+		if (retval)
 		{
 			switch (overlap->type)
 			{
@@ -230,7 +227,8 @@ DWORD WINAPI MinNetIOCP::WorkThread(LPVOID arg)
 				StartClose(((MinNetRecvOverlapped *)overlap)->user);
 			}
 		}
-		_sleep(0);
+
+		//_sleep(0);
 	}
 	return 0;
 }
@@ -263,7 +261,7 @@ void MinNetIOCP::PingTest()
 
 			if (user->last_ping != -1)
 			{
-				if (curTie - user->last_pong > 5000)
+				if (curTie - user->last_pong > 10000)
 				{
 					std::cout << user << " 이 응답하지 않아 연결 끊음" << std::endl;
 					removeQ.push(user);
@@ -346,7 +344,7 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 	if (setsockopt(overlap->socket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (const char*)&listen_socket, sizeof(SOCKET)) == SOCKET_ERROR)
 	{
 		// 대충 오류니까 overlap->socket 닫음
-		std::cout << "EndAccept error" << std::endl;
+		std::cout << "EndAccept error : " << WSAGetLastError() << std::endl;
 
 		MinNetUser * user = MinNetPool::userPool->pop();
 		user->sock = overlap->socket;
@@ -470,16 +468,20 @@ void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
 
 	MinNetUser * user = overlap->user;
 
-	memcpy(&user->temporary_buffer[user->buffer_position], overlap->wsabuf.buf, len);
+	//memcpy(&user->temporary_buffer[user->buffer_position], overlap->wsabuf.buf, len);
+	user->temproraryLock.lock();
+	memmove(&user->temporary_buffer[user->buffer_position], &overlap->wsabuf.buf[0], len);
 	user->buffer_position += len;
+	user->temproraryLock.unlock();
 
 	while (true)
 	{
-
 		MinNetPacket * packet = MinNetPool::packetPool->pop();
 
+		user->temproraryLock.lock();
 		int checked = packet->Parse(user->temporary_buffer, user->buffer_position);
 		user->buffer_position -= checked;
+		user->temproraryLock.unlock();
 
 		if (checked == 0)// 패킷을 완성하지 못함
 		{
@@ -545,14 +547,4 @@ void MinNetIOCP::OnPong(MinNetUser * user, MinNetPacket * packet)
 	StartSend(user, cast);
 
 	MinNetPool::packetPool->push(cast);
-}
-
-void MinNetSpinLock::lock()
-{
-	while (locker.test_and_set(std::memory_order_acquire));
-}
-
-void MinNetSpinLock::unlock()
-{
-	locker.clear(std::memory_order_release);
 }

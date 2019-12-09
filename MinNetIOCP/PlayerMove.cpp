@@ -84,7 +84,7 @@ void PlayerMove::HitSync(int hitObjectID, Vector3 hitPosition, Vector3 shotPosit
 
 	float distance = Vector3::distance(hitPosition, hitObj->position);// 로컬과 서버의 위치 차이 계산
 
-	if (distance < 0.5f)// 위치 차이가 너무 많이 나면 동기화가 깨졌거나 해킹된 클라이언트라고 판단
+	if (distance < 2.0f)// 위치 차이가 너무 많이 나면 동기화가 깨졌거나 해킹된 클라이언트라고 판단
 	{// 맞았다고 판단
 		int hitDamage = damage + static_cast<int>(isHead) * (battleFieldManager->headShotDamageMultiple - 1.0f) * damage;
 		RPC("HitSuccess", gameObject->owner, isHead, hitDamage);// 적중하는데 성공했다고 알려줌
@@ -197,6 +197,8 @@ void PlayerMove::Awake()
 	if (battleFieldManagerObject == nullptr)
 		return;
 
+	playerName = gameObject->owner->userValue.GetValueString("NickName");
+
 	battleFieldManager = battleFieldManagerObject->GetComponent<BattleFieldManager>();
 	if (battleFieldManager == nullptr)
 		return;
@@ -226,7 +228,7 @@ void PlayerMove::Update()
 
 void PlayerMove::OnInstantiate(MinNetUser * user)
 {
-	RPC("OnInstantiate", MinNetRpcTarget::AllNotServer, static_cast<int>(team), static_cast<int>(state), maxHP, user->userValue.GetValueString("NickName"));
+	RPC("OnInstantiate", MinNetRpcTarget::AllNotServer, static_cast<int>(team), static_cast<int>(state), maxHP, gameObject->owner->userValue.GetValueString("NickName"));
 	SyncScore();
 }
 
@@ -267,15 +269,15 @@ void PlayerMove::Chat(std::string chat)
 	switch (team)
 	{
 	case PlayerMove::Team::Red:
-		r = 84.0f / 255.0f;
-		g = 119.0f / 255.0f;
-		b = 151.0f / 255.0f;
+		r = 223.0f / 255.0f;
+		g = 100.0f / 255.0f;
+		b = 100.0f / 255.0f;
 		break;
 
 	case PlayerMove::Team::Blue:
 		r = 84.0f / 255.0f;
-		g = 100.0f / 255.0f;
-		b = 100.0f / 255.0f;
+		g = 119.0f / 255.0f;
+		b = 151.0f / 255.0f;
 		break;
 
 	case PlayerMove::Team::Spectator:

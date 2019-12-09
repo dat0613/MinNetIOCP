@@ -6,6 +6,8 @@
 class MinNetSpinLock
 {
 public:
+	MinNetSpinLock();
+	~MinNetSpinLock();
 	void lock();
 	void unlock();
 

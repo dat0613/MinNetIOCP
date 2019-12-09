@@ -12,6 +12,8 @@
 #include "ReadyRoomManager.h"
 #include "ReadyUser.h"
 
+#include "Debug.h"
+
 void main()
 {
 	MinNetCache::SetComponentCache("ThirdPersonPlayer", [](MinNetGameObject * object)
@@ -119,7 +121,6 @@ void main()
 	});
 
 	MinNetCache::SetSceneCache("Lobby", "Lobby");
-
 
 	MinNetIOCP * iocp = new MinNetIOCP();
 	iocp->SetTickrate(20);
