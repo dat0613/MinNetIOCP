@@ -27,7 +27,7 @@ public:
 	void ServerLoop();
 
 	std::string GetIP();
-	void StartSend(MinNetUser * user, MinNetPacket * packet);
+	void StartSend(MinNetUser * user, MinNetPacket * packet, bool isTcp = true);
 
 	MinNetSpinLock consoleLock;
 
@@ -35,6 +35,9 @@ private:
 
 	LPFN_ACCEPTEX lpfnAcceptEx = NULL;
 	GUID guidAcceptEx = WSAID_ACCEPTEX;
+
+	LPFN_GETACCEPTEXSOCKADDRS lpfnGetAcceptExSockaddrs = NULL;
+	GUID guidGetAcceptSockAddrs = WSAID_GETACCEPTEXSOCKADDRS;
 
 	HANDLE hPort = nullptr;
 	HANDLE port = nullptr;
@@ -68,7 +71,7 @@ private:
 	void StartClose(MinNetUser * user);
 	void EndClose(MinNetCloseOverlapped * overlap);
 
-	void StartRecv(MinNetUser * user);
+	void StartRecv(MinNetUser * user, bool isTcp = true);
 	void EndRecv(MinNetRecvOverlapped * overlap, int len);
 
 	void EndSend(MinNetSendOverlapped * overlap);

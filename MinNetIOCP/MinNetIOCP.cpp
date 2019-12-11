@@ -5,6 +5,7 @@
 #include "MinNetPool.h"
 #include "MinNetRoom.h"
 #include "Time.h"
+#include "Debug.h"
 
 MinNetIOCP::MinNetIOCP() : room_manager(this)
 {
@@ -39,14 +40,15 @@ void MinNetIOCP::StartServer()
 	WSADATA wsa;
 	if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
 	{
-		printf("WSAStartup error");
+		Debug::Log("WSAStartup error");
 		return;
 	}
 
 	hPort = CreateIoCompletionPort(INVALID_HANDLE_VALUE, NULL, 0, 0);
 	if (hPort == nullptr)
 	{
-		std::cout << "CreateIoCompletionPort error" << std::endl;
+		Debug::Log("CreateIoCompletionPort error");
+		
 		return;
 	}
 
@@ -63,7 +65,7 @@ void MinNetIOCP::StartServer()
 	tcpSocket = WSASocket(PF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	if (tcpSocket == INVALID_SOCKET)
 	{
-		printf("WSASocket error");
+		Debug::Log("WSASocket error");
 		return;
 	}
 
@@ -77,19 +79,15 @@ void MinNetIOCP::StartServer()
 	udpSocket = WSASocket(PF_INET, SOCK_DGRAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 	if (bind(udpSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR)
 	{
-		printf("bind error");
+		Debug::Log("bind error");
 		return;
 	}
-
-
-	if(setsockopt(udpSocket, SOL_SOCKET, SO_RCVBUF, (const char*)))
 	
 	char iSockOpt = 1;
 	setsockopt(tcpSocket, SOL_SOCKET, SO_REUSEADDR, &iSockOpt, sizeof(iSockOpt));
 
-
-
 	CreateIoCompletionPort((HANDLE)tcpSocket, hPort, tcpSocket, 0);
+	CreateIoCompletionPort((HANDLE)udpSocket, hPort, udpSocket, 0);
 
 	BOOL on = TRUE;
 	if (setsockopt(tcpSocket, SOL_SOCKET, SO_CONDITIONAL_ACCEPT, (char *)&on, sizeof(on)))
@@ -99,7 +97,7 @@ void MinNetIOCP::StartServer()
 	int retval = bind(tcpSocket, (sockaddr*)&serverAddr, sizeof(serverAddr));
 	if (retval == SOCKET_ERROR)
 	{
-		printf("bind error");
+		Debug::Log("bind error");
 		return;
 	}
 
@@ -108,15 +106,25 @@ void MinNetIOCP::StartServer()
 	if (retval == SOCKET_ERROR)
 		if (WSAGetLastError() != WSA_IO_PENDING)
 		{
-			printf("WSAIoctl error");
+			Debug::Log("WSAIoctl error");
 			return;
 		}
+
+	retval = WSAIoctl(tcpSocket, SIO_GET_EXTENSION_FUNCTION_POINTER, &guidGetAcceptSockAddrs, sizeof(guidGetAcceptSockAddrs), &lpfnGetAcceptExSockaddrs, sizeof(lpfnGetAcceptExSockaddrs), &dwBytes, NULL, NULL);
+	if (retval == SOCKET_ERROR)
+	{
+		if (WSAGetLastError() != WSA_IO_PENDING)
+		{
+			Debug::Log("WSAIoctl error");
+			return;
+		}
+	}
 
 
 	retval = listen(tcpSocket, SOMAXCONN);
 	if (retval == SOCKET_ERROR)
 	{
-		printf("listen error");
+		Debug::Log("listen error");
 		return;
 	}
 
@@ -124,8 +132,8 @@ void MinNetIOCP::StartServer()
 
 	StartAccept();
 
-	std::cout << "서버 시작" << std::endl;
-	std::cout << "IP : " << GetIP().c_str() << std::endl;
+	Debug::Log("서버 시작");
+	Debug::Log("IP ",GetIP().c_str());
 
 	room_manager.GetPeacefulRoom("Main");// 기본적으로 있어야 하는 룸을 만듦
 }
@@ -338,8 +346,8 @@ void MinNetIOCP::StartAccept()
 		overlap->socket,
 		(LPVOID)&overlap->buf,
 		0,
-		sizeof(SOCKADDR_IN) + 16,
-		sizeof(SOCKADDR_IN) + 16,
+		sizeof(sockaddr_in) + 16,
+		sizeof(sockaddr_in) + 16,
 		&overlap->dwBytes,
 		overlap
 	);
@@ -365,25 +373,22 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 		return;
 	}
 
-	//SOCKADDR *local_addr, *remote_addr;
-	//int l_len = 0, r_len = 0;
-	//GetAcceptExSockaddrs
-	//(
-	//	(LPVOID)&overlap->buf,
-	//	(sizeof(SOCKADDR_IN) + 16) * 2,
-	//	sizeof(SOCKADDR_IN) + 16,
-	//	sizeof(SOCKADDR_IN) + 16,
-	//	&local_addr,
-	//	&l_len,
-	//	&remote_addr,
-	//	&r_len
-	//);
+	SOCKADDR *local_addr, *remote_addr;
+	int l_len = 0, r_len = 0;
+	lpfnGetAcceptExSockaddrs
+	(
+		(LPVOID)&overlap->buf,
+		0,
+		sizeof(SOCKADDR_IN) + 16,
+		sizeof(SOCKADDR_IN) + 16,
+		&local_addr,
+		&l_len,
+		&remote_addr,
+		&r_len
+	);
 
-	//sockaddr_in * sin = SOCKADDRtoSOCKADDR_IN(remote_addr);
-
-	//cout << inet_ntoa(sin->sin_addr) << endl;
-
-	std::cout << "새로운 유저 접속 : " << overlap->socket << std::endl;
+	sockaddr_in * sin = SOCKADDRtoSOCKADDR_IN(remote_addr);
+	Debug::Log("새로운 유저 접속", overlap->socket, inet_ntoa(sin->sin_addr));
 
 	HANDLE hResult = CreateIoCompletionPort((HANDLE)overlap->socket, hPort, (DWORD)overlap->socket, 0);
 	if (hResult == NULL)
@@ -395,6 +400,7 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 	user_list.push_back(user);
 
 	user->isConnected = true;
+	user->addr = sin;
 
 	MinNetPacket * packet = MinNetPool::packetPool->pop();
 	packet->create_packet(Defines::MinNetPacketType::USER_ENTER_ROOM);
@@ -408,8 +414,9 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 
 	MinNetPool::acceptOverlappedPool->push(overlap);
 
-	StartRecv(user);
-
+	StartRecv(user, true);
+	StartRecv(user, false);
+	
 	StartAccept();// 다음 클라이언트를 받을 준비를 함
 }
 
@@ -448,7 +455,7 @@ void MinNetIOCP::EndClose(MinNetCloseOverlapped * overlap)
 	MinNetPool::closeOverlappedPool->push(overlap);
 }
 
-void MinNetIOCP::StartRecv(MinNetUser * user)
+void MinNetIOCP::StartRecv(MinNetUser * user, bool isTcp)
 {
 	MinNetRecvOverlapped * overlap = MinNetPool::recvOverlappedPool->pop();
 
@@ -456,8 +463,21 @@ void MinNetIOCP::StartRecv(MinNetUser * user)
 
 	DWORD recvbytes;
 	DWORD flags = 0;
-	int retval = WSARecv(user->sock, &overlap->wsabuf, 1, &recvbytes, &flags, overlap, NULL);
 
+	int retval = 0;
+	overlap->isTcp = isTcp;
+
+	if (isTcp)
+	{
+		retval = WSARecv(user->sock, &overlap->wsabuf, 1, &recvbytes, &flags, overlap, NULL);
+	}
+	else
+	{
+		overlap->addr = user->addr;
+		int lenSize = sizeof(SOCKADDR_IN);
+		retval = WSARecvFrom(udpSocket, &overlap->wsabuf, 1, &recvbytes, &flags, (sockaddr *)overlap->addr, &lenSize, overlap, NULL);
+	}
+	
 	if (retval == SOCKET_ERROR)
 	{
 		if (WSAGetLastError() != WSA_IO_PENDING)
@@ -479,21 +499,40 @@ void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
 		return;
 	}
 
+	auto isTcp = overlap->isTcp;
+
 	MinNetUser * user = overlap->user;
 
-	user->temproraryLock.lock();
-	memmove(&user->temporary_buffer[user->buffer_position], &overlap->wsabuf.buf[0], len);
-	user->buffer_position += len;
-	user->temproraryLock.unlock();
+	int * bufferPosition = nullptr;
+	byte * buffer = nullptr;
+	MinNetSpinLock * spinLock = nullptr;
+
+	if (isTcp)
+	{
+		bufferPosition = &user->tcpBufferPosition;
+		buffer = user->tcpBuffer;
+		spinLock = &user->tcpBufferLock;
+	}
+	else
+	{
+		bufferPosition = &user->udpBufferPosition;
+		buffer = user->udpBuffer;
+		spinLock = &user->udpBufferLock;
+	}
+
+	spinLock->lock();
+	memmove(&buffer[*bufferPosition], &overlap->wsabuf.buf[0], len);
+	*bufferPosition += len;
+	spinLock->unlock();
 
 	while (true)
 	{
 		MinNetPacket * packet = MinNetPool::packetPool->pop();
 
-		user->temproraryLock.lock();
-		int checked = packet->Parse(user->temporary_buffer, user->buffer_position);
-		user->buffer_position -= checked;
-		user->temproraryLock.unlock();
+		spinLock->lock();
+		int checked = packet->Parse(buffer, *bufferPosition);
+		*bufferPosition -= checked;
+		spinLock->unlock();
 
 		if (checked == 0)// 패킷을 완성하지 못함
 		{
@@ -506,17 +545,18 @@ void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
 		else
 		{
 			messageQ_spin_lock.lock();
+			packet->isTcpCasting = isTcp;
 			recvQ.push(std::make_pair(packet, user));
 			messageQ_spin_lock.unlock();
 		}
 	}
 
-	StartRecv(user);
+	StartRecv(user, isTcp);
 
 	MinNetPool::recvOverlappedPool->push(overlap);
 }
 
-void MinNetIOCP::StartSend(MinNetUser * user, MinNetPacket * packet)
+void MinNetIOCP::StartSend(MinNetUser * user, MinNetPacket * packet, bool isTcp)
 {
 	if (user == nullptr || user->loadingEnd == false)
 		return;
@@ -524,8 +564,19 @@ void MinNetIOCP::StartSend(MinNetUser * user, MinNetPacket * packet)
 	MinNetSendOverlapped * overlap = MinNetPool::sendOverlappedPool->pop();
 	memcpy(overlap->wsabuf.buf, packet->buffer, packet->size());
 	overlap->wsabuf.len = packet->size();
+	overlap->isTcp = isTcp;
 
-	int retval = WSASend(user->sock, &overlap->wsabuf, 1, nullptr, 0, overlap, nullptr);
+	int retval = 0;
+
+	if (isTcp || user->addr == nullptr)
+	{
+		retval = WSASend(user->sock, &overlap->wsabuf, 1, nullptr, 0, overlap, nullptr);
+	}
+	else
+	{
+		retval = WSASendTo(udpSocket, &overlap->wsabuf, 1,nullptr, 0, (sockaddr*)user->addr, sizeof(SOCKADDR_IN), overlap, NULL);
+	}
+
 
 	if (retval == SOCKET_ERROR)
 	{

@@ -81,8 +81,8 @@ public:
 	MinNetUser * GetUser(int id);
 
 	void ObjectRPC(MinNetUser * user, MinNetPacket * packet);
-	void SendRPC(int objectId, std::string componentName, std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters);
-	void SendRPC(int objectId, std::string componentName, std::string methodName, MinNetUser * target, MinNetPacket * parameters);
+	void SendRPC(int objectId, std::string componentName, std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters, bool isTcp);
+	void SendRPC(int objectId, std::string componentName, std::string methodName, MinNetUser * target, MinNetPacket * parameters, bool isTcp);
 
 	void SetSceneName(std::string sceneName);
 

@@ -164,6 +164,8 @@ public:
 	Vector3 pop_vector3();
 	int Parse(byte * arr, int length);
 
+	bool isTcpCasting = true;
+
 private:
 };
 
@@ -171,9 +173,14 @@ class MinNetUser
 {
 public:
 
-	MinNetSpinLock temproraryLock;
-	byte temporary_buffer[Defines::TEMPORARYBUFFERSIZE] = { '\0', };
-	int buffer_position = 0;
+	MinNetSpinLock tcpBufferLock;
+	byte tcpBuffer[Defines::TEMPORARYBUFFERSIZE] = { '\0', };
+	MinNetSpinLock udpBufferLock;
+	byte udpBuffer[Defines::TEMPORARYBUFFERSIZE] = { '\0', };
+
+	int tcpBufferPosition = 0;
+	int udpBufferPosition = 0;
+
 	SOCKET sock;
 	int ping = -1;
 
@@ -181,6 +188,8 @@ public:
 	
 	bool isConnected = false;
 	bool loadingEnd = true;
+
+	SOCKADDR_IN * addr = nullptr;
 
 	void ChangeRoom(MinNetRoom * room);
 	void ChangeRoom(std::string roomName);

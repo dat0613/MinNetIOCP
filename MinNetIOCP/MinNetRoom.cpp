@@ -513,7 +513,7 @@ void MinNetRoom::ObjectRPC(MinNetUser * user, MinNetPacket * packet)
 	}
 }
 
-void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters)
+void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string methodName, MinNetRpcTarget target, MinNetPacket * parameters, bool isTcp)
 {
 	MinNetPacket * rpcPacket = MinNetPool::packetPool->pop();
 	rpcPacket->create_packet((int)Defines::MinNetPacketType::RPC);
@@ -546,6 +546,8 @@ void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string me
 
 	rpcPacket->create_header();
 
+	rpcPacket->isTcpCasting;
+
 	if(target == MinNetRpcTarget::Others)
 	{
 		if (obj->owner != nullptr)
@@ -559,7 +561,7 @@ void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string me
 	MinNetPool::packetPool->push(rpcPacket);
 }
 
-void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string methodName, MinNetUser * target, MinNetPacket * parameters)
+void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string methodName, MinNetUser * target, MinNetPacket * parameters, bool isTcp)
 {
 	MinNetPacket * rpcPacket = MinNetPool::packetPool->pop();
 	rpcPacket->create_packet((int)Defines::MinNetPacketType::RPC);
@@ -581,6 +583,8 @@ void MinNetRoom::SendRPC(int objectId, std::string componentName, std::string me
 	}
 
 	rpcPacket->create_header();
+
+	rpcPacket->isTcpCasting;
 
 	manager->Send(target, rpcPacket);
 
@@ -655,7 +659,7 @@ void MinNetRoomManager::Send(MinNetRoom * room, MinNetPacket * packet, MinNetUse
 
 void MinNetRoomManager::Send(MinNetUser * user, MinNetPacket * packet)
 {
-	minnet->StartSend(user, packet);
+	minnet->StartSend(user, packet, packet->isTcpCasting);
 }
 
 void MinNetRoomManager::PacketHandler(MinNetUser * user, MinNetPacket * packet)

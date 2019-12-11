@@ -31,10 +31,13 @@ struct MinNetSendOverlapped : MinNetOverlapped
 {
 	MinNetUser * user;
 	WSABUF wsabuf;
+	bool isTcp;
 };
 
 struct MinNetRecvOverlapped : MinNetOverlapped
 {
 	MinNetUser * user;
 	WSABUF wsabuf;
+	SOCKADDR_IN * addr = nullptr;
+	bool isTcp;
 };
