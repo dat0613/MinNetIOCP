@@ -18,7 +18,7 @@ public:
 	static void Reader();
 
 private:
-	static MinNetSpinLock consoleLock;
+	static MinNetSpinLock consoleLock;// 다수의 스레드가 콘솔창에 접근하기 때문에 가끔 문장이 합처지는 경우가 있어 lock한 후 프린트 함
 
 };
 

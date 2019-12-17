@@ -295,8 +295,6 @@ void MinNetRoom::RemoveUser(MinNetUser * user)
 	if (user == nullptr)
 		return;
 
-	//std::cout << user << " 유저가 방에서 나감" << std::endl;
-
 	user_map.erase(user->ID);
 	user_list.remove(user); 
 

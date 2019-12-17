@@ -33,7 +33,7 @@ void MinNetIOCP::SetTickrate(int tick)
 	this->tick = tick;
 }
 
-void MinNetIOCP::StartServer()
+void MinNetIOCP::StartServer()// 서버 시작
 {	
 	srand(static_cast<unsigned int>(time(NULL)));
 
@@ -310,7 +310,7 @@ void MinNetIOCP::PingTest()
 	}
 }
 
-void MinNetIOCP::SendPing(MinNetUser * user)
+void MinNetIOCP::SendPing(MinNetUser * user)// 클라이언트 에게 핑을 알려줌
 {
 	MinNetPacket * packet = MinNetPool::packetPool->pop();
 
@@ -324,7 +324,7 @@ void MinNetIOCP::SendPing(MinNetUser * user)
 	MinNetPool::packetPool->push(packet);
 }
 
-void MinNetIOCP::SyncTime(MinNetUser * user)
+void MinNetIOCP::SyncTime(MinNetUser * user)// 클라이언트의 시간을 맞춤
 {
 	MinNetPacket * packet = MinNetPool::packetPool->pop();
 
@@ -530,7 +530,7 @@ void MinNetIOCP::EndRecv(MinNetRecvOverlapped * overlap, int len)
 		MinNetPacket * packet = MinNetPool::packetPool->pop();
 
 		spinLock->lock();
-		int checked = packet->Parse(buffer, *bufferPosition);
+		int checked = packet->Parse(buffer, *bufferPosition);// 잘린 패킷을 합치거나 이어진 패킷을 자름
 		*bufferPosition -= checked;
 		spinLock->unlock();
 

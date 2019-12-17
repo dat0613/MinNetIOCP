@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 
-class EasyContainer
+class EasyContainer// key (string) : value (string) 로 저장되는 컨테이너
 {
 public:
 	EasyContainer();

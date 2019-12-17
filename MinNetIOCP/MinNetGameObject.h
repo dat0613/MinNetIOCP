@@ -22,10 +22,10 @@ class MinNetGameObject
 {
 private:
 
-	std::map<std::string, std::shared_ptr<MinNetComponent>> componentMap;
-	std::list<std::shared_ptr<MinNetComponent>> componentList;
+	std::map<std::string, std::shared_ptr<MinNetComponent>> componentMap;// 컴포넌트를 찾을때 사용할 map
+	std::list<std::shared_ptr<MinNetComponent>> componentList;// 컴포넌트를 순회하며 update등의 함수를 호출할 때 사용할 list
 
-	std::string name = "";
+	std::string name = "";// 프리펩의 이름
 	MinNetRoom * nowRoom = nullptr;
 	int objectId = -1;
 
@@ -62,12 +62,12 @@ public:
 	void Awake();
 	void Update();
 
-	std::shared_ptr<MinNetComponent> GetComponent(std::string componentName);
+	std::shared_ptr<MinNetComponent> GetComponent(std::string componentName);// 컴포넌트를 찾는 함수
 
 	template <typename T>
 	T * GetComponent();
 
-	EasyContainer gameObjectOption;
+	EasyContainer gameObjectOption;// 임시 값 들을 저장할 컨테이너
 
 public:
 

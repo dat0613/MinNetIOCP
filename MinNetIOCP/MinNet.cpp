@@ -266,7 +266,7 @@ std::string MinNetPacket::pop_string()
 	return StringConverter::UTF8ToMultibyte(utf8);
 }
 
-//const char * MinNetPacket::pop_const_char()
+//const char * MinNetPacket::pop_const_char() // 생각보다 쓸모가 없어서 뺌
 //{
 //	auto str = pop_string();
 //	return str.c_str();
