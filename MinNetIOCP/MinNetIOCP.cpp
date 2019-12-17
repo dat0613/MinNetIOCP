@@ -4,7 +4,7 @@
 #include "MinNetPool.h"
 #include "MinNetPool.h"
 #include "MinNetRoom.h"
-#include "Time.h"
+#include "MinNetTime.h"
 #include "Debug.h"
 
 MinNetIOCP::MinNetIOCP() : room_manager(this)
@@ -176,7 +176,7 @@ void MinNetIOCP::ServerLoop()
 		}
 
 		room_manager.Update();
-		Time::FrameEnd();
+		MinNetTime::FrameEnd();
 
 
 		_sleep(sleep_time);
@@ -272,7 +272,7 @@ void MinNetIOCP::PingTest()
 {
 	std::queue<MinNetUser *> removeQ;
 
-	auto curTie = Time::curTime();
+	auto curTie = MinNetTime::curTime();
 
 	if (user_list.size() > 0)
 	{

@@ -4,8 +4,7 @@
 #include <iostream>
 #include <functional>
 #include <map>
-#include <ctime>
-#include "Time.h"
+#include "MinNetTime.h"
 #include "MinNetPool.h"
 #include "MinNet.h"
 #include "MinNetRoom.h"

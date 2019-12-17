@@ -184,11 +184,6 @@ void MinNetPacket::push(short data)					//short형 데이터를 패킷에 넣는 함수
 	buffer_position += sizeof(data);
 }
 
-void MinNetPacket::push(f data)
-{
-	push(data.value);
-}
-
 void MinNetPacket::push(float data)					//float형 데이터를 패킷에 넣는 함수
 {
 	byte* temp_buffer = BitConverter::GetBytes(data);

@@ -10,6 +10,7 @@
 #include <list>
 #include "EasyContainer.h"
 #include "MinNetOptimizer.h"
+#include "MinNetTime.h"
 
 class MinNetRoom;
 class MinNetGameObject;
@@ -113,18 +114,6 @@ public:
 	friend std::ostream& operator<< (std::ostream& o, const Vector2& vector2);
 };
 
-class f	// Lua에서 int와 float을 구분하기 위한 Wrapping 클래스
-{
-public:
-
-	f(float value)
-	{
-		this->value = value;
-	}
-
-	float value;
-};
-
 class MinNetPacket
 {
 	friend class MinNetUser;
@@ -147,7 +136,6 @@ public:
 	void push(int data);
 	void push(bool data);
 	void push(short data);
-	void push(f data);
 	void push(float data);
 	void push(std::string str);
 	void push(const char * str);
