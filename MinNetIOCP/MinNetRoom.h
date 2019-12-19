@@ -109,7 +109,7 @@ private:
 class MinNetRoomManager
 {
 public:
-	MinNetRoomManager(MinNetIOCP * minnet);
+	MinNetRoomManager();
 	MinNetRoom * GetPeacefulRoom(std::string roomName);
 	MinNetRoom * GetRoom(int roomId);
 
@@ -129,5 +129,4 @@ private:
 	void DestroyRoom(MinNetRoom * room);
 
 	std::list<MinNetRoom *> room_list;
-	MinNetIOCP * minnet;
 };

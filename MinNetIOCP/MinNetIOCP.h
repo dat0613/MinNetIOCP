@@ -10,71 +10,69 @@
 
 #pragma comment (lib,"ws2_32.lib")
 #pragma comment (lib, "mswsock.lib")
-//#pragma pack(1)
-
 
 class MinNetUser;
 class MinNetPacket;
 
-class MinNetIOCP
+static class MinNetIOCP
 {
 public:
 	MinNetIOCP();
 	~MinNetIOCP();
 
-	void SetTickrate(int tick);
-	void StartServer();
-	void ServerLoop();
+	static void SetTickrate(int tick);
+	static void StartServer();
+	static void ServerLoop();
 
-	std::string GetIP();
-	void StartSend(MinNetUser * user, MinNetPacket * packet, bool isTcp = true);
-
-	MinNetSpinLock consoleLock;
+	static std::string GetIP();
+	static void StartSend(MinNetUser * user, MinNetPacket * packet, bool isTcp = true);
 
 private:
 
-	LPFN_ACCEPTEX lpfnAcceptEx = NULL;
-	GUID guidAcceptEx = WSAID_ACCEPTEX;
+	static LPFN_ACCEPTEX lpfnAcceptEx;
+	static GUID guidAcceptEx;
 
-	LPFN_GETACCEPTEXSOCKADDRS lpfnGetAcceptExSockaddrs = NULL;
-	GUID guidGetAcceptSockAddrs = WSAID_GETACCEPTEXSOCKADDRS;
+	static LPFN_GETACCEPTEXSOCKADDRS lpfnGetAcceptExSockaddrs;
+	static GUID guidGetAcceptSockAddrs;
 
-	HANDLE hPort = nullptr;
-	HANDLE port = nullptr;
+	static HANDLE hPort;
+	static HANDLE port;
 	
-	int tick = 60;
+	static int tick;
 
-	MinNetRoomManager room_manager;
+	static MinNetRoomManager room_manager;
 
-	MinNetSpinLock messageQ_spin_lock;
+	static MinNetSpinLock messageQ_spin_lock;
 
-	std::list<MinNetUser *> user_list;
-	DWORD WINAPI WorkThread(LPVOID arg);
+	static std::list<MinNetUser *> user_list;
 
-	sockaddr_in * SOCKADDRtoSOCKADDR_IN(sockaddr * addr);
+	static SOCKET tcpSocket;
+	static SOCKET udpSocket;
 
-	SOCKET tcpSocket;
-	SOCKET udpSocket;
+	static DWORD WINAPI WorkThread(LPVOID arg);
 
-	std::queue<std::pair<MinNetPacket *, MinNetUser *>> recvQ;
-	std::queue<std::pair<MinNetPacket *, MinNetUser *>> messageQ;
+	static sockaddr_in * SOCKADDRtoSOCKADDR_IN(sockaddr * addr);
 
-	void PacketHandler(MinNetUser * user, MinNetPacket * packet);
 
-	void PingTest();
-	void SendPing(MinNetUser * user);
-	void SyncTime(MinNetUser * user);
+	static std::queue<std::pair<MinNetPacket *, MinNetUser *>> recvQ;
+	static std::queue<std::pair<MinNetPacket *, MinNetUser *>> messageQ;
 
-	void StartAccept();
-	void EndAccept(MinNetAcceptOverlapped * overlap);
+	static void PacketHandler(MinNetUser * user, MinNetPacket * packet);
 
-	void StartClose(MinNetUser * user);
-	void EndClose(MinNetCloseOverlapped * overlap);
+	static void PingTest();
+	static void SendPing(MinNetUser * user);
+	static void SyncTime(MinNetUser * user);
 
-	void StartRecv(MinNetUser * user, bool isTcp = true);
-	void EndRecv(MinNetRecvOverlapped * overlap, int len);
+	static void StartAccept();
+	static void EndAccept(MinNetAcceptOverlapped * overlap);
 
-	void EndSend(MinNetSendOverlapped * overlap);
+	static void StartClose(MinNetUser * user);
+	static void EndClose(MinNetCloseOverlapped * overlap);
 
-	void OnPong(MinNetUser * user, MinNetPacket * packet);
+	static void StartRecv(MinNetUser * user, bool isTcp = true);
+	static void EndRecv(MinNetRecvOverlapped * overlap, int len);
+
+	static void EndSend(MinNetSendOverlapped * overlap);
+
+	static void OnPong(MinNetUser * user, MinNetPacket * packet);
 };

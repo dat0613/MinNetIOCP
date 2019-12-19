@@ -6,8 +6,32 @@
 #include "MinNetRoom.h"
 #include "MinNetTime.h"
 #include "Debug.h"
+#include "MinNetOptimizer.h"
 
-MinNetIOCP::MinNetIOCP() : room_manager(this)
+LPFN_ACCEPTEX MinNetIOCP::lpfnAcceptEx = NULL;
+GUID MinNetIOCP::guidAcceptEx = WSAID_ACCEPTEX;
+
+LPFN_GETACCEPTEXSOCKADDRS MinNetIOCP::lpfnGetAcceptExSockaddrs = NULL;
+GUID MinNetIOCP::guidGetAcceptSockAddrs = WSAID_GETACCEPTEXSOCKADDRS;
+
+HANDLE MinNetIOCP::hPort = nullptr;
+HANDLE MinNetIOCP::port = nullptr;
+
+int MinNetIOCP::tick = 60;
+
+MinNetRoomManager MinNetIOCP::room_manager = MinNetRoomManager();
+
+MinNetSpinLock MinNetIOCP::messageQ_spin_lock;
+
+std::list<MinNetUser *> MinNetIOCP::user_list = std::list<MinNetUser *>();
+
+SOCKET MinNetIOCP::tcpSocket = SOCKET();
+SOCKET MinNetIOCP::udpSocket = SOCKET();
+
+std::queue<std::pair<MinNetPacket *, MinNetUser *>> MinNetIOCP::recvQ = std::queue<std::pair<MinNetPacket *, MinNetUser *>>();
+std::queue<std::pair<MinNetPacket *, MinNetUser *>> MinNetIOCP::messageQ = std::queue<std::pair<MinNetPacket *, MinNetUser *>>();
+
+MinNetIOCP::MinNetIOCP()
 {
 
 }
@@ -30,7 +54,7 @@ MinNetIOCP::~MinNetIOCP()
 
 void MinNetIOCP::SetTickrate(int tick)
 {
-	this->tick = tick;
+	MinNetIOCP::tick = tick;
 }
 
 void MinNetIOCP::StartServer()// 서버 시작
@@ -120,7 +144,6 @@ void MinNetIOCP::StartServer()// 서버 시작
 		}
 	}
 
-
 	retval = listen(tcpSocket, SOMAXCONN);
 	if (retval == SOCKET_ERROR)
 	{
@@ -146,6 +169,8 @@ void MinNetIOCP::ServerLoop()
 
 	while (true)
 	{
+		// 여기서 nonblocking 데이터 베이스 IO 할것
+
 		cur_time = clock();
 
 		if (cur_time - last_heart_beat > 3000)
@@ -342,7 +367,7 @@ void MinNetIOCP::StartAccept()
 
 	bool error = !lpfnAcceptEx
 	(
-		this->tcpSocket,
+		MinNetIOCP::tcpSocket,
 		overlap->socket,
 		(LPVOID)&overlap->buf,
 		0,

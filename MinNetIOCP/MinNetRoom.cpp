@@ -611,9 +611,9 @@ void MinNetRoom::ObjectDestroy(MinNetUser * user, MinNetPacket * packet)
 	Destroy(prefabName, objectId, true);
 }
 
-MinNetRoomManager::MinNetRoomManager(MinNetIOCP * minnet)
+MinNetRoomManager::MinNetRoomManager()
 {
-	this->minnet = minnet;
+
 }
 
 MinNetRoom * MinNetRoomManager::GetPeacefulRoom(std::string roomName)
@@ -657,7 +657,7 @@ void MinNetRoomManager::Send(MinNetRoom * room, MinNetPacket * packet, MinNetUse
 
 void MinNetRoomManager::Send(MinNetUser * user, MinNetPacket * packet)
 {
-	minnet->StartSend(user, packet, packet->isTcpCasting);
+	MinNetIOCP::StartSend(user, packet, packet->isTcpCasting);
 }
 
 void MinNetRoomManager::PacketHandler(MinNetUser * user, MinNetPacket * packet)
