@@ -1,7 +1,5 @@
 #include "EasyContainer.h"
 
-
-
 EasyContainer::EasyContainer()
 {
 }

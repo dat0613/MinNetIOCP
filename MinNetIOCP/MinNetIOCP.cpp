@@ -1,4 +1,5 @@
 #include "MinNetIOCP.h"
+#include "MinNetMySQL.h"
 
 #include "MinNet.h"
 #include "MinNetPool.h"
@@ -169,7 +170,7 @@ void MinNetIOCP::ServerLoop()
 
 	while (true)
 	{
-		// 여기서 nonblocking 데이터 베이스 IO 할것
+		MinNetMySQL::IOprocessing();// 데이터베이스와의 작업은 싱글 스레드에서만 함 멀티 스레드 로 하기에는 아직 경험이 없음
 
 		cur_time = clock();
 

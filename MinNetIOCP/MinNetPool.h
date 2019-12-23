@@ -6,6 +6,7 @@
 class MinNetRoom;
 class MinNetGameObject;
 class MinNetComponent;
+class NonBlockingDataBaseIO;
 
 static class MinNetPool
 {
@@ -24,4 +25,5 @@ public:
 	static MinNetObjectPool<MinNetRecvOverlapped> * recvOverlappedPool;
 	static MinNetObjectPool<MinNetUser> * userPool;
 	static MinNetObjectPool<MinNetPacket> * packetPool;
+	static MinNetObjectPool<NonBlockingDataBaseIO> * ioPool;
 };

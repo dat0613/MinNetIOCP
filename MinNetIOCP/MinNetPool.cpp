@@ -1,6 +1,6 @@
 #include "MinNetPool.h"
 #include "MinNetRoom.h"
-
+#include "MinNetMySQL.h"
 
 MinNetObjectPool<MinNetAcceptOverlapped> * MinNetPool::acceptOverlappedPool = nullptr;
 MinNetObjectPool<MinNetCloseOverlapped> * MinNetPool::closeOverlappedPool = nullptr;
@@ -8,6 +8,7 @@ MinNetObjectPool<MinNetSendOverlapped> * MinNetPool::sendOverlappedPool = nullpt
 MinNetObjectPool<MinNetRecvOverlapped> * MinNetPool::recvOverlappedPool = nullptr;
 MinNetObjectPool<MinNetUser> * MinNetPool::userPool = nullptr;
 MinNetObjectPool<MinNetPacket> * MinNetPool::packetPool = nullptr;
+MinNetObjectPool<NonBlockingDataBaseIO> * MinNetPool::ioPool = nullptr;
 
 MinNetPool::MinNetPool()
 {
@@ -25,6 +26,7 @@ void MinNetPool::Init()
 	recvOverlappedPool = new MinNetObjectPool<MinNetRecvOverlapped>();
 	userPool = new MinNetObjectPool<MinNetUser>();
 	packetPool = new MinNetObjectPool<MinNetPacket>();
+	ioPool = new MinNetObjectPool<NonBlockingDataBaseIO>();
 
 	userPool->SetOnPush([](MinNetUser * user) {
 		user->ID = -1;
@@ -38,7 +40,6 @@ void MinNetPool::Init()
 		ZeroMemory(user->udpBuffer, Defines::TEMPORARYBUFFERSIZE);
 	});
 	userPool->AddObject(100);
-
 
 	acceptOverlappedPool->SetOnPush([](MinNetAcceptOverlapped * overlap) {
 		ZeroMemory(overlap, sizeof(MinNetAcceptOverlapped));
@@ -93,5 +94,13 @@ void MinNetPool::Init()
 		packet->body_size = 0;
 		ZeroMemory(packet->buffer, Defines::PACKETSIZE);
 	});
-	packetPool->AddObject(3000);
+	packetPool->AddObject(500);
+
+	ioPool->SetOnPush([](NonBlockingDataBaseIO * io)
+	{
+		io->query = "";
+		io->rowVector.clear();
+		io->callback = nullptr;
+	});
+	ioPool->AddObject(100);
 }

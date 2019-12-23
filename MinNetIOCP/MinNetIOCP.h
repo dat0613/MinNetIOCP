@@ -8,8 +8,9 @@
 #include "MinNetRoom.h"
 #include <list>
 
-#pragma comment (lib,"ws2_32.lib")
+#pragma comment (lib, "ws2_32.lib")
 #pragma comment (lib, "mswsock.lib")
+#pragma comment (lib, "libmysql.lib")
 
 class MinNetUser;
 class MinNetPacket;

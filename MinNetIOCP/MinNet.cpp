@@ -1,5 +1,5 @@
-#include "MinNet.h"
 #include "MinNetIOCP.h"
+#include "MinNet.h"
 #include "MinNetRoom.h"
 #include <atlstr.h>
 #include <cmath>
