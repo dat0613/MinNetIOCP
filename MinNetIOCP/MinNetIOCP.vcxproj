@@ -69,7 +69,10 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>C:\Users\ASUS\Desktop\boost\boost_1_71_0;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\ASUS\Desktop\boost\boost_1_71_0\x64\stage\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>
@@ -137,6 +140,7 @@
     <ClCompile Include="MinNetComponent.cpp" />
     <ClCompile Include="MinNetGameObject.cpp" />
     <ClCompile Include="MinNetIOCP.cpp" />
+    <ClCompile Include="MinNetMath.cpp" />
     <ClCompile Include="MinNetOptimizer.cpp" />
     <ClCompile Include="MinNetOverlapped.cpp" />
     <ClCompile Include="MinNetPool.cpp" />
@@ -151,6 +155,7 @@
     <ClInclude Include="MinNetComponent.h" />
     <ClInclude Include="MinNetGameObject.h" />
     <ClInclude Include="MinNetIOCP.h" />
+    <ClInclude Include="MinNetMath.h" />
     <ClInclude Include="MinNetOptimizer.h" />
     <ClInclude Include="MinNetOverlapped.h" />
     <ClInclude Include="MinNetPool.h" />

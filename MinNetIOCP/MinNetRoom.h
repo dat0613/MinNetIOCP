@@ -8,6 +8,10 @@
 #include "MinNetOptimizer.h"
 #include "EasyContainer.h"
 
+#include <boost\asio.hpp>
+#include <boost\bind.hpp>
+#include <boost\thread.hpp>
+
 class MinNetIOCP;
 class MinNetUser;
 class MinNetPacket;
@@ -19,7 +23,7 @@ class MinNetRoom
 {
 public:
 
-	MinNetRoom();
+	MinNetRoom(boost::asio::io_service& service);
 	~MinNetRoom();
 
 	void SetName(std::string name);
@@ -45,8 +49,6 @@ public:
 
 	void Destroy(std::string prefabName, int id, bool casting = false, MinNetUser * except = nullptr);
 	void Destroy();
-
-	void UserLoadingComplete(MinNetUser * user);
 
 	void ObjectInstantiate(MinNetUser * user, MinNetPacket * packet);
 	void ObjectDestroy(MinNetUser * user, MinNetPacket * packet);
@@ -75,6 +77,7 @@ public:
 	void ChangeRoom(std::string roomName);
 
 	void Update();
+	void LateUpdate();
 
 	int GetNewID();
 
@@ -85,6 +88,8 @@ public:
 	void SendRPC(int objectId, std::string componentName, std::string methodName, MinNetUser * target, MinNetPacket * parameters, bool isTcp);
 
 	void SetSceneName(std::string sceneName);
+
+	boost::asio::io_service::strand strand;
 
 private:
 
@@ -110,6 +115,8 @@ class MinNetRoomManager
 {
 public:
 	MinNetRoomManager();
+	~MinNetRoomManager();
+
 	MinNetRoom * GetPeacefulRoom(std::string roomName);
 	MinNetRoom * GetRoom(int roomId);
 
@@ -119,6 +126,7 @@ public:
 	void PacketHandler(MinNetUser * user, MinNetPacket * packet);
 	
 	void Update();
+	void LateUpdate();
 
 	std::list<MinNetRoom *>& GetRoomList();
 
@@ -129,4 +137,9 @@ private:
 	void DestroyRoom(MinNetRoom * room);
 
 	std::list<MinNetRoom *> room_list;
+
+	boost::asio::io_service service;
+	boost::thread_group io_threads;
+	boost::asio::io_service::work work;
+
 };

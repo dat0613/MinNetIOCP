@@ -7,7 +7,12 @@
 
 #include "MinNetCache.h"
 
-MinNetRoom::MinNetRoom()
+//MinNetRoom::MinNetRoom()
+//{
+//	SetMaxUser(10);
+//}
+
+MinNetRoom::MinNetRoom(boost::asio::io_service& service) : strand(service)
 {
 	SetMaxUser(10);
 }
@@ -460,6 +465,46 @@ void MinNetRoom::Update()
 	{
 		object->Update();
 	}
+
+	if (changeRoom)
+	{// ·ëÀ» º¯°æÇØ¾ß ÇÑ´Ù¸é
+		Destroy();// ·ë¿¡ ÀÖ´Â ¸ðµç °´Ã¼ ÆÄ±«
+
+		auto userList = GetUserList();
+
+		std::queue<MinNetUser *> tempQ;
+		std::list<MinNetUser *> tempList;
+
+		for (auto user : *userList)
+		{
+			tempList.push_back(user);
+			tempQ.push(user);
+		}
+
+		for (auto user : tempList)
+			user->ChangeRoom(nullptr);
+
+		SetName(changeRoomName);
+		MinNetCache::AddRoom(this, nullptr);
+
+		while (!tempQ.empty())
+		{
+			auto front = tempQ.front();
+			front->ChangeRoom(this);
+			tempQ.pop();
+		}
+
+		changeRoomName = "";
+		changeRoom = false;
+	}
+}
+
+void MinNetRoom::LateUpdate()
+{
+	for (auto object : object_list)
+	{
+		object->LateUpdate();
+	}
 }
 
 int MinNetRoom::GetNewID()
@@ -611,9 +656,19 @@ void MinNetRoom::ObjectDestroy(MinNetUser * user, MinNetPacket * packet)
 	Destroy(prefabName, objectId, true);
 }
 
-MinNetRoomManager::MinNetRoomManager()
+MinNetRoomManager::MinNetRoomManager() : work(service)
 {
+	for (int i = 0; i < Defines::BOOSTTHREADCOUNT; i++)
+	{
+		io_threads.create_thread(boost::bind(&boost::asio::io_service::run, &service));
+	}
+}
 
+MinNetRoomManager::~MinNetRoomManager()
+{
+	service.stop();
+	io_threads.join_all();
+	service.reset();
 }
 
 MinNetRoom * MinNetRoomManager::GetPeacefulRoom(std::string roomName)
@@ -775,7 +830,6 @@ void MinNetRoomManager::Update()
 
 	for (auto room : room_list)
 	{
-		room->Update();
 		if (room->destroyWhenEmpty)
 		{
 			if (room->UserCount() < 1)
@@ -784,43 +838,21 @@ void MinNetRoomManager::Update()
 			}
 		}
 
-		if (room->changeRoom)
-		{// ·ëÀ» º¯°æÇØ¾ß ÇÑ´Ù¸é
-			room->Destroy();// ·ë¿¡ ÀÖ´Â ¸ðµç °´Ã¼ ÆÄ±«
-
-			auto userList = room->GetUserList();
-			
-			std::queue<MinNetUser *> tempQ;
-			std::list<MinNetUser *> tempList;
-
-			for (auto user : *userList)
-			{
-				tempList.push_back(user);
-				tempQ.push(user);
-			}
-
-			for (auto user : tempList)
-				user->ChangeRoom(nullptr);
-
-			room->SetName(room->changeRoomName);
-			MinNetCache::AddRoom(room, nullptr);
-
-			while (!tempQ.empty())
-			{
-				auto front = tempQ.front();
-				front->ChangeRoom(room);
-				tempQ.pop();
-			}
-
-			room->changeRoomName = "";
-			room->changeRoom = false;
-		}
+		service.post(room->strand.wrap(boost::bind(&MinNetRoom::Update, room)));
 	}
 
 	while (deleteQ.size() > 0)
 	{
 		DestroyRoom(deleteQ.front());
 		deleteQ.pop();
+	}
+}
+
+void MinNetRoomManager::LateUpdate()
+{
+	for (auto room : room_list)
+	{
+		service.post(room->strand.wrap(boost::bind(&MinNetRoom::LateUpdate, room)));
 	}
 }
 
@@ -831,7 +863,7 @@ std::list<MinNetRoom*>& MinNetRoomManager::GetRoomList()
 
 MinNetRoom * MinNetRoomManager::CreateRoom(std::string roomName, MinNetPacket * packet)
 {
-	auto room = new MinNetRoom();
+	auto room = new MinNetRoom(service);
 
 	room->SetManager(this);
 	room->SetName(roomName);	

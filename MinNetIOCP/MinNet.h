@@ -24,6 +24,7 @@ public:
 	static const short BUFFERSIZE = 4096;
 	static const short PACKETSIZE = 1024;
 	static const short TEMPORARYBUFFERSIZE = 10240;
+	static const short BOOSTTHREADCOUNT = 4;
 
 	enum MinNetPacketType 
 	{

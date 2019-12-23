@@ -19,7 +19,7 @@ HANDLE MinNetIOCP::port = nullptr;
 
 int MinNetIOCP::tick = 60;
 
-MinNetRoomManager MinNetIOCP::room_manager = MinNetRoomManager();
+MinNetRoomManager MinNetIOCP::room_manager;
 
 MinNetSpinLock MinNetIOCP::messageQ_spin_lock;
 

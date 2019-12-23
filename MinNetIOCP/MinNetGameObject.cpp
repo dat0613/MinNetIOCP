@@ -131,6 +131,14 @@ void MinNetGameObject::Update()
 	}
 }
 
+void MinNetGameObject::LateUpdate()
+{
+	for (auto component : componentList)
+	{
+		component->LateUpdate();
+	}
+}
+
 std::shared_ptr<MinNetComponent> MinNetGameObject::GetComponent(std::string componentName)
 {
 	auto set = componentMap.find(componentName);

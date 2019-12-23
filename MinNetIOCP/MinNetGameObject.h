@@ -61,6 +61,7 @@ public:
 	void OnInstantiate(MinNetUser * user);
 	void Awake();
 	void Update();
+	void LateUpdate();
 
 	std::shared_ptr<MinNetComponent> GetComponent(std::string componentName);// 컴포넌트를 찾는 함수
 
