@@ -16,6 +16,7 @@ class MinNetIOCP;
 class MinNetUser;
 class MinNetPacket;
 class MinNetRoomManager;
+class MinNetp2pGroup;
 
 class MinNetGameObject;
 
@@ -42,6 +43,8 @@ public:
 	bool destroyWhenEmpty = false;
 	bool changeRoom = false; // 룸이 실행되는 도중 룸 옵션을 바꿀때 true로
 	std::string changeRoomName = "";
+
+	MinNetp2pGroup * Createp2pGroup();
 
 	std::shared_ptr<MinNetGameObject> Instantiate(std::string prefabName);
 	std::shared_ptr<MinNetGameObject> Instantiate(std::string prefabName, Vector3 position, Vector3 euler);
@@ -100,6 +103,8 @@ private:
 	int max_user = 10;
 
 	int id_count = 0;
+
+	std::list<MinNetp2pGroup *> p2pGroupList;
 
 	bool lock = false;// 방 접속 차단
 

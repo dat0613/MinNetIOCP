@@ -19,6 +19,9 @@ HANDLE MinNetIOCP::hPort = nullptr;
 HANDLE MinNetIOCP::port = nullptr;
 
 int MinNetIOCP::tick = 60;
+int MinNetIOCP::userIDcount = 0;
+
+MinNetSpinLock MinNetIOCP::idCountLock;
 
 MinNetRoomManager MinNetIOCP::room_manager;
 
@@ -419,7 +422,9 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 	);
 
 	sockaddr_in * sin = SOCKADDRtoSOCKADDR_IN(remote_addr);
-	Debug::Log("새로운 유저 접속", overlap->socket, inet_ntoa(sin->sin_addr));
+	std::string remoteAddr = inet_ntoa(sin->sin_addr);
+	int port = ntohs(sin->sin_port);
+	Debug::Log("새로운 유저 접속", overlap->socket, remoteAddr, port);
 
 	HANDLE hResult = CreateIoCompletionPort((HANDLE)overlap->socket, hPort, (DWORD)overlap->socket, 0);
 	if (hResult == NULL)
@@ -433,6 +438,8 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 	user->isConnected = true;
 	user->addr = sin;
 
+	user->ID = GetUserID();
+
 	MinNetPacket * packet = MinNetPool::packetPool->pop();
 	packet->create_packet(Defines::MinNetPacketType::USER_ENTER_ROOM);
 	packet->push(-2);// 나중에 방 번호로 입장 기능을 만들때 쓸것
@@ -444,6 +451,14 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 	messageQ_spin_lock.unlock();
 
 	MinNetPool::acceptOverlappedPool->push(overlap);
+
+	MinNetPacket * ipCastPacket = MinNetPool::packetPool->pop();
+	ipCastPacket->create_packet(Defines::MinNetPacketType::IP_CAST);
+	ipCastPacket->push(remoteAddr);
+	ipCastPacket->push(port);
+	ipCastPacket->create_header();
+
+	StartSend(user, ipCastPacket);
 
 	StartRecv(user, true);
 	StartRecv(user, false);
@@ -641,4 +656,13 @@ void MinNetIOCP::OnPong(MinNetUser * user, MinNetPacket * packet)
 	StartSend(user, cast);
 
 	MinNetPool::packetPool->push(cast);
+}
+
+int MinNetIOCP::GetUserID()
+{
+	idCountLock.lock();
+	int retval = userIDcount++;
+	idCountLock.unlock();
+
+	return retval;
 }

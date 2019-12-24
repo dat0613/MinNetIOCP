@@ -14,6 +14,7 @@
 
 class MinNetRoom;
 class MinNetGameObject;
+class MinNetp2pGroup;
 
 enum class MinNetRpcTarget { All = -1000, Others, AllViaServer, Server, One, AllNotServer };
 
@@ -44,7 +45,13 @@ public:
 		USER_ENTER_ROOM_FAIL,
 		CHANGE_SCENE_COMPLETE,
 		SET_USER_VALUE,
-		GET_USER_VALUE
+		GET_USER_VALUE,
+		IP_CAST,
+		OTHER_JOIN_P2P_GROUP,
+		OTHER_LEAVE_P2P_GROUP,
+		JOIN_P2P_GROUP,
+		LEAVE_P2P_GROUP,
+		P2P_MEMBER_CAST
 	};
 };
 
@@ -167,13 +174,15 @@ public:
 	MinNetSpinLock udpBufferLock;
 	byte udpBuffer[Defines::TEMPORARYBUFFERSIZE] = { '\0', };
 
+	MinNetp2pGroup * nowp2pGroup = nullptr;
+
 	int tcpBufferPosition = 0;
 	int udpBufferPosition = 0;
 
 	SOCKET sock;
 	int ping = -1;
 
-	int ID;
+	int ID = -1;
 	
 	bool isConnected = false;
 	bool loadingEnd = true;
@@ -181,8 +190,6 @@ public:
 	SOCKADDR_IN * addr = nullptr;
 
 	void ChangeRoom(MinNetRoom * room);
-	void ChangeRoom(std::string roomName);
-	void ChangeRoom(int roomId);
 
 	MinNetRoom * GetRoom();
 	clock_t last_ping = -1;
