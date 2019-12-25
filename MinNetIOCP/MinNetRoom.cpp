@@ -6,7 +6,6 @@
 #include "MinNetGameObject.h"
 
 #include "MinNetCache.h"
-#include "MinNetp2pGroup.h"
 
 //MinNetRoom::MinNetRoom()
 //{
@@ -76,15 +75,6 @@ void MinNetRoom::SetLock(bool lock)
 std::list<MinNetUser*> * MinNetRoom::GetUserList()
 {
 	return &user_list;
-}
-
-MinNetp2pGroup * MinNetRoom::Createp2pGroup()
-{
-	MinNetp2pGroup * group = new MinNetp2pGroup(this);
-
-	p2pGroupList.push_back(group);
-	
-	return group;
 }
 
 std::shared_ptr<MinNetGameObject> MinNetRoom::Instantiate(std::string prefabName)
@@ -309,11 +299,6 @@ void MinNetRoom::RemoveUser(MinNetUser * user)
 {
 	if (user == nullptr)
 		return;
-
-	if (user->nowp2pGroup != nullptr)
-	{
-		user->nowp2pGroup->DelMember(user);
-	}
 
 	user_map.erase(user->ID);
 	user_list.remove(user); 

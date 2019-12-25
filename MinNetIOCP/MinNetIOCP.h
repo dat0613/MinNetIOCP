@@ -54,8 +54,6 @@ private:
 
 	static sockaddr_in * SOCKADDRtoSOCKADDR_IN(sockaddr * addr);
 
-	static int userIDcount;
-	static MinNetSpinLock idCountLock;
 
 	static std::queue<std::pair<MinNetPacket *, MinNetUser *>> recvQ;
 	static std::queue<std::pair<MinNetPacket *, MinNetUser *>> messageQ;
@@ -78,6 +76,4 @@ private:
 	static void EndSend(MinNetSendOverlapped * overlap);
 
 	static void OnPong(MinNetUser * user, MinNetPacket * packet);
-
-	static int GetUserID();
 };

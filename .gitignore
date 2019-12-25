@@ -33,9 +33,3 @@
 
 
 *.opendb
-MinNetIOCP/.vs/MinNetIOCP/v14/.suo
-MinNetIOCP/MinNetIOCP.VC.db
-MinNetIOCP/x64/Debug/MinNetIOCP.idb
-MinNetIOCP/x64/Debug/MinNetIOCP.log
-MinNetIOCP/x64/Debug/MinNetIOCP.pdb
-MinNetIOCP/x64/Debug/MinNetIOCP.tlog/CL.write.1.tlog

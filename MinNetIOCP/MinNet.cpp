@@ -404,6 +404,7 @@ std::ostream & operator<<(std::ostream & o, const Vector3 & vector3)
 	return o;
 }
 
+
 Vector2::Vector2()
 {
 	x = y = 0.0f;

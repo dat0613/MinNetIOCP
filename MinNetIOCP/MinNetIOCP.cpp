@@ -19,9 +19,6 @@ HANDLE MinNetIOCP::hPort = nullptr;
 HANDLE MinNetIOCP::port = nullptr;
 
 int MinNetIOCP::tick = 60;
-int MinNetIOCP::userIDcount = 0;
-
-MinNetSpinLock MinNetIOCP::idCountLock;
 
 MinNetRoomManager MinNetIOCP::room_manager;
 
@@ -169,13 +166,21 @@ void MinNetIOCP::ServerLoop()
 {
 	float sleep_time = 1000.0f / (float)tick;
 	clock_t last_heart_beat = 0;
+	clock_t lastUpdate = 0;
 	clock_t cur_time = 0;
 
 	while (true)
 	{
+		cur_time = clock();
+		
 		MinNetMySQL::IOprocessing();// 데이터베이스와의 작업은 싱글 스레드에서만 함 멀티 스레드 로 하기에는 아직 경험이 없음
 
-		cur_time = clock();
+		if (cur_time - lastUpdate <= sleep_time)
+		{
+			continue;
+		}
+
+		lastUpdate = cur_time;
 
 		if (cur_time - last_heart_beat > 3000)
 		{
@@ -206,9 +211,6 @@ void MinNetIOCP::ServerLoop()
 
 		room_manager.Update();
 		MinNetTime::FrameEnd();
-
-
-		_sleep(sleep_time);
 	}
 }
 
@@ -417,9 +419,7 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 	);
 
 	sockaddr_in * sin = SOCKADDRtoSOCKADDR_IN(remote_addr);
-	std::string remoteAddr = inet_ntoa(sin->sin_addr);
-	int port = ntohs(sin->sin_port);
-	Debug::Log("새로운 유저 접속", overlap->socket, remoteAddr, port);
+	Debug::Log("새로운 유저 접속", overlap->socket, inet_ntoa(sin->sin_addr));
 
 	HANDLE hResult = CreateIoCompletionPort((HANDLE)overlap->socket, hPort, (DWORD)overlap->socket, 0);
 	if (hResult == NULL)
@@ -433,8 +433,6 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 	user->isConnected = true;
 	user->addr = sin;
 
-	user->ID = GetUserID();
-
 	MinNetPacket * packet = MinNetPool::packetPool->pop();
 	packet->create_packet(Defines::MinNetPacketType::USER_ENTER_ROOM);
 	packet->push(-2);// 나중에 방 번호로 입장 기능을 만들때 쓸것
@@ -446,14 +444,6 @@ void MinNetIOCP::EndAccept(MinNetAcceptOverlapped * overlap)
 	messageQ_spin_lock.unlock();
 
 	MinNetPool::acceptOverlappedPool->push(overlap);
-
-	MinNetPacket * ipCastPacket = MinNetPool::packetPool->pop();
-	ipCastPacket->create_packet(Defines::MinNetPacketType::IP_CAST);
-	ipCastPacket->push(remoteAddr);
-	ipCastPacket->push(port);
-	ipCastPacket->create_header();
-
-	StartSend(user, ipCastPacket);
 
 	StartRecv(user, true);
 	StartRecv(user, false);
@@ -651,13 +641,4 @@ void MinNetIOCP::OnPong(MinNetUser * user, MinNetPacket * packet)
 	StartSend(user, cast);
 
 	MinNetPool::packetPool->push(cast);
-}
-
-int MinNetIOCP::GetUserID()
-{
-	idCountLock.lock();
-	int retval = userIDcount++;
-	idCountLock.unlock();
-
-	return retval;
 }
