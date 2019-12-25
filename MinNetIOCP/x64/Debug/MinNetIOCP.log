@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 ﻿  MinNetIOCP.cpp
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnettime.h(20): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetTime' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(72): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
@@ -63,10 +64,55 @@ c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(479): warning C4
   코드를 생성하고 있습니다...
   컴파일하고 있습니다...
   MinNetRoom.cpp
+=======
+﻿  MinNet.cpp
+>>>>>>> parent of 40822ef... MySQL 테스트 끝
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnettime.h(20): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetTime' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(65): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(77): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.h(79): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetIOCP' 왼쪽은 무시됩니다.
+<<<<<<< HEAD
+=======
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(28): warning C4806: '&': 안전하지 않은 연산입니다. 'bool' 형식의 값('int' 형식으로 확장)이 주어진 상수와 같을 수 없습니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(71): warning C4800: 'int': 'true' 또는 'false'로 bool 값을 강제하고 있습니다(성능 경고).
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(90): warning C4244: '초기화 중': 'float'에서 'unsigned long'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(197): warning C4267: '초기화 중': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(464): warning C4927: 변환이 잘못되었습니다. 사용자 정의 변환이 암시적으로 두 번 이상 적용되었습니다.
+  c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(464): note: 'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string(const _Elem *)' 생성자를 호출하는 동안
+          with
+          [
+              _Elem=wchar_t
+          ]
+  c:\program files (x86)\microsoft visual studio 14.0\vc\include\xstring(834): note: 'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string' 선언을 참조하십시오.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(469): warning C4927: 변환이 잘못되었습니다. 사용자 정의 변환이 암시적으로 두 번 이상 적용되었습니다.
+  c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(469): note: 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const _Elem *)' 생성자를 호출하는 동안
+          with
+          [
+              _Elem=char
+          ]
+  c:\program files (x86)\microsoft visual studio 14.0\vc\include\xstring(834): note: 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string' 선언을 참조하십시오.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(474): warning C4927: 변환이 잘못되었습니다. 사용자 정의 변환이 암시적으로 두 번 이상 적용되었습니다.
+  c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(474): note: 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string(const _Elem *)' 생성자를 호출하는 동안
+          with
+          [
+              _Elem=char
+          ]
+  c:\program files (x86)\microsoft visual studio 14.0\vc\include\xstring(834): note: 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string' 선언을 참조하십시오.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(479): warning C4927: 변환이 잘못되었습니다. 사용자 정의 변환이 암시적으로 두 번 이상 적용되었습니다.
+  c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.cpp(479): note: 'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string(const _Elem *)' 생성자를 호출하는 동안
+          with
+          [
+              _Elem=wchar_t
+          ]
+  c:\program files (x86)\microsoft visual studio 14.0\vc\include\xstring(834): note: 'std::basic_string<wchar_t,std::char_traits<wchar_t>,std::allocator<wchar_t>>::basic_string' 선언을 참조하십시오.
+  코드를 생성하고 있습니다...
+  컴파일하고 있습니다...
+  MinNetRoom.cpp
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnettime.h(20): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetTime' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(65): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(77): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.h(79): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetIOCP' 왼쪽은 무시됩니다.
+>>>>>>> parent of 40822ef... MySQL 테스트 끝
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetpool.h(29): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetPool' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetcache.h(39): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetCache' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetroom.cpp(51): warning C4267: 'return': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
@@ -94,5 +140,8 @@ c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetroom.cpp(450): warnin
   MinNetComponent.cpp
   MinNetPool.cpp
   MinNetMySQL.cpp
+<<<<<<< HEAD
+>>>>>>> parent of 40822ef... MySQL 테스트 끝
+=======
 >>>>>>> parent of 40822ef... MySQL 테스트 끝
   MinNetIOCP.vcxproj -> C:\Users\ASUS\Documents\GitHub\MinNetIOCP\MinNetIOCP\x64\Debug\MinNetIOCP.lib
