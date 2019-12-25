@@ -1,2 +1,0 @@
-# MinNetIOCP
-MinNet + IOCP
