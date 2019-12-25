@@ -158,12 +158,6 @@ void MinNetMySQL::IOprocessing()
 
 void MinNetMySQL::AddQuery(std::string query, DataBaseIOcallback callBack)
 {
-	if (!isConnected)
-	{
-		Debug::Log("MySQL 서버와 연결되어 있지 않습니다.");
-		return;
-	}
-
 	auto io = MinNetPool::ioPool->pop();
 
 	io->query = query;

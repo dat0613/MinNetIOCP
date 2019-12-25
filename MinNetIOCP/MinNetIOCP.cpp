@@ -169,21 +169,13 @@ void MinNetIOCP::ServerLoop()
 {
 	float sleep_time = 1000.0f / (float)tick;
 	clock_t last_heart_beat = 0;
-	clock_t lastUpdate = 0;
 	clock_t cur_time = 0;
 
 	while (true)
 	{
-		cur_time = clock();
-		
 		MinNetMySQL::IOprocessing();// 데이터베이스와의 작업은 싱글 스레드에서만 함 멀티 스레드 로 하기에는 아직 경험이 없음
 
-		if (cur_time - lastUpdate <= sleep_time)
-		{
-			continue;
-		}
-
-		lastUpdate = cur_time;
+		cur_time = clock();
 
 		if (cur_time - last_heart_beat > 3000)
 		{
@@ -214,6 +206,9 @@ void MinNetIOCP::ServerLoop()
 
 		room_manager.Update();
 		MinNetTime::FrameEnd();
+
+
+		_sleep(sleep_time);
 	}
 }
 
