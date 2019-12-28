@@ -144,6 +144,7 @@
     <ClCompile Include="MinNetMySQL.cpp" />
     <ClCompile Include="MinNetOptimizer.cpp" />
     <ClCompile Include="MinNetOverlapped.cpp" />
+    <ClCompile Include="MinNetp2pGroup.cpp" />
     <ClCompile Include="MinNetPool.cpp" />
     <ClCompile Include="MinNetRoom.cpp" />
     <ClCompile Include="MinNetTime.cpp" />
@@ -160,6 +161,7 @@
     <ClInclude Include="MinNetMySQL.h" />
     <ClInclude Include="MinNetOptimizer.h" />
     <ClInclude Include="MinNetOverlapped.h" />
+    <ClInclude Include="MinNetp2pGroup.h" />
     <ClInclude Include="MinNetPool.h" />
     <ClInclude Include="MinNetRoom.h" />
     <ClInclude Include="MinNetTime.h" />

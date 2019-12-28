@@ -45,9 +45,6 @@
     <ClCompile Include="MinNetPool.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="MinNetRoom.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="MinNet.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -60,11 +57,14 @@
     <ClCompile Include="MinNetMySQL.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="MinNetp2pGroup.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="MinNetRoom.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MinNetRoom.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Debug.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -102,6 +102,12 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="MinNetMySQL.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MinNetp2pGroup.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="MinNetRoom.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
