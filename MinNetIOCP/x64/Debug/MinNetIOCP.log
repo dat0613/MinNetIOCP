@@ -1,19 +1,19 @@
-﻿  MinNetRoom.cpp
+﻿  MinNetIOCP.cpp
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnettime.h(20): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetTime' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(74): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(86): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(76): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(88): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.h(112): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetIOCP' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetmysql.h(54): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetMySQL' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetpool.h(29): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetPool' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetcache.h(39): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetCache' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetroom.cpp(51): warning C4267: 'return': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  코드를 생성하고 있습니다...
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetroom.cpp(460): warning C4172: 지역 변수 또는 임시: objectVector의 주소를 반환하고 있습니다.
-  건너뛰고 있습니다... (관련된 변경 내용 없음)
-  MinNetp2pGroup.cpp
-  MinNetPool.cpp
-  MinNetIOCP.cpp
-  MinNetGameObject.cpp
-  MinNetComponent.cpp
-  MinNetCache.cpp
-  MinNet.cpp
+c:\users\asus\documents\github\minnetiocp\minnetiocp\debug.h(23): warning C4091: 'static ': 변수를 선언하지 않으면 'Debug' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(243): warning C4996: 'gethostbyname': Use getaddrinfo() or GetAddrInfoW() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(2238): note: 'gethostbyname' 선언을 참조하십시오.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(245): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1868): note: 'inet_ntoa' 선언을 참조하십시오.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(598): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1868): note: 'inet_ntoa' 선언을 참조하십시오.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(797): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1868): note: 'inet_ntoa' 선언을 참조하십시오.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.cpp(849): warning C4996: 'inet_ntoa': Use inet_ntop() or InetNtop() instead or define _WINSOCK_DEPRECATED_NO_WARNINGS to disable deprecated API warnings
+  c:\program files (x86)\windows kits\8.1\include\um\winsock2.h(1868): note: 'inet_ntoa' 선언을 참조하십시오.
   MinNetIOCP.vcxproj -> C:\Users\ASUS\Documents\GitHub\MinNetIOCP\MinNetIOCP\x64\Debug\MinNetIOCP.lib
