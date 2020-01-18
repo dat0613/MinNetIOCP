@@ -70,8 +70,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\ASUS\Desktop\boost\boost_1_71_0;C:\Users\ASUS\Desktop\MySQL\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\ASUS\Desktop\boost\boost_1_71_0\x64\stage\lib;C:\Users\ASUS\Desktop\MySQL\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\ASUS\Desktop\boost\boost_1_71_0;C:\Users\ASUS\Desktop\MySQL\include;C:\Users\ASUS\Desktop\펑펑펑\recastnavigation-master\RecastDemo\Build\vs2015;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\ASUS\Desktop\boost\boost_1_71_0\x64\stage\lib;C:\Users\ASUS\Desktop\MySQL\lib;C:\Users\ASUS\Desktop\펑펑펑\recastnavigation-master\RecastDemo\Build\vs2015\lib\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
