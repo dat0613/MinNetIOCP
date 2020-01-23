@@ -70,7 +70,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\ASUS\Desktop\boost\boost_1_71_0;C:\Users\ASUS\Desktop\MySQL\include;C:\Users\ASUS\Desktop\펑펑펑\recastnavigation-master\Detour\Include;C:\Users\ASUS\Desktop\펑펑펑\recastnavigation-master\Recast\Include;C:\Users\ASUS\Desktop\펑펑펑\recastnavigation-master\DetourCrowd\Include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Users\ASUS\Desktop\boost\boost_1_71_0;C:\Users\ASUS\Desktop\MySQL\include;C:\Users\ASUS\Desktop\recastnavigation-master\Detour\Include;C:\Users\ASUS\Desktop\recastnavigation-master\Recast\Include;C:\Users\ASUS\Desktop\recastnavigation-master\DetourCrowd\Include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Users\ASUS\Desktop\boost\boost_1_71_0\x64\stage\lib;C:\Users\ASUS\Desktop\MySQL\lib;C:\Users\ASUS\Desktop\펑펑펑\recastnavigation-master\RecastDemo\Build\vs2015\lib\Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -136,6 +136,8 @@
     <ClCompile Include="Debug.cpp" />
     <ClCompile Include="EasyContainer.cpp" />
     <ClCompile Include="MinNet.cpp" />
+    <ClCompile Include="MinNetAnimator.cpp" />
+    <ClCompile Include="MinNetNavMeshAgent.cpp" />
     <ClCompile Include="MinNetPrefab.cpp" />
     <ClCompile Include="MinNetComponent.cpp" />
     <ClCompile Include="MinNetGameObject.cpp" />
@@ -148,11 +150,14 @@
     <ClCompile Include="MinNetPool.cpp" />
     <ClCompile Include="MinNetRoom.cpp" />
     <ClCompile Include="MinNetTime.cpp" />
+    <ClCompile Include="MinNetTransform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Debug.h" />
     <ClInclude Include="EasyContainer.h" />
     <ClInclude Include="MinNet.h" />
+    <ClInclude Include="MinNetAnimator.h" />
+    <ClInclude Include="MinNetNavMeshAgent.h" />
     <ClInclude Include="MinNetPrefab.h" />
     <ClInclude Include="MinNetComponent.h" />
     <ClInclude Include="MinNetGameObject.h" />
@@ -165,6 +170,7 @@
     <ClInclude Include="MinNetPool.h" />
     <ClInclude Include="MinNetRoom.h" />
     <ClInclude Include="MinNetTime.h" />
+    <ClInclude Include="MinNetTransform.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
