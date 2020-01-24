@@ -13,7 +13,6 @@ MinNetNavMeshAgent::~MinNetNavMeshAgent()
 
 void MinNetNavMeshAgent::Awake()
 {
-	SetDefaultParameter();
 	gameObject->GetNowRoom()->AddNavAgent(this);
 }
 
@@ -47,8 +46,8 @@ void MinNetNavMeshAgent::SetDefaultParameter()
 {
 	memset(&agentParams, 0, sizeof(agentParams));
 
-	agentParams.radius = 0.6f;
-	agentParams.height = 2.0f;
+	agentParams.radius = 1.0f;
+	agentParams.height = 1.0f;
 	agentParams.maxAcceleration = 8.0f;
 	agentParams.maxSpeed = 3.5f;
 	agentParams.collisionQueryRange = agentParams.radius * 12.0f;

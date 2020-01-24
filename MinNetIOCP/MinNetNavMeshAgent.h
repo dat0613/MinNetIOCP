@@ -20,9 +20,12 @@ public:
 
 	void SetIdx(const int idx);
 
+	void SetDefaultParameter();
+
+	Vector3 addtion = Vector3::zero;
+
 private:
 
-	void SetDefaultParameter();
 
 	int agentIdx = -1;
 };

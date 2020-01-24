@@ -1,7 +1,21 @@
-﻿  MinNetNavMeshAgent.cpp
+﻿  MinNetRoom.cpp
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnettime.h(20): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetTime' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(87): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(99): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetiocp.h(122): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetIOCP' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetpool.h(26): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetPool' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetprefab.h(67): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetPrefab' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\debug.h(23): warning C4091: 'static ': 변수를 선언하지 않으면 'Debug' 왼쪽은 무시됩니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetroom.cpp(54): warning C4267: 'return': 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetroom.cpp(778): warning C4244: '=': 'float'에서 'unsigned char'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetroom.cpp(779): warning C4244: '=': 'float'에서 'unsigned char'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetroom.cpp(780): warning C4244: '=': 'float'에서 'unsigned char'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  MinNetNavMeshAgent.cpp
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnettime.h(20): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetTime' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(87): warning C4091: 'static ': 변수를 선언하지 않으면 'BitConverter' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnet.h(99): warning C4091: 'static ': 변수를 선언하지 않으면 'StringConverter' 왼쪽은 무시됩니다.
 c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetpool.h(26): warning C4091: 'static ': 변수를 선언하지 않으면 'MinNetPool' 왼쪽은 무시됩니다.
-c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetnavmeshagent.cpp(62): warning C4244: '=': 'float'에서 'unsigned char'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetnavmeshagent.cpp(61): warning C4244: '=': 'float'에서 'unsigned char'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  코드를 생성하고 있습니다...
+c:\users\asus\documents\github\minnetiocp\minnetiocp\minnetroom.cpp(463): warning C4172: 지역 변수 또는 임시: objectVector의 주소를 반환하고 있습니다.
   MinNetIOCP.vcxproj -> C:\Users\ASUS\Documents\GitHub\MinNetIOCP\MinNetIOCP\x64\Debug\MinNetIOCP.lib
