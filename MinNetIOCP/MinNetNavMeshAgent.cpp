@@ -63,3 +63,8 @@ void MinNetNavMeshAgent::SetDefaultParameter()
 
 	agentParams.userData = this;
 }
+
+Vector3 MinNetNavMeshAgent::GetRandomPointAround()
+{
+	return Vector3();
+}

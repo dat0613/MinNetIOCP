@@ -22,7 +22,11 @@ public:
 
 	void SetDefaultParameter();
 
+	Vector3 GetRandomPointAround();
+
 	Vector3 addtion = Vector3::zero;
+
+	Vector3 velocity = Vector3::zero;
 
 private:
 
